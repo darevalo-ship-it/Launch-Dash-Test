@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Launch Dashboard | Thrive Causemetics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --tc-teal: #3A9E98; --tc-teal-dark: #1F6E6A; --tc-teal-light: #E6F4F3;
+      --tc-navy: #1C2B3A; --tc-gold: #C9A84C;
+      --bg: #F0F2F5; --card: #FFFFFF; --text: #1C2B3A;
+      --muted: #6B7A8D; --border: #E2E8EF;
+      --positive: #22A06B; --warn: #F59E0B; --r: 12px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); }
+
+    .hdr { background:linear-gradient(135deg,var(--tc-navy) 0%,var(--tc-teal-dark) 100%); color:#fff; padding:20px 36px; }
+    .back-btn { display:inline-flex; align-items:center; gap:6px; color:rgba(255,255,255,.65); text-decoration:none; font-size:13px; margin-bottom:12px; transition:color .15s; }
+    .back-btn:hover { color:#fff; }
+    .hdr-body { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+    .hdr-title h1 { font-size:22px; font-weight:700; }
+    .hdr-title p  { font-size:13px; opacity:.65; margin-top:3px; }
+    .hdr-badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+    .badge { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; border-radius:20px; padding:4px 12px; }
+    .badge-live { background:rgba(34,160,107,.25); color:#6EFCB8; border:1px solid rgba(34,160,107,.4); }
+    .badge-day  { background:rgba(255,255,255,.12); color:rgba(255,255,255,.9); border:1px solid rgba(255,255,255,.22); }
+    .hdr-ts { font-size:11px; opacity:.45; margin-top:8px; }
+
+    .tabs { background:var(--card); border-bottom:1px solid var(--border); padding:0 36px; display:flex; }
+    .tab { padding:13px 20px; font-size:13px; font-weight:500; color:var(--muted); border-bottom:2px solid transparent; cursor:pointer; transition:all .15s; user-select:none; }
+    .tab.active { color:var(--tc-teal); border-bottom-color:var(--tc-teal); font-weight:600; }
+    .tab:hover:not(.active) { color:var(--text); }
+
+    .main { max-width:1340px; margin:0 auto; padding:28px 24px; }
+
+    .kpi-row { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px; }
+    .kpi-card { background:var(--card); border-radius:var(--r); border:1px solid var(--border); padding:18px 20px; position:relative; overflow:hidden; }
+    .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+    .kpi-card.c-teal::before  { background:var(--tc-teal); }
+    .kpi-card.c-gold::before  { background:var(--tc-gold); }
+    .kpi-card.c-navy::before  { background:var(--tc-navy); }
+    .kpi-card.c-green::before { background:var(--positive); }
+    .kpi-card.c-warn::before  { background:var(--warn); }
+    .kpi-label { font-size:11px; font-weight:600; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+    .kpi-value { font-size:26px; font-weight:700; line-height:1; }
+    .kpi-sub   { font-size:12px; color:var(--muted); margin-top:6px; }
+    .ptp-bar   { height:4px; background:var(--border); border-radius:2px; margin-top:8px; overflow:hidden; }
+    .ptp-fill  { height:100%; border-radius:2px; transition:width .5s ease; }
+
+    .row-2-3 { display:grid; grid-template-columns:2fr 1fr; gap:18px; margin-bottom:18px; }
+    .row-1-1 { display:grid; grid-template-columns:1fr 1fr;  gap:18px; margin-bottom:18px; }
+    .chart-card { background:var(--card); border-radius:var(--r); border:1px solid var(--border); padding:20px; }
+    .chart-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:14px; }
+
+    .nvr-wrap   { display:flex; flex-direction:column; align-items:center; }
+    .nvr-legend { width:100%; margin-top:14px; display:flex; flex-direction:column; gap:10px; }
+    .nvr-item   { display:flex; align-items:center; justify-content:space-between; font-size:13px; }
+    .nvr-dot    { width:10px; height:10px; border-radius:50%; margin-right:8px; flex-shrink:0; }
+    .nvr-left   { display:flex; align-items:center; }
+    .nvr-val    { font-weight:600; }
+    .nvr-pct    { font-size:12px; color:var(--muted); margin-left:4px; }
+
+    .table-card { background:var(--card); border-radius:var(--r); border:1px solid var(--border); overflow:hidden; margin-bottom:18px; }
+    .table-hdr  { padding:16px 20px; border-bottom:1px solid var(--border); }
+    .table-hdr h3 { font-size:14px; font-weight:600; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    thead th { text-align:left; padding:10px 16px; font-size:11px; font-weight:600; letter-spacing:.6px; text-transform:uppercase; color:var(--muted); background:var(--bg); border-bottom:1px solid var(--border); }
+    thead th.r { text-align:right; }
+    tbody tr { border-bottom:1px solid var(--border); transition:background .1s; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover:not(.tot) { background:var(--tc-teal-light); }
+    tbody tr.tot { background:var(--tc-teal-light); font-weight:600; }
+    td { padding:12px 16px; }
+    td.r { text-align:right; font-variant-numeric:tabular-nums; }
+    .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:8px; vertical-align:middle; }
+    .ptp-cell { display:flex; align-items:center; justify-content:flex-end; gap:8px; }
+    .ptp-mini { width:52px; height:4px; background:var(--border); border-radius:2px; overflow:hidden; flex-shrink:0; }
+    .ptp-mini-fill { height:100%; border-radius:2px; }
+
+    .loading-overlay { position:fixed; inset:0; background:rgba(255,255,255,.85); display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--muted); z-index:200; }
+    .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--tc-teal); border-radius:50%; animation:spin .65s linear infinite; margin-right:10px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .error-banner { background:#FEF2F2; border:1px solid #FECACA; border-radius:var(--r); padding:16px 20px; color:#B91C1C; font-size:14px; margin-bottom:20px; }
+
+    @media(max-width:1100px) { .kpi-row { grid-template-columns:repeat(3,1fr); } .row-2-3 { grid-template-columns:1fr; } }
+    @media(max-width:768px)  { .kpi-row { grid-template-columns:repeat(2,1fr); } .row-1-1 { grid-template-columns:1fr; } .hdr,.tabs { padding-left:16px; padding-right:16px; } .main { padding:16px; } }
+  </style>
+</head>
+<body>
+
+<div id="loading" class="loading-overlay">
+  <div class="spinner"></div>Loading launch data&hellip;
+</div>
+
+<div class="hdr">
+  <a class="back-btn" href="/launch-dashboards/">&larr; Launch Intelligence Hub</a>
+  <div class="hdr-body">
+    <div class="hdr-title">
+      <h1 id="launch-name">Loading&hellip;</h1>
+      <p id="launch-sub"></p>
+    </div>
+    <div id="hdr-badges" class="hdr-badges"></div>
+  </div>
+  <div class="hdr-ts" id="hdr-ts"></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="overview">Overview</div>
+  <div class="tab" data-tab="trend">Daily Trend</div>
+</div>
+
+<div class="main">
+  <div id="error-banner" class="error-banner" style="display:none"></div>
+
+  <div id="panel-overview">
+    <div class="kpi-row" id="kpi-row"></div>
+
+    <div class="row-2-3">
+      <div class="chart-card">
+        <div class="chart-title">Net Sales by Variant</div>
+        <canvas id="chart-sales"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">New vs Returning Customers</div>
+        <div class="nvr-wrap">
+          <canvas id="chart-donut" style="max-height:180px"></canvas>
+          <div class="nvr-legend" id="nvr-legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-1-1">
+      <div class="chart-card">
+        <div class="chart-title">Units Sold by Variant</div>
+        <canvas id="chart-units"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">New vs Returning by Shade</div>
+        <canvas id="chart-nvr-shade"></canvas>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-hdr"><h3>Variant Performance Summary</h3></div>
+      <table>
+        <thead>
+          <tr>
+            <th>Shade / Product</th>
+            <th class="r">Units Sold</th>
+            <th class="r">Net Sales</th>
+            <th class="r">AOV</th>
+            <th class="r">New Customers</th>
+            <th class="r">Returning</th>
+            <th class="r">% to Plan (Units)</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body">
+          <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Loading&hellip;</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="panel-trend" style="display:none">
+    <div class="chart-card" style="margin-bottom:18px">
+      <div class="chart-title">Daily Net Sales</div>
+      <canvas id="chart-daily" height="280"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Cumulative Units Sold</div>
+      <canvas id="chart-cum" height="280"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+const fmt = {
+  cur:  v => '$' + Number(v||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}),
+  num:  v => Number(v||0).toLocaleString('en-US'),
+  pct:  v => v == null ? '—' : Number(v).toFixed(1) + '%',
+  day:  v => { if (!v) return ''; const d = new Date(String(v).replace(' ','T')); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); },
+  date: v => { if (!v) return ''; const d = new Date(String(v).replace(' ','T')); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); },
+};
+function ptpColor(v) { return v == null ? '#9CA3AF' : v >= 100 ? '#22A06B' : v >= 85 ? '#F59E0B' : '#EF4444'; }
+
+const launchId = new URLSearchParams(location.search).get('id') || 'empowershine';
+
+async function loadData() {
+  const r = await fetch('/api/launch-data?launch=' + encodeURIComponent(launchId));
+  if (!r.ok) throw new Error('API ' + r.status);
+  return r.json();
+}
+
+function renderHeader(d) {
+  document.title = d.name + ' | Thrive Causemetics';
+  document.getElementById('launch-name').textContent = d.name;
+  document.getElementById('launch-sub').textContent =
+    'Launched ' + fmt.date(d.launchDate) + '  ·  ' + d.byVariant.length + ' Variant' + (d.byVariant.length !== 1 ? 's' : '');
+  document.getElementById('hdr-badges').innerHTML =
+    '<span class="badge badge-live">&#9679; ' + d.status + '</span>' +
+    '<span class="badge badge-day">Day ' + d.daysLive + '</span>';
+  document.getElementById('hdr-ts').textContent = 'Data as of ' + new Date().toLocaleTimeString();
+}
+
+function renderKPIs(d) {
+  const s = d.summary, ptp = s.pctToPlanUnits, ptpW = Math.min(ptp||0,120), ptpC = ptpColor(ptp);
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi-card c-teal"><div class="kpi-label">Net Sales</div><div class="kpi-value">${fmt.cur(s.netSales)}</div><div class="kpi-sub">${fmt.num(s.orders)} orders</div></div>
+    <div class="kpi-card c-gold"><div class="kpi-label">Units Sold</div><div class="kpi-value">${fmt.num(s.units)}</div><div class="kpi-sub">${d.byVariant.length} variants</div></div>
+    <div class="kpi-card c-navy"><div class="kpi-label">Avg Order Value</div><div class="kpi-value">${fmt.cur(s.aov)}</div><div class="kpi-sub">Per order</div></div>
+    <div class="kpi-card c-green"><div class="kpi-label">New Customers</div><div class="kpi-value">${s.newPct.toFixed(1)}%</div><div class="kpi-sub">${fmt.num(s.newCustomers)} new &middot; ${fmt.num(s.retCustomers)} ret.</div></div>
+    <div class="kpi-card c-warn">
+      <div class="kpi-label">% to Plan (Units)</div>
+      <div class="kpi-value" style="color:${ptpC}">${ptp!=null?ptp.toFixed(1)+'%':'—'}</div>
+      <div class="ptp-bar"><div class="ptp-fill" style="width:${ptpW}%;background:${ptpC}"></div></div>
+      <div class="kpi-sub">${fmt.num(s.units)} / ${fmt.num(s.planUnits)} planned</div>
+    </div>`;
+}
+
+const _ch = {};
+function kill(id) { if (_ch[id]) { _ch[id].destroy(); delete _ch[id]; } }
+
+function renderSales(d) {
+  kill('s');
+  _ch.s = new Chart(document.getElementById('chart-sales'), {
+    type:'bar', data:{ labels:d.byVariant.map(v=>v.name),
+      datasets:[{label:'Net Sales',data:d.byVariant.map(v=>v.netSales),backgroundColor:d.byVariant.map(v=>v.color||'#3A9E98'),borderRadius:4}]},
+    options:{ indexAxis:'y', responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.cur(c.raw)}}},
+      scales:{ x:{ticks:{callback:v=>'$'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:'#E2E8EF'}}, y:{grid:{display:false}} } },
+  });
+}
+
+function renderUnits(d) {
+  kill('u');
+  _ch.u = new Chart(document.getElementById('chart-units'), {
+    type:'bar', data:{ labels:d.byVariant.map(v=>v.name),
+      datasets:[{label:'Units',data:d.byVariant.map(v=>v.units),backgroundColor:d.byVariant.map(v=>v.color||'#3A9E98'),borderRadius:4}]},
+    options:{ indexAxis:'y', responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.num(c.raw)+' units'}}},
+      scales:{ x:{ticks:{callback:v=>v.toLocaleString()},grid:{color:'#E2E8EF'}}, y:{grid:{display:false}} } },
+  });
+}
+
+function renderDonut(d) {
+  kill('d');
+  const s = d.summary;
+  _ch.d = new Chart(document.getElementById('chart-donut'), {
+    type:'doughnut', data:{ labels:['New','Returning'],
+      datasets:[{data:[s.newCustomers,s.retCustomers],backgroundColor:['#3A9E98','#C9A84C'],borderWidth:0,hoverOffset:6}]},
+    options:{ responsive:true, cutout:'68%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.num(c.raw)+' ('+(c.raw/(s.totalCustomers||1)*100).toFixed(1)+'%)'}}} },
+  });
+  document.getElementById('nvr-legend').innerHTML = [
+    {label:'New Customers',val:s.newCustomers,pct:s.newPct,color:'#3A9E98'},
+    {label:'Returning',val:s.retCustomers,pct:s.retPct,color:'#C9A84C'},
+  ].map(it=>`<div class="nvr-item"><div class="nvr-left"><div class="nvr-dot" style="background:${it.color}"></div>${it.label}</div><div><span class="nvr-val">${fmt.num(it.val)}</span><span class="nvr-pct">${it.pct.toFixed(1)}%</span></div></div>`).join('');
+}
+
+function renderNvrShade(d) {
+  kill('ns');
+  _ch.ns = new Chart(document.getElementById('chart-nvr-shade'), {
+    type:'bar', data:{ labels:d.byVariant.map(v=>v.name),
+      datasets:[{label:'New',data:d.byVariant.map(v=>v.newCustomers),backgroundColor:'#3A9E98',borderRadius:3},
+                {label:'Returning',data:d.byVariant.map(v=>v.retCustomers),backgroundColor:'#C9A84C',borderRadius:3}]},
+    options:{ responsive:true, plugins:{legend:{position:'top',labels:{boxWidth:12}}},
+      scales:{ x:{grid:{display:false},ticks:{maxRotation:45}}, y:{grid:{color:'#E2E8EF'}} } },
+  });
+}
+
+function renderTable(d) {
+  const s = d.summary;
+  const rows = d.byVariant.map(v => {
+    const aov=v.orders>0?v.netSales/v.orders:0, ptpW=Math.min(v.pctToPlanUnits||0,120), ptpC=ptpColor(v.pctToPlanUnits);
+    return `<tr>
+      <td><span class="dot" style="background:${v.color||'#3A9E98'}"></span><strong>${v.name}</strong>${v.shade?'<br><span style="margin-left:18px;font-size:11px;color:var(--muted)">'+v.shade+'</span>':''}</td>
+      <td class="r">${fmt.num(v.units)}</td><td class="r">${fmt.cur(v.netSales)}</td><td class="r">${fmt.cur(aov)}</td>
+      <td class="r">${fmt.num(v.newCustomers)}</td><td class="r">${fmt.num(v.retCustomers)}</td>
+      <td class="r"><div class="ptp-cell"><div class="ptp-mini"><div class="ptp-mini-fill" style="width:${ptpW}%;background:${ptpC}"></div></div><span style="color:${ptpC};font-weight:600">${v.pctToPlanUnits!=null?v.pctToPlanUnits.toFixed(1)+'%':'—'}</span></div></td>
+    </tr>`;
+  });
+  const tc=ptpColor(s.pctToPlanUnits), taov=s.orders>0?s.netSales/s.orders:0;
+  rows.push(`<tr class="tot"><td>Total</td><td class="r">${fmt.num(s.units)}</td><td class="r">${fmt.cur(s.netSales)}</td><td class="r">${fmt.cur(taov)}</td><td class="r">${fmt.num(s.newCustomers)}</td><td class="r">${fmt.num(s.retCustomers)}</td><td class="r" style="color:${tc}">${s.pctToPlanUnits!=null?s.pctToPlanUnits.toFixed(1)+'%':'—'}</td></tr>`);
+  document.getElementById('tbl-body').innerHTML = rows.join('');
+}
+
+function renderTrend(d) {
+  const labels = d.dailySales.map(r => fmt.day(r.date));
+  kill('dl'); kill('cu');
+  _ch.dl = new Chart(document.getElementById('chart-daily'), {
+    type:'bar', data:{labels,datasets:[{label:'Net Sales',data:d.dailySales.map(r=>r.netSales),backgroundColor:'rgba(58,158,152,.7)',borderColor:'#3A9E98',borderRadius:3}]},
+    options:{ responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.cur(c.raw)}}},
+      scales:{ x:{grid:{display:false},ticks:{maxTicksLimit:16,maxRotation:45}}, y:{ticks:{callback:v=>'$'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:'#E2E8EF'}} } },
+  });
+  _ch.cu = new Chart(document.getElementById('chart-cum'), {
+    type:'line', data:{labels,datasets:[{label:'Cumulative Units',data:d.dailySales.map(r=>r.cumUnits),borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,.1)',fill:true,tension:0.3,pointRadius:2}]},
+    options:{ responsive:true, plugins:{legend:{display:false}},
+      scales:{ x:{grid:{display:false},ticks:{maxTicksLimit:16,maxRotation:45}}, y:{ticks:{callback:v=>v.toLocaleString()},grid:{color:'#E2E8EF'}} } },
+  });
+}
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-overview').style.display = t.dataset.tab==='overview'?'':'none';
+    document.getElementById('panel-trend').style.display    = t.dataset.tab==='trend'?'':'none';
+  });
+});
+
+async function init() {
+  try {
+    const d = await loadData();
+    document.getElementById('loading').style.display = 'none';
+    renderHeader(d); renderKPIs(d); renderSales(d); renderUnits(d);
+    renderDonut(d); renderNvrShade(d); renderTable(d); renderTrend(d);
+  } catch (e) {
+    document.getElementById('loading').style.display = 'none';
+    const b = document.getElementById('error-banner');
+    b.textContent = 'Failed to load data: ' + e.message;
+    b.style.display = '';
+  }
+}
+
+init();
+setInterval(init, 10 * 60 * 1000);
+</script>
+</body>
+</html>

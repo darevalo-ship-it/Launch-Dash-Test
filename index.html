@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="/launch-dashboards/">
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="1800">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Launch Intelligence Hub - Thrive Causemetics</title>
+  <style>
+    :root {
+      --tc-teal: #3A9E98;
+      --tc-teal-dark: #1F6E6A;
+      --tc-teal-light: #E6F4F3;
+      --tc-navy: #1C2B3A;
+      --tc-gold: #C9A84C;
+      --bg: #F4F6F8;
+      --card: #FFFFFF;
+      --text: #1C2B3A;
+      --muted: #6B7A8D;
+      --border: #E2E8EF;
+      --positive: #22A06B;
+      --r: 12px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); }
+
+    .hdr {
+      background:linear-gradient(135deg, var(--tc-navy) 0%, var(--tc-teal-dark) 100%);
+      color:#fff; padding:28px 36px;
+    }
+    .hdr h1 { font-size:22px; font-weight:700; letter-spacing:.3px; }
+    .hdr p  { font-size:13px; opacity:.7; margin-top:4px; }
+    .hdr-meta { display:flex; align-items:center; gap:12px; margin-top:16px; flex-wrap:wrap; }
+    .stat-pill {
+      background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+      border-radius:20px; padding:5px 14px; font-size:12px; font-weight:500;
+    }
+    .stat-pill.green { background:rgba(34,160,107,.25); border-color:rgba(34,160,107,.5); }
+
+    .main { max-width:1200px; margin:0 auto; padding:32px 24px; }
+
+    .section-title {
+      font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
+      color:var(--muted); margin-bottom:16px; padding-bottom:8px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; margin-bottom:40px; }
+
+    .card {
+      background:var(--card); border-radius:var(--r); border:1px solid var(--border);
+      padding:20px; display:flex; flex-direction:column; gap:12px;
+      transition:box-shadow .15s, transform .15s;
+      text-decoration:none; color:inherit; position:relative; overflow:hidden;
+    }
+    .card:hover { box-shadow:0 4px 20px rgba(28,43,58,.1); transform:translateY(-1px); }
+    .card.live     { border-left:4px solid var(--tc-teal); }
+    .card.upcoming { border-left:4px solid var(--border); }
+    .card.upcoming .card-action { display:none; }
+
+    .card-accent {
+      position:absolute; top:0; right:0; width:80px; height:80px;
+      border-radius:0 var(--r) 0 80px; opacity:.06;
+    }
+    .card.live .card-accent     { background:var(--tc-teal); }
+    .card.upcoming .card-accent { background:var(--muted); }
+
+    .card-top  { display:flex; justify-content:space-between; align-items:flex-start; }
+    .card-name { font-size:15px; font-weight:700; line-height:1.3; flex:1; padding-right:8px; }
+    .badge {
+      font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase;
+      border-radius:20px; padding:3px 10px; white-space:nowrap;
+    }
+    .badge.live     { background:rgba(34,160,107,.12); color:#15794E; border:1px solid rgba(34,160,107,.3); }
+    .badge.upcoming { background:rgba(107,122,141,.1);  color:var(--muted); border:1px solid var(--border); }
+    .badge.soon     { background:rgba(245,158,11,.12);  color:#B45309; border:1px solid rgba(245,158,11,.3); }
+
+    .card-dates { display:flex; gap:16px; flex-wrap:wrap; }
+    .date-item  { font-size:12px; color:var(--muted); }
+    .date-item strong { color:var(--text); font-weight:600; display:block; font-size:13px; }
+
+    .card-kpis { display:flex; gap:10px; flex-wrap:wrap; }
+    .kpi-chip {
+      background:var(--tc-teal-light); border-radius:8px; padding:6px 12px;
+      font-size:12px; color:var(--tc-teal-dark); font-weight:600;
+    }
+    .kpi-chip.gold    { background:rgba(201,168,76,.12); color:#7A5C00; }
+    .kpi-chip.loading { background:var(--border); color:var(--muted); animation:fade 1.5s ease-in-out infinite; }
+    @keyframes fade { 0%,100%{opacity:1} 50%{opacity:.45} }
+
+    .card-action {
+      display:inline-flex; align-items:center; gap:6px; margin-top:4px;
+      background:var(--tc-teal); color:#fff; border-radius:8px;
+      padding:8px 16px; font-size:12px; font-weight:600;
+      text-decoration:none; transition:background .15s; align-self:flex-start;
+    }
+    .card-action:hover { background:var(--tc-teal-dark); }
+
+    .upcoming-note { font-size:12px; color:var(--muted); font-style:italic; margin-top:2px; }
+    .footer { text-align:center; padding:24px; font-size:11px; color:var(--muted); border-top:1px solid var(--border); }
+
+    @media(max-width:600px) {
+      .grid { grid-template-columns:1fr; }
+      .hdr  { padding:20px; }
+      .main { padding:20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>&#128640; Launch Intelligence Hub</h1>
+  <p>Thrive Causemetics &nbsp;&middot;&nbsp; Live dashboards for every product launch</p>
+  <div class="hdr-meta">
+    <span class="stat-pill green">3 Live Launches</span>
+    <span class="stat-pill">8 Launches Tracked &mdash; 2026</span>
+    <span class="stat-pill">Source: Snowflake &middot; DAASITY_DB</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="section-title">Live Launches</div>
+  <div class="grid">
+
+    <a class="card live" href="launch.html?id=empowershine">
+      <div class="card-accent"></div>
+      <div class="card-top">
+        <div class="card-name">EmpowerShine Satin Lip Cream<br><span style="font-size:12px;font-weight:400;color:var(--muted)">10 Shades</span></div>
+        <span class="badge live">Live</span>
+      </div>
+      <div class="card-dates">
+        <div class="date-item"><strong>Apr 7, 2026</strong>Launch Date</div>
+        <div class="date-item"><strong id="es-days">Day &mdash;</strong>Since Launch</div>
+      </div>
+      <div class="card-kpis" id="es-kpis"><span class="kpi-chip loading">Loading&hellip;</span></div>
+      <span class="card-action">View Dashboard &rarr;</span>
+    </a>
+
+    <a class="card live" href="launch.html?id=becca-brow" style="border-left-color:#C9A84C">
+      <div class="card-accent" style="background:#C9A84C"></div>
+      <div class="card-top">
+        <div class="card-name">Becca Brow<br><span style="font-size:12px;font-weight:400;color:var(--muted)">3 Products &middot; Silver Grey</span></div>
+        <span class="badge live">Live</span>
+      </div>
+      <div class="card-dates">
+        <div class="date-item"><strong>Jun 8, 2026</strong>Launch Date</div>
+        <div class="date-item"><strong id="bb-days">Day &mdash;</strong>Since Launch</div>
+      </div>
+      <div class="card-kpis" id="bb-kpis"><span class="kpi-chip loading">Loading&hellip;</span></div>
+      <span class="card-action" style="background:#7A5C00">View Dashboard &rarr;</span>
+    </a>
+
+    <a class="card live" href="llem-shade-extension.html" style="border-left-color:#6B4C8A">
+      <div class="card-accent" style="background:#6B4C8A"></div>
+      <div class="card-top">
+        <div class="card-name">LLEM Shade Extension<br><span style="font-size:12px;font-weight:400;color:var(--muted)">Monitoring</span></div>
+        <span class="badge live">Live</span>
+      </div>
+      <div class="card-dates">
+        <div class="date-item"><strong>Apr 15, 2026</strong>Launch Date</div>
+        <div class="date-item"><strong>Week 8</strong>Post-Launch</div>
+      </div>
+      <div class="card-kpis">
+        <span class="kpi-chip">Shade Extension</span>
+        <span class="kpi-chip gold">Monitoring</span>
+      </div>
+      <span class="card-action" style="background:#6B4C8A">View Dashboard &rarr;</span>
+    </a>
+
+  </div>
+
+  <div class="section-title">Upcoming Launches</div>
+  <div class="grid">
+
+    <div class="card upcoming">
+      <div class="card-accent"></div>
+      <div class="card-top"><div class="card-name">BEB Extension: Hoda &amp; Mila</div><span class="badge soon">Jun 17</span></div>
+      <div class="card-dates">
+        <div class="date-item"><strong>Jun 17, 2026</strong>Launch Date</div>
+        <div class="date-item"><strong>May 29, 2026</strong>Internal</div>
+      </div>
+      <p class="upcoming-note">Dashboard will be created once live</p>
+    </div>
+
+    <div class="card upcoming">
+      <div class="card-accent"></div>
+      <div class="card-top"><div class="card-name">Summer Promo</div><span class="badge upcoming">Jul 1</span></div>
+      <div class="card-dates">
+        <div class="date-item"><strong>Jul 1, 2026</strong>Launch Date</div>
+        <div class="date-item"><strong>Jun 23, 2026</strong>Internal</div>
+      </div>
+      <p class="upcoming-note">Dashboard will be created once live</p>
+    </div>
+
+    <div class="card upcoming">
+      <div class="card-accent"></div>
+      <div class="card-top"><div class="card-name">Eyeshadow Quads</div><span class="badge upcoming">Jul 22</span></div>
+      <div class="card-dates">
+        <div class="date-item"><strong>Jul 22, 2026</strong>Launch Date</div>
+        <div class="date-item"><strong>Jul 14, 2026</strong>Internal</div>
+      </div>
+      <p class="upcoming-note">Dashboard will be created once live</p>
+    </div>
+
+    <div class="card upcoming">
+      <div class="card-accent"></div>
+      <div class="card-top"><div class="card-name">Back to Me + Triple Threat</div><span class="badge upcoming">Aug 20</span></div>
+      <div class="card-dates">
+        <div class="date-item"><strong>Aug 20, 2026</strong>Launch Date</div>
+        <div class="date-item"><strong>Jul 24, 2026</strong>Internal</div>
+      </div>
+      <p class="upcoming-note">Dashboard will be created once live</p>
+    </div>
+
+    <div class="card upcoming">
+      <div class="card-accent"></div>
+      <div class="card-top"><div class="card-name">Lip Stain Marker</div><span class="badge upcoming">Sep 9</span></div>
+      <div class="card-dates">
+        <div class="date-item"><strong>Sep 9, 2026</strong>Launch Date</div>
+        <div class="date-item"><strong>Sep 2, 2026</strong>Internal</div>
+      </div>
+      <p class="upcoming-note">Dashboard will be created once live</p>
+    </div>
+
+    <div class="card upcoming">
+      <div class="card-accent"></div>
+      <div class="card-top"><div class="card-name">Holiday 2026 + Limited Edition</div><span class="badge upcoming">Oct 12</span></div>
+      <div class="card-dates">
+        <div class="date-item"><strong>Oct 12, 2026</strong>Launch Date</div>
+        <div class="date-item"><strong>Oct 6, 2026</strong>Internal</div>
+      </div>
+      <p class="upcoming-note">Dashboard will be created once live</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">Thrive Causemetics Launch Intelligence Hub &mdash; Data: Snowflake DAASITY_DB &middot; <a href="https://github.com/thrivecausemetics/glowing-launch-pad" style="color:var(--tc-teal);text-decoration:none;">glowing-launch-pad</a></div>
+
+<script>
+  function daysSince(iso) {
+    return Math.max(1, Math.floor((Date.now() - new Date(iso + 'T00:00:00').getTime()) / 86400000) + 1);
+  }
+  document.getElementById('es-days').textContent = 'Day ' + daysSince('2026-04-07');
+  document.getElementById('bb-days').textContent = 'Day ' + daysSince('2026-06-08');
+
+  (async () => {
+    try {
+      const res  = await fetch('/api/launches');
+      if (!res.ok) return;
+      const data = await res.json();
+      for (const l of data) {
+        const s    = l.summary;
+        const ptp  = s.pctToPlanUnits;
+        const ptpC = ptp == null ? '#9CA3AF' : ptp >= 100 ? '#22A06B' : ptp >= 85 ? '#F59E0B' : '#EF4444';
+        const html = [
+          `<span class="kpi-chip">$${(s.netSales/1000).toFixed(0)}k Net Sales</span>`,
+          `<span class="kpi-chip">${s.units.toLocaleString()} Units</span>`,
+          ptp != null ? `<span class="kpi-chip gold" style="color:${ptpC}">${ptp.toFixed(1)}% to Plan</span>` : '',
+        ].join('');
+        if (l.launchId === 'empowershine') document.getElementById('es-kpis').innerHTML = html;
+        if (l.launchId === 'becca-brow')   document.getElementById('bb-kpis').innerHTML = html;
+      }
+    } catch (_) {}
+  })();
+</script>
+</body>
+</html>

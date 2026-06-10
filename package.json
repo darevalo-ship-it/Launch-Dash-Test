@@ -1,0 +1,13 @@
+{
+  "name": "glowing-launch-pad",
+  "version": "1.0.0",
+  "description": "Thrive Causemetics Launch Intelligence Hub — powered by Snowflake",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "snowflake-sdk": "^1.9.0"
+  }
+}
