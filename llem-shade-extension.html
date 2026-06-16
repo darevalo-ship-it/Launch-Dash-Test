@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLEM Shade Extension | Thrive Causemetics</title>
+  <style>
+    :root {
+      --tc-teal: #3A9E98; --tc-teal-dark: #1F6E6A; --tc-teal-light: #E6F4F3;
+      --tc-navy: #1C2B3A; --tc-gold: #C9A84C;
+      --purple: #6B4C8A; --purple-light: #F0EBF6;
+      --bg: #F0F2F5; --card: #FFFFFF; --text: #1C2B3A;
+      --muted: #6B7A8D; --border: #E2E8EF;
+      --positive: #22A06B; --r: 12px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); }
+
+    .hdr { background:linear-gradient(135deg, var(--tc-navy) 0%, #3D2660 100%); color:#fff; padding:20px 36px; }
+    .back-btn { display:inline-flex; align-items:center; gap:6px; color:rgba(255,255,255,.65); text-decoration:none; font-size:13px; margin-bottom:12px; transition:color .15s; }
+    .back-btn:hover { color:#fff; }
+    .hdr-body { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+    .hdr-title h1 { font-size:22px; font-weight:700; }
+    .hdr-title p  { font-size:13px; opacity:.65; margin-top:3px; }
+    .hdr-badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+    .badge { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; border-radius:20px; padding:4px 12px; }
+    .badge-live    { background:rgba(34,160,107,.25); color:#6EFCB8; border:1px solid rgba(34,160,107,.4); }
+    .badge-week    { background:rgba(255,255,255,.12); color:rgba(255,255,255,.9); border:1px solid rgba(255,255,255,.22); }
+    .badge-monitor { background:rgba(201,168,76,.25); color:#FFD97A; border:1px solid rgba(201,168,76,.4); }
+
+    .main { max-width:1200px; margin:0 auto; padding:28px 24px; }
+
+    .section-title {
+      font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
+      color:var(--muted); margin-bottom:16px; padding-bottom:8px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .info-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; margin-bottom:32px; }
+    .info-card {
+      background:var(--card); border-radius:var(--r); border:1px solid var(--border);
+      padding:18px 20px; position:relative; overflow:hidden;
+    }
+    .info-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--purple); }
+    .info-label { font-size:11px; font-weight:600; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+    .info-value { font-size:20px; font-weight:700; }
+    .info-sub   { font-size:12px; color:var(--muted); margin-top:4px; }
+
+    .shade-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; margin-bottom:32px; }
+    .shade-card {
+      background:var(--card); border-radius:var(--r); border:1px solid var(--border);
+      padding:16px 18px; display:flex; align-items:center; gap:14px;
+    }
+    .shade-dot { width:36px; height:36px; border-radius:50%; flex-shrink:0; border:2px solid rgba(0,0,0,.08); }
+    .shade-info { flex:1; }
+    .shade-name  { font-size:14px; font-weight:700; }
+    .shade-sku   { font-size:11px; color:var(--muted); margin-top:2px; }
+    .shade-badge { font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; border-radius:10px; padding:2px 8px; margin-top:6px; display:inline-block; }
+    .shade-badge.new  { background:rgba(58,158,152,.12); color:var(--tc-teal-dark); border:1px solid rgba(58,158,152,.3); }
+    .shade-badge.ext  { background:var(--purple-light); color:var(--purple); border:1px solid rgba(107,76,138,.25); }
+
+    .notice {
+      background:#FFF8E6; border:1px solid rgba(201,168,76,.4); border-left:4px solid var(--tc-gold);
+      border-radius:var(--r); padding:16px 20px; margin-bottom:28px;
+      font-size:13px; color:#7A5C00; line-height:1.6;
+    }
+    .notice strong { font-weight:700; }
+
+    .timeline { background:var(--card); border-radius:var(--r); border:1px solid var(--border); padding:20px 24px; margin-bottom:32px; }
+    .timeline h3 { font-size:14px; font-weight:700; margin-bottom:16px; }
+    .tl-row { display:flex; align-items:flex-start; gap:16px; padding:10px 0; border-bottom:1px solid var(--border); }
+    .tl-row:last-child { border-bottom:none; }
+    .tl-dot { width:10px; height:10px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+    .tl-dot.done  { background:var(--positive); }
+    .tl-dot.now   { background:var(--tc-gold); box-shadow:0 0 0 3px rgba(201,168,76,.25); }
+    .tl-dot.next  { background:var(--border); }
+    .tl-label { font-size:13px; font-weight:600; flex:1; }
+    .tl-date  { font-size:12px; color:var(--muted); }
+    .tl-note  { font-size:12px; color:var(--muted); margin-top:2px; }
+
+    footer { text-align:center; padding:24px; font-size:11px; color:var(--muted); border-top:1px solid var(--border); }
+
+    @media(max-width:600px) {
+      .hdr  { padding:20px; }
+      .main { padding:20px 16px; }
+      .info-grid { grid-template-columns:repeat(2,1fr); }
+      .shade-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hdr">
+  <a class="back-btn" href="index.html">&larr; Launch Intelligence Hub</a>
+  <div class="hdr-body">
+    <div class="hdr-title">
+      <h1>LLEM Shade Extension</h1>
+      <p>Liquid Lash Extension Mascara &nbsp;&middot;&nbsp; New Shade Additions</p>
+    </div>
+    <div class="hdr-badges">
+      <span class="badge badge-live">&#9679; Live</span>
+      <span class="badge badge-week" id="week-badge">Week &mdash;</span>
+      <span class="badge badge-monitor">Monitoring</span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="notice">
+    <strong>Monitoring Phase</strong> &mdash; This launch is in Week 8 post-launch monitoring.
+    Live sales metrics (units, net sales, % to plan) are available in the
+    <strong>Snowflake server dashboard</strong>. This page tracks shade configuration and launch milestones.
+  </div>
+
+  <div class="section-title">Launch Overview</div>
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-label">Launch Date</div>
+      <div class="info-value">Apr 15, 2026</div>
+      <div class="info-sub">Original LLEM launch</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label">Shade Extension Date</div>
+      <div class="info-value">Apr 15, 2026</div>
+      <div class="info-sub">New shades added</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label">Post-Launch Phase</div>
+      <div class="info-value" id="week-display">Week 8</div>
+      <div class="info-sub">Monitoring cadence</div>
+    </div>
+    <div class="info-card">
+      <div class="info-label">Status</div>
+      <div class="info-value" style="color:var(--positive)">Live</div>
+      <div class="info-sub">Shade Extension</div>
+    </div>
+  </div>
+
+  <div class="section-title">Shade Lineup</div>
+  <div class="notice" style="margin-bottom:16px; background:#F0EBF6; border-color:rgba(107,76,138,.3); border-left-color:var(--purple); color:#3D2660;">
+    <strong>Note:</strong> Update the SKU numbers and shade names below with the actual LLEM Shade Extension variants before publishing.
+  </div>
+  <div class="shade-grid">
+    <div class="shade-card">
+      <div class="shade-dot" style="background:#1A1A1A"></div>
+      <div class="shade-info">
+        <div class="shade-name">Blackest Black</div>
+        <div class="shade-sku">SKU: TBD</div>
+        <span class="shade-badge new">New Shade</span>
+      </div>
+    </div>
+    <div class="shade-card">
+      <div class="shade-dot" style="background:#3D2B1F"></div>
+      <div class="shade-info">
+        <div class="shade-name">Deep Brown</div>
+        <div class="shade-sku">SKU: TBD</div>
+        <span class="shade-badge new">New Shade</span>
+      </div>
+    </div>
+    <div class="shade-card">
+      <div class="shade-dot" style="background:#2C1654"></div>
+      <div class="shade-info">
+        <div class="shade-name">Midnight Plum</div>
+        <div class="shade-sku">SKU: TBD</div>
+        <span class="shade-badge ext">Extension</span>
+      </div>
+    </div>
+    <div class="shade-card">
+      <div class="shade-dot" style="background:#1C3A52"></div>
+      <div class="shade-info">
+        <div class="shade-name">Navy</div>
+        <div class="shade-sku">SKU: TBD</div>
+        <span class="shade-badge ext">Extension</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Post-Launch Timeline</div>
+  <div class="timeline">
+    <div class="tl-row">
+      <div class="tl-dot done"></div>
+      <div>
+        <div class="tl-label">Launch Day</div>
+        <div class="tl-note">Shade Extension went live</div>
+      </div>
+      <div class="tl-date">Apr 15, 2026</div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-dot done"></div>
+      <div>
+        <div class="tl-label">Week 1 Check-in</div>
+        <div class="tl-note">Initial sell-through review</div>
+      </div>
+      <div class="tl-date">Apr 22, 2026</div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-dot done"></div>
+      <div>
+        <div class="tl-label">Week 4 Review</div>
+        <div class="tl-note">Performance vs. plan</div>
+      </div>
+      <div class="tl-date">May 13, 2026</div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-dot now"></div>
+      <div>
+        <div class="tl-label">Week 8 Monitoring &nbsp;<span style="font-size:11px;font-weight:400;color:var(--tc-gold)">&#9679; Current</span></div>
+        <div class="tl-note">Ongoing retention & repurchase tracking</div>
+      </div>
+      <div class="tl-date">Jun 10, 2026</div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-dot next"></div>
+      <div>
+        <div class="tl-label">Week 12 Closeout</div>
+        <div class="tl-note">Final launch review &amp; handoff to core catalog</div>
+      </div>
+      <div class="tl-date">Jul 8, 2026</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Thrive Causemetics Launch Intelligence Hub &mdash; LLEM Shade Extension Monitoring</footer>
+
+<script>
+  const launchDate = new Date('2026-04-15T00:00:00');
+  const weeksLive  = Math.floor((Date.now() - launchDate.getTime()) / (7 * 86400000));
+  document.getElementById('week-badge').textContent    = 'Week ' + weeksLive;
+  document.getElementById('week-display').textContent  = 'Week ' + weeksLive;
+</script>
+</body>
+</html>

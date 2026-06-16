@@ -113,7 +113,7 @@
   <div class="hdr-meta">
     <span class="stat-pill green">3 Live Launches</span>
     <span class="stat-pill">8 Launches Tracked &mdash; 2026</span>
-    <span class="stat-pill">Source: Snowflake &middot; DAASITY_DB</span>
+    <span class="stat-pill">Snapshot: Jun 16, 2026 &middot; DAASITY_DB</span>
   </div>
 </div>
 
@@ -244,24 +244,21 @@
   document.getElementById('es-days').textContent = 'Day ' + daysSince('2026-04-07');
   document.getElementById('bb-days').textContent = 'Day ' + daysSince('2026-06-08');
 
-  (async () => {
-    try {
-      const res  = await fetch('/api/launches');
-      if (!res.ok) return;
-      const data = await res.json();
-      for (const l of data) {
-        const s    = l.summary;
-        const ptp  = s.pctToPlanUnits;
-        const ptpC = ptp == null ? '#9CA3AF' : ptp >= 100 ? '#22A06B' : ptp >= 85 ? '#F59E0B' : '#EF4444';
-        const html = [
-          `<span class="kpi-chip">$${(s.netSales/1000).toFixed(0)}k Net Sales</span>`,
-          `<span class="kpi-chip">${s.units.toLocaleString()} Units</span>`,
-          ptp != null ? `<span class="kpi-chip gold" style="color:${ptpC}">${ptp.toFixed(1)}% to Plan</span>` : '',
-        ].join('');
-        if (l.launchId === 'empowershine') document.getElementById('es-kpis').innerHTML = html;
-        if (l.launchId === 'becca-brow')   document.getElementById('bb-kpis').innerHTML = html;
-      }
-    } catch (_) {}
+  (function () {
+    const snap = [
+      { id:'empowershine', netSales:1364032, units:53446, ptp:157.14 },
+      { id:'becca-brow',   netSales:38805,   units:1673,  ptp:44.42  },
+    ];
+    for (const l of snap) {
+      const ptpC = l.ptp >= 100 ? '#22A06B' : l.ptp >= 85 ? '#F59E0B' : '#EF4444';
+      const html = [
+        `<span class="kpi-chip">$${(l.netSales/1000).toFixed(0)}k Net Sales</span>`,
+        `<span class="kpi-chip">${l.units.toLocaleString()} Units</span>`,
+        `<span class="kpi-chip gold" style="color:${ptpC}">${l.ptp.toFixed(1)}% to Plan</span>`,
+      ].join('');
+      const el = document.getElementById(l.id === 'empowershine' ? 'es-kpis' : 'bb-kpis');
+      if (el) el.innerHTML = html;
+    }
   })();
 </script>
 </body>

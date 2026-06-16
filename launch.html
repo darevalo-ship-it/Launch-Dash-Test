@@ -185,38 +185,113 @@ const fmt = {
 };
 function ptpColor(v) { return v == null ? '#9CA3AF' : v >= 100 ? '#22A06B' : v >= 85 ? '#F59E0B' : '#EF4444'; }
 
-const LAUNCH_META = {
-  'empowershine': {
-    name: 'EmpowerShine Satin Lip Cream', launchDate: '2026-04-07',
-    variants: ['Ragan','Joan','Kaisa','Ilene','Kathy','Michelle','Linda','Chanice','Rosa','Kackie'],
-  },
-  'becca-brow': {
-    name: 'Becca Brow', launchDate: '2026-06-08',
-    variants: ['Brow Pencil','Brow Gel','Brow Liner'],
-  },
-};
-
 const launchId = new URLSearchParams(location.search).get('id') || 'empowershine';
-const meta = LAUNCH_META[launchId] || { name: launchId, launchDate: '', variants: [] };
-
-// Render static header immediately so the page title is never "Loading..."
-(function applyStaticHeader() {
-  document.title = meta.name + ' | Thrive Causemetics';
-  const nameEl = document.getElementById('launch-name');
-  const subEl  = document.getElementById('launch-sub');
-  const bdgEl  = document.getElementById('hdr-badges');
-  if (nameEl) nameEl.textContent = meta.name;
-  if (meta.launchDate && subEl) {
-    const daysLive = Math.max(1, Math.floor((Date.now() - new Date(meta.launchDate + 'T00:00:00').getTime()) / 86400000) + 1);
-    subEl.textContent = 'Launched ' + fmt.date(meta.launchDate) + '  ·  ' + meta.variants.length + ' Variant' + (meta.variants.length !== 1 ? 's' : '');
-    if (bdgEl) bdgEl.innerHTML = '<span class="badge badge-live">&#9679; LIVE</span><span class="badge badge-day">Day ' + daysLive + '</span>';
-  }
-})();
 
 async function loadData() {
-  const r = await fetch('/api/launch-data?launch=' + encodeURIComponent(launchId));
-  if (!r.ok) throw new Error('API ' + r.status);
-  return r.json();
+  const snapshots = {
+    empowershine: {
+      launchId:'empowershine', name:'EmpowerShine Satin Lip Cream',
+      launchDate:'2026-04-07', status:'LIVE',
+      summary:{
+        netSales:1364032.28, units:53446, orders:52433, aov:26.01,
+        newCustomers:13392, retCustomers:27113, totalCustomers:40505,
+        newPct:33.06, retPct:66.94,
+        planUnits:34011, planSales:0, pctToPlanUnits:157.14, pctToPlanSales:null,
+      },
+      byVariant:[
+        {sku:'TVG5950',name:'Ragan',shade:'Warm Plum',color:'#7B3FA0',netSales:356969.36,units:14027,orders:13778,newCustomers:4256,retCustomers:9377,planUnits:6851,planSales:0,pctToPlanUnits:204.74},
+        {sku:'TVG5890',name:'Michelle',shade:'Neutral Mauve',color:'#A0888A',netSales:220540.68,units:8637,orders:8449,newCustomers:2556,retCustomers:5788,planUnits:2371,planSales:0,pctToPlanUnits:364.28},
+        {sku:'TVG5880',name:'Ilene',shade:'Natural Rose',color:'#C89EA0',netSales:184950.72,units:7290,orders:7167,newCustomers:2706,retCustomers:4397,planUnits:4021,planSales:0,pctToPlanUnits:181.30},
+        {sku:'TVG5960',name:'Joan',shade:'Cool Rose',color:'#E8748A',netSales:177578.24,units:6961,orders:6887,newCustomers:2097,retCustomers:4725,planUnits:4748,planSales:0,pctToPlanUnits:146.61},
+        {sku:'TVG5920',name:'Kaisa',shade:'Dusty Rose',color:'#D4879A',netSales:135806.99,units:5300,orders:5233,newCustomers:1691,retCustomers:3484,planUnits:4670,planSales:0,pctToPlanUnits:113.49},
+        {sku:'TVG5900',name:'Rosa',shade:'Deep Berry',color:'#7A1840',netSales:129801.68,units:5025,orders:4843,newCustomers:2094,retCustomers:2699,planUnits:1610,planSales:0,pctToPlanUnits:312.11},
+        {sku:'TVG5940',name:'Kathy',shade:'Soft Apricot',color:'#F4A460',netSales:45873.29,units:1795,orders:1767,newCustomers:508,retCustomers:1238,planUnits:2432,planSales:0,pctToPlanUnits:73.81},
+        {sku:'TVG5930',name:'Chanice',shade:'Magenta Pink',color:'#C930B8',netSales:42279.37,units:1663,orders:1624,newCustomers:464,retCustomers:1145,planUnits:2013,planSales:0,pctToPlanUnits:82.61},
+        {sku:'TVG5910',name:'Linda',shade:'Cherry Red',color:'#C01830',netSales:42615.28,units:1659,orders:1634,newCustomers:535,retCustomers:1084,planUnits:1925,planSales:0,pctToPlanUnits:86.18},
+        {sku:'TVG5970',name:'Kackie',shade:'Mocha',color:'#8B6355',netSales:27616.67,units:1089,orders:1051,newCustomers:335,retCustomers:695,planUnits:3370,planSales:0,pctToPlanUnits:32.31},
+      ],
+      dailySales:[
+        {date:'2026-04-30',units:47,netSales:1244.62,cumUnits:47,cumSales:1244.62},
+        {date:'2026-05-01',units:1821,netSales:47218.36,cumUnits:1868,cumSales:48462.98},
+        {date:'2026-05-02',units:2533,netSales:66493.72,cumUnits:4401,cumSales:114956.70},
+        {date:'2026-05-03',units:1632,netSales:42567.45,cumUnits:6033,cumSales:157524.15},
+        {date:'2026-05-04',units:1315,netSales:34191.09,cumUnits:7348,cumSales:191715.24},
+        {date:'2026-05-05',units:1694,netSales:44075.73,cumUnits:9042,cumSales:235790.97},
+        {date:'2026-05-06',units:1331,netSales:34570.56,cumUnits:10373,cumSales:270361.53},
+        {date:'2026-05-07',units:1497,netSales:38898.19,cumUnits:11870,cumSales:309259.72},
+        {date:'2026-05-08',units:1624,netSales:41967.02,cumUnits:13494,cumSales:351226.74},
+        {date:'2026-05-09',units:1705,netSales:43498.17,cumUnits:15199,cumSales:394724.91},
+        {date:'2026-05-10',units:1996,netSales:51233.57,cumUnits:17195,cumSales:445958.48},
+        {date:'2026-05-11',units:1457,netSales:37694.37,cumUnits:18652,cumSales:483652.85},
+        {date:'2026-05-12',units:1237,netSales:31638.67,cumUnits:19889,cumSales:515291.52},
+        {date:'2026-05-13',units:1336,netSales:34340.53,cumUnits:21225,cumSales:549632.05},
+        {date:'2026-05-14',units:1300,netSales:33217.68,cumUnits:22525,cumSales:582849.73},
+        {date:'2026-05-15',units:1196,netSales:30525.66,cumUnits:23721,cumSales:613375.39},
+        {date:'2026-05-16',units:1432,netSales:36446.65,cumUnits:25153,cumSales:649822.04},
+        {date:'2026-05-17',units:1440,netSales:37131.00,cumUnits:26593,cumSales:686953.04},
+        {date:'2026-05-18',units:1225,netSales:31119.40,cumUnits:27818,cumSales:718072.44},
+        {date:'2026-05-19',units:1274,netSales:32477.67,cumUnits:29092,cumSales:750550.11},
+        {date:'2026-05-20',units:1229,netSales:31610.96,cumUnits:30321,cumSales:782161.07},
+        {date:'2026-05-21',units:1161,netSales:29341.73,cumUnits:31482,cumSales:811502.80},
+        {date:'2026-05-22',units:1434,netSales:36634.04,cumUnits:32916,cumSales:848136.84},
+        {date:'2026-05-23',units:1394,netSales:35464.21,cumUnits:34310,cumSales:883601.05},
+        {date:'2026-05-24',units:1545,netSales:39709.77,cumUnits:35855,cumSales:923310.82},
+        {date:'2026-05-25',units:1943,netSales:49816.54,cumUnits:37798,cumSales:973127.36},
+        {date:'2026-05-26',units:917,netSales:23082.16,cumUnits:38715,cumSales:996209.52},
+        {date:'2026-05-27',units:772,netSales:19376.53,cumUnits:39487,cumSales:1015586.05},
+        {date:'2026-05-28',units:840,netSales:21073.25,cumUnits:40327,cumSales:1036659.30},
+        {date:'2026-05-29',units:844,netSales:21177.68,cumUnits:41171,cumSales:1057836.98},
+        {date:'2026-05-30',units:723,netSales:18110.04,cumUnits:41894,cumSales:1075947.02},
+        {date:'2026-05-31',units:627,netSales:16116.04,cumUnits:42521,cumSales:1092063.06},
+        {date:'2026-06-01',units:817,netSales:20360.54,cumUnits:43338,cumSales:1112423.60},
+        {date:'2026-06-02',units:803,netSales:19834.97,cumUnits:44141,cumSales:1132258.57},
+        {date:'2026-06-03',units:844,netSales:20848.62,cumUnits:44985,cumSales:1153107.19},
+        {date:'2026-06-04',units:752,netSales:18269.80,cumUnits:45737,cumSales:1171376.99},
+        {date:'2026-06-05',units:740,netSales:18538.56,cumUnits:46477,cumSales:1189915.55},
+        {date:'2026-06-06',units:546,netSales:13721.38,cumUnits:47023,cumSales:1203636.93},
+        {date:'2026-06-07',units:628,netSales:16113.65,cumUnits:47651,cumSales:1219750.58},
+        {date:'2026-06-08',units:913,netSales:23285.16,cumUnits:48564,cumSales:1243035.74},
+        {date:'2026-06-09',units:499,netSales:12337.57,cumUnits:49063,cumSales:1255373.31},
+        {date:'2026-06-10',units:395,netSales:9814.55,cumUnits:49458,cumSales:1265187.86},
+        {date:'2026-06-11',units:483,netSales:12313.55,cumUnits:49941,cumSales:1277501.41},
+        {date:'2026-06-12',units:590,netSales:14998.13,cumUnits:50531,cumSales:1292499.54},
+        {date:'2026-06-13',units:1083,netSales:26370.80,cumUnits:51614,cumSales:1318870.34},
+        {date:'2026-06-14',units:1368,netSales:33397.37,cumUnits:52982,cumSales:1352267.71},
+        {date:'2026-06-15',units:450,netSales:11379.29,cumUnits:53432,cumSales:1363646.99},
+        {date:'2026-06-16',units:14,netSales:385.30,cumUnits:53446,cumSales:1364032.29},
+      ],
+    },
+    'becca-brow': {
+      launchId:'becca-brow', name:'Becca Brow',
+      launchDate:'2026-06-08', status:'LIVE',
+      summary:{
+        netSales:38805.00, units:1673, orders:1590, aov:24.41,
+        newCustomers:443, retCustomers:956, totalCustomers:1399,
+        newPct:31.67, retPct:68.33,
+        planUnits:3766, planSales:0, pctToPlanUnits:44.42, pctToPlanSales:null,
+      },
+      byVariant:[
+        {sku:'TVG6690',name:'Brow Gel',shade:'Silver Grey',color:'#6B7A8D',netSales:15426.47,units:692,orders:668,newCustomers:197,retCustomers:470,planUnits:1087,planSales:0,pctToPlanUnits:63.66},
+        {sku:'TVG6680',name:'Brow Pencil',shade:'Silver Grey',color:'#4B5563',netSales:16939.46,units:683,orders:655,newCustomers:226,retCustomers:426,planUnits:874,planSales:0,pctToPlanUnits:78.14},
+        {sku:'TVG6710',name:'Brow Liner',shade:'Silver Grey',color:'#9CA3AF',netSales:6439.07,units:298,orders:267,newCustomers:50,retCustomers:214,planUnits:1805,planSales:0,pctToPlanUnits:16.51},
+      ],
+      dailySales:[
+        {date:'2026-06-08',units:46,netSales:1072.52,cumUnits:46,cumSales:1072.52},
+        {date:'2026-06-09',units:213,netSales:4307.07,cumUnits:259,cumSales:5379.59},
+        {date:'2026-06-10',units:214,netSales:4960.26,cumUnits:473,cumSales:10339.85},
+        {date:'2026-06-11',units:304,netSales:7254.70,cumUnits:777,cumSales:17594.55},
+        {date:'2026-06-12',units:214,netSales:5043.18,cumUnits:991,cumSales:22637.73},
+        {date:'2026-06-13',units:249,netSales:5863.42,cumUnits:1240,cumSales:28501.15},
+        {date:'2026-06-14',units:272,netSales:6441.52,cumUnits:1512,cumSales:34942.67},
+        {date:'2026-06-15',units:158,netSales:3786.45,cumUnits:1670,cumSales:38729.12},
+        {date:'2026-06-16',units:3,netSales:75.89,cumUnits:1673,cumSales:38805.00},
+      ],
+    },
+  };
+  const raw = snapshots[launchId];
+  if (!raw) throw new Error('Unknown launch: ' + launchId);
+  const daysLive = Math.max(1, Math.floor((Date.now() - new Date(raw.launchDate + 'T00:00:00').getTime()) / 86400000) + 1);
+  return { ...raw, daysLive };
 }
 
 function renderHeader(d) {
@@ -227,7 +302,7 @@ function renderHeader(d) {
   document.getElementById('hdr-badges').innerHTML =
     '<span class="badge badge-live">&#9679; ' + d.status + '</span>' +
     '<span class="badge badge-day">Day ' + d.daysLive + '</span>';
-  document.getElementById('hdr-ts').textContent = 'Data as of ' + new Date().toLocaleTimeString();
+  document.getElementById('hdr-ts').textContent = 'Snapshot: Jun 16, 2026  ·  Source: DAASITY_DB';
 }
 
 function renderKPIs(d) {
@@ -343,15 +418,12 @@ async function init() {
   } catch (e) {
     document.getElementById('loading').style.display = 'none';
     const b = document.getElementById('error-banner');
-    b.innerHTML = e.message.includes('404') || e.message.includes('fetch')
-      ? '<strong>Live data requires the Snowflake server.</strong> Deploy with <code>npm start</code> or run locally to see charts and KPIs.'
-      : 'Failed to load data: ' + e.message;
+    b.textContent = 'Error loading data: ' + e.message;
     b.style.display = '';
   }
 }
 
 init();
-setInterval(init, 10 * 60 * 1000);
 </script>
 </body>
 </html>
