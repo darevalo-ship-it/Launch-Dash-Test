@@ -185,7 +185,33 @@ const fmt = {
 };
 function ptpColor(v) { return v == null ? '#9CA3AF' : v >= 100 ? '#22A06B' : v >= 85 ? '#F59E0B' : '#EF4444'; }
 
+const LAUNCH_META = {
+  'empowershine': {
+    name: 'EmpowerShine Satin Lip Cream', launchDate: '2026-04-07',
+    variants: ['Ragan','Joan','Kaisa','Ilene','Kathy','Michelle','Linda','Chanice','Rosa','Kackie'],
+  },
+  'becca-brow': {
+    name: 'Becca Brow', launchDate: '2026-06-08',
+    variants: ['Brow Pencil','Brow Gel','Brow Liner'],
+  },
+};
+
 const launchId = new URLSearchParams(location.search).get('id') || 'empowershine';
+const meta = LAUNCH_META[launchId] || { name: launchId, launchDate: '', variants: [] };
+
+// Render static header immediately so the page title is never "Loading..."
+(function applyStaticHeader() {
+  document.title = meta.name + ' | Thrive Causemetics';
+  const nameEl = document.getElementById('launch-name');
+  const subEl  = document.getElementById('launch-sub');
+  const bdgEl  = document.getElementById('hdr-badges');
+  if (nameEl) nameEl.textContent = meta.name;
+  if (meta.launchDate && subEl) {
+    const daysLive = Math.max(1, Math.floor((Date.now() - new Date(meta.launchDate + 'T00:00:00').getTime()) / 86400000) + 1);
+    subEl.textContent = 'Launched ' + fmt.date(meta.launchDate) + '  ·  ' + meta.variants.length + ' Variant' + (meta.variants.length !== 1 ? 's' : '');
+    if (bdgEl) bdgEl.innerHTML = '<span class="badge badge-live">&#9679; LIVE</span><span class="badge badge-day">Day ' + daysLive + '</span>';
+  }
+})();
 
 async function loadData() {
   const r = await fetch('/api/launch-data?launch=' + encodeURIComponent(launchId));
@@ -317,7 +343,9 @@ async function init() {
   } catch (e) {
     document.getElementById('loading').style.display = 'none';
     const b = document.getElementById('error-banner');
-    b.textContent = 'Failed to load data: ' + e.message;
+    b.innerHTML = e.message.includes('404') || e.message.includes('fetch')
+      ? '<strong>Live data requires the Snowflake server.</strong> Deploy with <code>npm start</code> or run locally to see charts and KPIs.'
+      : 'Failed to load data: ' + e.message;
     b.style.display = '';
   }
 }
