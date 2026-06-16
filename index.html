@@ -150,20 +150,17 @@
       <span class="card-action" style="background:#7A5C00">View Dashboard &rarr;</span>
     </a>
 
-    <a class="card live" href="llem-shade-extension.html" style="border-left-color:#6B4C8A">
+    <a class="card live" href="launch.html?id=llem-shade-extension" style="border-left-color:#6B4C8A">
       <div class="card-accent" style="background:#6B4C8A"></div>
       <div class="card-top">
-        <div class="card-name">LLEM Shade Extension<br><span style="font-size:12px;font-weight:400;color:var(--muted)">Monitoring</span></div>
+        <div class="card-name">LLEM Shade Extension<br><span style="font-size:12px;font-weight:400;color:var(--muted)">3 Shades &middot; Liquid Lash™</span></div>
         <span class="badge live">Live</span>
       </div>
       <div class="card-dates">
-        <div class="date-item"><strong>Apr 15, 2026</strong>Launch Date</div>
-        <div class="date-item"><strong>Week 8</strong>Post-Launch</div>
+        <div class="date-item"><strong>Apr 7, 2026</strong>Launch Date</div>
+        <div class="date-item"><strong id="llem-days">Day &mdash;</strong>Since Launch</div>
       </div>
-      <div class="card-kpis">
-        <span class="kpi-chip">Shade Extension</span>
-        <span class="kpi-chip gold">Monitoring</span>
-      </div>
+      <div class="card-kpis" id="llem-kpis"><span class="kpi-chip loading">Loading&hellip;</span></div>
       <span class="card-action" style="background:#6B4C8A">View Dashboard &rarr;</span>
     </a>
 
@@ -241,13 +238,15 @@
   function daysSince(iso) {
     return Math.max(1, Math.floor((Date.now() - new Date(iso + 'T00:00:00').getTime()) / 86400000) + 1);
   }
-  document.getElementById('es-days').textContent = 'Day ' + daysSince('2026-04-07');
-  document.getElementById('bb-days').textContent = 'Day ' + daysSince('2026-06-08');
+  document.getElementById('es-days').textContent   = 'Day ' + daysSince('2026-04-07');
+  document.getElementById('bb-days').textContent   = 'Day ' + daysSince('2026-06-08');
+  document.getElementById('llem-days').textContent = 'Day ' + daysSince('2026-04-07');
 
   (function () {
     const snap = [
-      { id:'empowershine', netSales:1364032, units:53446, ptp:157.14 },
-      { id:'becca-brow',   netSales:38805,   units:1673,  ptp:44.42  },
+      { elId:'es-kpis',   netSales:1364032, units:53446, ptp:157.14 },
+      { elId:'bb-kpis',   netSales:38805,   units:1673,  ptp:44.42  },
+      { elId:'llem-kpis', netSales:1501974, units:63790,  ptp:168.38 },
     ];
     for (const l of snap) {
       const ptpC = l.ptp >= 100 ? '#22A06B' : l.ptp >= 85 ? '#F59E0B' : '#EF4444';
@@ -256,7 +255,7 @@
         `<span class="kpi-chip">${l.units.toLocaleString()} Units</span>`,
         `<span class="kpi-chip gold" style="color:${ptpC}">${l.ptp.toFixed(1)}% to Plan</span>`,
       ].join('');
-      const el = document.getElementById(l.id === 'empowershine' ? 'es-kpis' : 'bb-kpis');
+      const el = document.getElementById(l.elId);
       if (el) el.innerHTML = html;
     }
   })();
