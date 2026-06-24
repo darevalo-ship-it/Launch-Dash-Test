@@ -11,81 +11,159 @@
       --tc-navy: #1C2B3A; --tc-gold: #C9A84C;
       --bg: #F0F2F5; --card: #FFFFFF; --text: #1C2B3A;
       --muted: #6B7A8D; --border: #E2E8EF;
-      --positive: #22A06B; --warn: #F59E0B; --r: 12px;
+      --positive: #22A06B; --warn: #F59E0B; --danger: #EF4444; --r: 12px;
     }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
-    .hdr { background:linear-gradient(135deg,var(--tc-navy) 0%,var(--tc-teal-dark) 100%); color:#fff; padding:20px 36px; }
-    .back-btn { display:inline-flex; align-items:center; gap:6px; color:rgba(255,255,255,.65); text-decoration:none; font-size:13px; margin-bottom:12px; transition:color .15s; }
+    /* HEADER */
+    .hdr { background:linear-gradient(135deg,var(--tc-navy) 0%,var(--tc-teal-dark) 100%); color:#fff; padding:18px 36px 14px; }
+    .back-btn { display:inline-flex; align-items:center; gap:6px; color:rgba(255,255,255,.6); text-decoration:none; font-size:12px; margin-bottom:10px; transition:color .15s; }
     .back-btn:hover { color:#fff; }
-    .hdr-body { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; }
-    .hdr-title h1 { font-size:22px; font-weight:700; }
-    .hdr-title p  { font-size:13px; opacity:.65; margin-top:3px; }
-    .hdr-badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
-    .badge { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; border-radius:20px; padding:4px 12px; }
-    .badge-live { background:rgba(34,160,107,.25); color:#6EFCB8; border:1px solid rgba(34,160,107,.4); }
-    .badge-day  { background:rgba(255,255,255,.12); color:rgba(255,255,255,.9); border:1px solid rgba(255,255,255,.22); }
-    .hdr-ts { font-size:11px; opacity:.45; margin-top:8px; }
+    .hdr-body { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    .hdr-left { flex:1; min-width:0; }
+    .hdr-title { font-size:21px; font-weight:700; line-height:1.25; }
+    .hdr-sub   { font-size:12px; opacity:.6; margin-top:3px; }
+    .hdr-chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center; }
+    .chip { font-size:11px; font-weight:600; letter-spacing:.5px; border-radius:20px; padding:4px 12px; }
+    .chip-live  { background:rgba(34,160,107,.28); color:#8FFFD4; border:1px solid rgba(34,160,107,.45); }
+    .chip-day   { background:rgba(255,255,255,.12); color:rgba(255,255,255,.88); border:1px solid rgba(255,255,255,.2); }
+    .chip-units { background:rgba(58,158,152,.28); color:#B0EDEA; border:1px solid rgba(58,158,152,.45); }
+    .chip-rev   { background:rgba(201,168,76,.22); color:#F5DFA4; border:1px solid rgba(201,168,76,.4); }
+    .chip-nvr   { background:rgba(139,92,246,.22); color:#D8C8FF; border:1px solid rgba(139,92,246,.4); }
+    .hdr-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+    .refresh-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.25);
+      border-radius:8px; padding:7px 14px; font-size:12px; font-weight:500;
+      color:rgba(255,255,255,.85); cursor:pointer; transition:all .15s; user-select:none;
+    }
+    .refresh-btn:hover { background:rgba(255,255,255,.22); }
+    .refresh-note { font-size:10px; opacity:.4; text-align:right; max-width:180px; line-height:1.4; }
+    .hdr-sources { font-size:11px; opacity:.45; margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,.1); }
 
-    .tabs { background:var(--card); border-bottom:1px solid var(--border); padding:0 36px; display:flex; }
-    .tab { padding:13px 20px; font-size:13px; font-weight:500; color:var(--muted); border-bottom:2px solid transparent; cursor:pointer; transition:all .15s; user-select:none; }
+    /* TABS */
+    .tabs-wrap { background:var(--card); border-bottom:2px solid var(--border); padding:0 36px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    .tabs-wrap::-webkit-scrollbar { display:none; }
+    .tabs { display:flex; min-width:max-content; }
+    .tab { padding:13px 18px; font-size:13px; font-weight:500; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-2px; cursor:pointer; transition:all .15s; user-select:none; white-space:nowrap; }
     .tab.active { color:var(--tc-teal); border-bottom-color:var(--tc-teal); font-weight:600; }
     .tab:hover:not(.active) { color:var(--text); }
 
-    .main { max-width:1340px; margin:0 auto; padding:28px 24px; }
+    /* MAIN */
+    .main { max-width:1360px; margin:0 auto; padding:28px 24px 80px; }
 
-    .kpi-row { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px; }
-    .kpi-card { background:var(--card); border-radius:var(--r); border:1px solid var(--border); padding:18px 20px; position:relative; overflow:hidden; }
+    /* KPI GRID */
+    .kpi-row1 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:14px; }
+    .kpi-row2 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+    .kpi-card { background:var(--card); border-radius:var(--r); border:1px solid var(--border); padding:16px 20px; position:relative; overflow:hidden; }
     .kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
     .kpi-card.c-teal::before  { background:var(--tc-teal); }
     .kpi-card.c-gold::before  { background:var(--tc-gold); }
     .kpi-card.c-navy::before  { background:var(--tc-navy); }
     .kpi-card.c-green::before { background:var(--positive); }
     .kpi-card.c-warn::before  { background:var(--warn); }
-    .kpi-label { font-size:11px; font-weight:600; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-    .kpi-value { font-size:26px; font-weight:700; line-height:1; }
-    .kpi-sub   { font-size:12px; color:var(--muted); margin-top:6px; }
-    .ptp-bar   { height:4px; background:var(--border); border-radius:2px; margin-top:8px; overflow:hidden; }
-    .ptp-fill  { height:100%; border-radius:2px; transition:width .5s ease; }
+    .kpi-card.c-purple::before{ background:#8B5CF6; }
+    .kpi-card.c-sky::before   { background:#0EA5E9; }
+    .kpi-card.c-gray::before  { background:var(--border); }
+    .kpi-label { font-size:10px; font-weight:700; letter-spacing:.9px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+    .kpi-value { font-size:24px; font-weight:700; line-height:1; }
+    .kpi-sub   { font-size:11px; color:var(--muted); margin-top:5px; }
+    .kpi-delta { font-size:11px; font-weight:600; margin-top:5px; }
+    .kpi-delta.pos { color:var(--positive); }
+    .kpi-delta.neg { color:var(--danger); }
+    .kpi-na    { color:var(--muted) !important; font-size:18px !important; }
+    .kpi-na-note { font-size:10px; color:var(--muted); font-style:italic; margin-top:4px; }
+    .ptp-bar  { height:4px; background:var(--border); border-radius:2px; margin-top:8px; overflow:hidden; }
+    .ptp-fill { height:100%; border-radius:2px; }
 
-    .row-2-3 { display:grid; grid-template-columns:2fr 1fr; gap:18px; margin-bottom:18px; }
-    .row-1-1 { display:grid; grid-template-columns:1fr 1fr;  gap:18px; margin-bottom:18px; }
+    /* CHARTS */
+    .row-2-1 { display:grid; grid-template-columns:2fr 1fr; gap:18px; margin-bottom:18px; }
+    .row-1-1 { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
     .chart-card { background:var(--card); border-radius:var(--r); border:1px solid var(--border); padding:20px; }
-    .chart-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:14px; }
+    .chart-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
+    .chart-sub   { font-size:11px; color:var(--muted); margin-bottom:14px; }
 
+    /* NVR */
     .nvr-wrap   { display:flex; flex-direction:column; align-items:center; }
-    .nvr-legend { width:100%; margin-top:14px; display:flex; flex-direction:column; gap:10px; }
+    .nvr-legend { width:100%; margin-top:12px; display:flex; flex-direction:column; gap:9px; }
     .nvr-item   { display:flex; align-items:center; justify-content:space-between; font-size:13px; }
     .nvr-dot    { width:10px; height:10px; border-radius:50%; margin-right:8px; flex-shrink:0; }
     .nvr-left   { display:flex; align-items:center; }
     .nvr-val    { font-weight:600; }
-    .nvr-pct    { font-size:12px; color:var(--muted); margin-left:4px; }
+    .nvr-pct    { font-size:11px; color:var(--muted); margin-left:4px; }
 
+    /* TABLE */
     .table-card { background:var(--card); border-radius:var(--r); border:1px solid var(--border); overflow:hidden; margin-bottom:18px; }
-    .table-hdr  { padding:16px 20px; border-bottom:1px solid var(--border); }
+    .table-hdr  { padding:14px 20px; border-bottom:1px solid var(--border); }
     .table-hdr h3 { font-size:14px; font-weight:600; }
+    .table-wrap { overflow-x:auto; }
     table { width:100%; border-collapse:collapse; font-size:13px; }
-    thead th { text-align:left; padding:10px 16px; font-size:11px; font-weight:600; letter-spacing:.6px; text-transform:uppercase; color:var(--muted); background:var(--bg); border-bottom:1px solid var(--border); }
+    thead th { text-align:left; padding:9px 16px; font-size:10px; font-weight:700; letter-spacing:.7px; text-transform:uppercase; color:var(--muted); background:var(--bg); border-bottom:1px solid var(--border); white-space:nowrap; }
     thead th.r { text-align:right; }
     tbody tr { border-bottom:1px solid var(--border); transition:background .1s; }
     tbody tr:last-child { border-bottom:none; }
     tbody tr:hover:not(.tot) { background:var(--tc-teal-light); }
     tbody tr.tot { background:var(--tc-teal-light); font-weight:600; }
-    td { padding:12px 16px; }
+    td { padding:11px 16px; white-space:nowrap; }
     td.r { text-align:right; font-variant-numeric:tabular-nums; }
     .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:8px; vertical-align:middle; }
     .ptp-cell { display:flex; align-items:center; justify-content:flex-end; gap:8px; }
-    .ptp-mini { width:52px; height:4px; background:var(--border); border-radius:2px; overflow:hidden; flex-shrink:0; }
+    .ptp-mini { width:48px; height:4px; background:var(--border); border-radius:2px; overflow:hidden; flex-shrink:0; }
     .ptp-mini-fill { height:100%; border-radius:2px; }
 
-    .loading-overlay { position:fixed; inset:0; background:rgba(255,255,255,.85); display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--muted); z-index:200; }
-    .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--tc-teal); border-radius:50%; animation:spin .65s linear infinite; margin-right:10px; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    .error-banner { background:#FEF2F2; border:1px solid #FECACA; border-radius:var(--r); padding:16px 20px; color:#B91C1C; font-size:14px; margin-bottom:20px; }
+    /* SECTION TITLE */
+    .section-title { font-size:10px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--border); }
 
-    @media(max-width:1100px) { .kpi-row { grid-template-columns:repeat(3,1fr); } .row-2-3 { grid-template-columns:1fr; } }
-    @media(max-width:768px)  { .kpi-row { grid-template-columns:repeat(2,1fr); } .row-1-1 { grid-template-columns:1fr; } .hdr,.tabs { padding-left:16px; padding-right:16px; } .main { padding:16px; } }
+    /* PLACEHOLDER */
+    .placeholder-wrap { display:flex; align-items:center; justify-content:center; padding:60px 24px; }
+    .placeholder-box { background:var(--card); border-radius:var(--r); border:1px solid var(--border); padding:52px 40px; text-align:center; max-width:560px; width:100%; }
+    .placeholder-icon { font-size:44px; margin-bottom:16px; }
+    .placeholder-box h3 { font-size:17px; font-weight:700; margin-bottom:10px; }
+    .placeholder-box p { font-size:13px; color:var(--muted); line-height:1.65; }
+    .source-tag {
+      display:inline-flex; align-items:center; gap:6px; margin-top:18px;
+      background:var(--tc-teal-light); color:var(--tc-teal-dark);
+      border-radius:8px; padding:6px 16px; font-size:12px; font-weight:600;
+    }
+
+    /* UPCOMING */
+    .upcoming-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px; }
+    .upc-card { background:var(--card); border-radius:var(--r); border:1px solid var(--border); padding:18px 20px; border-left:4px solid var(--border); }
+    .upc-card.near { border-left-color:var(--warn); }
+    .upc-badge { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; border-radius:20px; padding:3px 10px; margin-bottom:10px; }
+    .ub-near { background:rgba(245,158,11,.12); color:#B45309; border:1px solid rgba(245,158,11,.3); }
+    .ub-far  { background:rgba(107,122,141,.1); color:var(--muted); border:1px solid var(--border); }
+    .upc-name { font-size:14px; font-weight:700; margin-bottom:10px; line-height:1.3; }
+    .upc-dates { display:flex; gap:16px; flex-wrap:wrap; }
+    .upc-date { font-size:11px; color:var(--muted); }
+    .upc-date strong { display:block; color:var(--text); font-size:12px; font-weight:600; }
+
+    /* DATA GUIDE */
+    .guide-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+    .guide-card { background:var(--card); border-radius:var(--r); border:1px solid var(--border); padding:22px 24px; }
+    .guide-card h3 { font-size:13px; font-weight:700; color:var(--tc-teal-dark); margin-bottom:12px; text-transform:uppercase; letter-spacing:.5px; }
+    .guide-card p, .guide-card li { font-size:13px; color:var(--muted); line-height:1.7; }
+    .guide-card ul { padding-left:18px; margin-top:4px; }
+    .guide-card li { margin-bottom:5px; }
+    .guide-card strong { color:var(--text); }
+    .guide-card.full { grid-column:1/-1; }
+
+    /* LOADING / ERROR */
+    .loading-overlay { position:fixed; inset:0; background:rgba(255,255,255,.88); display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--muted); z-index:200; }
+    .spinner { width:26px; height:26px; border:3px solid var(--border); border-top-color:var(--tc-teal); border-radius:50%; animation:spin .65s linear infinite; margin-right:10px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .error-banner { background:#FEF2F2; border:1px solid #FECACA; border-radius:var(--r); padding:14px 18px; color:#B91C1C; font-size:13px; margin-bottom:20px; }
+
+    /* REPORT ISSUE FAB */
+    .fab { position:fixed; bottom:22px; right:22px; background:var(--tc-navy); color:#fff; border:none; border-radius:24px; padding:10px 20px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:7px; box-shadow:0 4px 16px rgba(28,43,58,.28); transition:all .15s; z-index:100; }
+    .fab:hover { background:var(--tc-teal-dark); transform:translateY(-1px); box-shadow:0 6px 20px rgba(28,43,58,.35); }
+
+    /* RESPONSIVE */
+    @media(max-width:1100px) { .row-2-1 { grid-template-columns:1fr; } .guide-grid { grid-template-columns:1fr; } .guide-card.full { grid-column:auto; } }
+    @media(max-width:900px)  { .kpi-row1,.kpi-row2 { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:768px)  { .row-1-1 { grid-template-columns:1fr; } .hdr,.tabs-wrap { padding-left:16px; padding-right:16px; } .main { padding:16px 14px 80px; } .hdr-right { display:none; } }
+    @media(max-width:520px)  { .kpi-row1,.kpi-row2 { grid-template-columns:repeat(2,1fr); } }
   </style>
 </head>
 <body>
@@ -94,38 +172,56 @@
   <div class="spinner"></div>Loading launch data&hellip;
 </div>
 
+<!-- HEADER -->
 <div class="hdr">
   <a class="back-btn" href="index.html">&larr; Launch Intelligence Hub</a>
   <div class="hdr-body">
-    <div class="hdr-title">
-      <h1 id="launch-name">Loading&hellip;</h1>
-      <p id="launch-sub"></p>
+    <div class="hdr-left">
+      <div class="hdr-title" id="launch-name">Loading&hellip;</div>
+      <div class="hdr-sub" id="launch-sub"></div>
+      <div class="hdr-chips" id="hdr-chips"></div>
     </div>
-    <div id="hdr-badges" class="hdr-badges"></div>
+    <div class="hdr-right">
+      <button class="refresh-btn" onclick="onRefreshClick()">&#8635;&nbsp; Refresh</button>
+      <div class="refresh-note" id="refresh-note">Static snapshot &mdash;<br>no live connection</div>
+    </div>
   </div>
-  <div class="hdr-ts" id="hdr-ts"></div>
+  <div class="hdr-sources" id="hdr-sources"></div>
 </div>
 
-<div class="tabs">
-  <div class="tab active" data-tab="overview">Overview</div>
-  <div class="tab" data-tab="trend">Daily Trend</div>
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tabs" id="tabs-bar">
+    <div class="tab active" data-tab="overview">Overview</div>
+    <div class="tab" data-tab="traffic">Traffic Sources</div>
+    <div class="tab" data-tab="landing">Landing Page</div>
+    <div class="tab" data-tab="pdp">PDP Health</div>
+    <div class="tab" data-tab="crosssells">Cross-Sells &amp; Pairings</div>
+    <div class="tab" data-tab="upcoming">Upcoming Launches</div>
+    <div class="tab" data-tab="guide">Data Guide</div>
+  </div>
 </div>
 
 <div class="main">
   <div id="error-banner" class="error-banner" style="display:none"></div>
 
+  <!-- ── OVERVIEW ── -->
   <div id="panel-overview">
-    <div class="kpi-row" id="kpi-row"></div>
 
-    <div class="row-2-3">
+    <div class="kpi-row1" id="kpi-row1"></div>
+    <div class="kpi-row2" id="kpi-row2"></div>
+
+    <div class="row-2-1">
       <div class="chart-card">
-        <div class="chart-title">Net Sales by Variant</div>
+        <div class="chart-title">Revenue by Variant</div>
+        <div class="chart-sub" id="cs-revenue-sub"></div>
         <canvas id="chart-sales"></canvas>
       </div>
       <div class="chart-card">
         <div class="chart-title">New vs Returning Customers</div>
+        <div class="chart-sub" id="cs-donut-sub"></div>
         <div class="nvr-wrap">
-          <canvas id="chart-donut" style="max-height:180px"></canvas>
+          <canvas id="chart-donut" style="max-height:178px"></canvas>
           <div class="nvr-legend" id="nvr-legend"></div>
         </div>
       </div>
@@ -134,50 +230,229 @@
     <div class="row-1-1">
       <div class="chart-card">
         <div class="chart-title">Units Sold by Variant</div>
+        <div class="chart-sub" id="cs-units-sub"></div>
         <canvas id="chart-units"></canvas>
       </div>
       <div class="chart-card">
         <div class="chart-title">New vs Returning by Shade</div>
+        <div class="chart-sub" id="cs-nvr-sub"></div>
         <canvas id="chart-nvr-shade"></canvas>
       </div>
     </div>
 
     <div class="table-card">
       <div class="table-hdr"><h3>Variant Performance Summary</h3></div>
-      <table>
-        <thead>
-          <tr>
-            <th>Shade / Product</th>
-            <th class="r">Units Sold</th>
-            <th class="r">Net Sales</th>
-            <th class="r">AOV</th>
-            <th class="r">New Customers</th>
-            <th class="r">Returning</th>
-            <th class="r">% to Plan (Units)</th>
-          </tr>
-        </thead>
-        <tbody id="tbl-body">
-          <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Loading&hellip;</td></tr>
-        </tbody>
-      </table>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Shade / Product</th>
+              <th class="r">Units</th>
+              <th class="r">Net Sales</th>
+              <th class="r">AOV</th>
+              <th class="r">New Cust.</th>
+              <th class="r">Returning</th>
+              <th class="r">% to Plan</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-body">
+            <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--muted)">Loading&hellip;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:6px">Daily Trend</div>
+    <div class="row-1-1">
+      <div class="chart-card">
+        <div class="chart-title">Daily Net Sales</div>
+        <div class="chart-sub" id="cs-daily-sub"></div>
+        <canvas id="chart-daily" height="240"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Cumulative Units Sold</div>
+        <div class="chart-sub" id="cs-cum-sub"></div>
+        <canvas id="chart-cum" height="240"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── TRAFFIC SOURCES ── -->
+  <div id="panel-traffic" style="display:none">
+    <div class="placeholder-wrap">
+      <div class="placeholder-box">
+        <div class="placeholder-icon">📈</div>
+        <h3>Traffic Sources</h3>
+        <p>Session and traffic breakdown by source / medium — Organic Search, Paid Search, Email, Direct, Social, Referral — including sessions, bounce rate, and conversion rate per channel.</p>
+        <p style="margin-top:10px">This data comes from <strong>Google Analytics 4 (GA4)</strong> and is not included in the current Snowflake static snapshot.</p>
+        <div class="source-tag">&#128279; Requires: Google Analytics 4</div>
+      </div>
     </div>
   </div>
 
-  <div id="panel-trend" style="display:none">
-    <div class="chart-card" style="margin-bottom:18px">
-      <div class="chart-title">Daily Net Sales</div>
-      <canvas id="chart-daily" height="280"></canvas>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Cumulative Units Sold</div>
-      <canvas id="chart-cum" height="280"></canvas>
+  <!-- ── LANDING PAGE ── -->
+  <div id="panel-landing" style="display:none">
+    <div class="placeholder-wrap">
+      <div class="placeholder-box">
+        <div class="placeholder-icon">🖥️</div>
+        <h3>Landing Page</h3>
+        <p>Landing page performance metrics: page views, avg. time on page, bounce rate, scroll depth, add-to-cart rate, and conversion rate across landing page variants.</p>
+        <p style="margin-top:10px">This data comes from <strong>Google Analytics 4 (GA4)</strong> and is not included in the current static snapshot.</p>
+        <div class="source-tag">&#128279; Requires: Google Analytics 4</div>
+      </div>
     </div>
   </div>
+
+  <!-- ── PDP HEALTH ── -->
+  <div id="panel-pdp" style="display:none">
+    <div class="placeholder-wrap">
+      <div class="placeholder-box">
+        <div class="placeholder-icon">🛍️</div>
+        <h3>PDP Health</h3>
+        <p>Product Detail Page health metrics: PDP views, add-to-cart rate, cart abandonment rate, customer review score and count, and PDP conversion rate by variant.</p>
+        <p style="margin-top:10px">This data comes from <strong>Google Analytics 4 + Shopify</strong> and is not included in the current static snapshot.</p>
+        <div class="source-tag">&#128279; Requires: GA4 + Shopify</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CROSS-SELLS & PAIRINGS ── -->
+  <div id="panel-crosssells" style="display:none">
+    <div class="placeholder-wrap">
+      <div class="placeholder-box">
+        <div class="placeholder-icon">🤝</div>
+        <h3>Cross-Sells &amp; Pairings</h3>
+        <p>Top products purchased alongside this launch, basket affinity analysis, and cross-sell conversion rates. Identifies which products most frequently co-occur in orders containing this launch's SKUs.</p>
+        <p style="margin-top:10px">This analysis requires <strong>order line item data from Shopify via Snowflake DAASITY_DB</strong> and is not included in the current static snapshot.</p>
+        <div class="source-tag">&#128279; Requires: Shopify Order Line Items</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── UPCOMING LAUNCHES ── -->
+  <div id="panel-upcoming" style="display:none">
+    <div class="section-title">Upcoming Launches — 2026</div>
+    <div class="upcoming-grid">
+      <div class="upc-card near">
+        <span class="upc-badge ub-near">Jun 17</span>
+        <div class="upc-name">BEB Extension: Hoda &amp; Mila</div>
+        <div class="upc-dates">
+          <div class="upc-date"><strong>Jun 17, 2026</strong>Launch Date</div>
+          <div class="upc-date"><strong>May 29, 2026</strong>Internal</div>
+        </div>
+      </div>
+      <div class="upc-card">
+        <span class="upc-badge ub-far">Jul 1</span>
+        <div class="upc-name">Summer Promo</div>
+        <div class="upc-dates">
+          <div class="upc-date"><strong>Jul 1, 2026</strong>Launch Date</div>
+          <div class="upc-date"><strong>Jun 23, 2026</strong>Internal</div>
+        </div>
+      </div>
+      <div class="upc-card">
+        <span class="upc-badge ub-far">Jul 22</span>
+        <div class="upc-name">Eyeshadow Quads</div>
+        <div class="upc-dates">
+          <div class="upc-date"><strong>Jul 22, 2026</strong>Launch Date</div>
+          <div class="upc-date"><strong>Jul 14, 2026</strong>Internal</div>
+        </div>
+      </div>
+      <div class="upc-card">
+        <span class="upc-badge ub-far">Aug 20</span>
+        <div class="upc-name">Back to Me + Triple Threat</div>
+        <div class="upc-dates">
+          <div class="upc-date"><strong>Aug 20, 2026</strong>Launch Date</div>
+          <div class="upc-date"><strong>Jul 24, 2026</strong>Internal</div>
+        </div>
+      </div>
+      <div class="upc-card">
+        <span class="upc-badge ub-far">Sep 9</span>
+        <div class="upc-name">Lip Stain Marker</div>
+        <div class="upc-dates">
+          <div class="upc-date"><strong>Sep 9, 2026</strong>Launch Date</div>
+          <div class="upc-date"><strong>Sep 2, 2026</strong>Internal</div>
+        </div>
+      </div>
+      <div class="upc-card">
+        <span class="upc-badge ub-far">Oct 12</span>
+        <div class="upc-name">Holiday 2026 + Limited Edition</div>
+        <div class="upc-dates">
+          <div class="upc-date"><strong>Oct 12, 2026</strong>Launch Date</div>
+          <div class="upc-date"><strong>Oct 6, 2026</strong>Internal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DATA GUIDE ── -->
+  <div id="panel-guide" style="display:none">
+    <div class="guide-grid">
+      <div class="guide-card">
+        <h3>Data Sources</h3>
+        <ul>
+          <li><strong>Shopify</strong> — Orders, line items, products, variants, customers</li>
+          <li><strong>NetSuite</strong> — Net sales after returns and discounts applied</li>
+          <li><strong>Snowflake DAASITY_DB · UOS schema</strong> — Unified Order Schema combining Shopify + NetSuite</li>
+          <li><strong>Snowflake DAASITY_DB · GSHEETS schema</strong> — SKU-level unit launch day forecasts from Google Sheets</li>
+        </ul>
+      </div>
+      <div class="guide-card">
+        <h3>Data Freshness</h3>
+        <p>This dashboard uses a <strong>static snapshot taken Jun 16, 2026</strong> from Snowflake DAASITY_DB. Data is not live.</p>
+        <p style="margin-top:8px">To get a refreshed snapshot, Claude must re-query Snowflake and re-generate the HTML. Contact your Data team or re-run the dashboard generation script.</p>
+        <p style="margin-top:8px">For a live connection, deploy the Node.js server (<code style="font-size:12px;background:var(--bg);padding:2px 6px;border-radius:4px">npm start</code>) which queries Snowflake on each page load.</p>
+      </div>
+      <div class="guide-card">
+        <h3>Metric Definitions</h3>
+        <ul>
+          <li><strong>Net Sales</strong> — SUM(price × quantity − discount_amount) where REFUND_FLAG IS NULL OR FALSE</li>
+          <li><strong>Units Sold</strong> — SUM(quantity) on all non-refunded line items</li>
+          <li><strong>AOV</strong> — Net Sales ÷ Total Orders (order level)</li>
+          <li><strong>Units / Order</strong> — Total Units ÷ Total Orders</li>
+          <li><strong>New Customer</strong> — Customer whose order date equals their MIN(order_date) across all orders in UOS.ORDERS</li>
+          <li><strong>Returning Customer</strong> — All others (prior purchase history exists)</li>
+          <li><strong>% to Plan (Units)</strong> — Cumulative actual units ÷ SUM(plan_units) from GSHEETS.SKU_LAUNCH_DAY_FORECAST through snapshot date</li>
+        </ul>
+      </div>
+      <div class="guide-card">
+        <h3>Not Yet Available</h3>
+        <ul>
+          <li><strong>Conversion Rate</strong> — Requires GA4 sessions + transactions</li>
+          <li><strong>Subscriptions</strong> — Requires Recharge subscription platform data</li>
+          <li><strong>Traffic Sources</strong> — Requires GA4 source/medium dimensions</li>
+          <li><strong>Landing Page Metrics</strong> — Requires GA4 page-level events</li>
+          <li><strong>PDP Health</strong> — Requires GA4 product detail page events + Shopify</li>
+          <li><strong>Cross-Sell Analysis</strong> — Requires basket-level order item pairing</li>
+        </ul>
+        <p style="margin-top:10px">To enable these, the relevant data sources need to be piped into the Snowflake warehouse and surfaced via the server-side API.</p>
+      </div>
+      <div class="guide-card full">
+        <h3>SKU Reference — This Launch</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>SKU</th><th>Product Name</th><th>Shade</th><th>Net Sales</th><th>Units</th><th>% to Plan</th></tr>
+            </thead>
+            <tbody id="guide-sku-tbl">
+              <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">Loading&hellip;</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
+<!-- Report Issue FAB -->
+<button class="fab" onclick="onReportIssue()">&#9888; Report Issue</button>
+
 <script>
+/* ─── FORMATTERS ─────────────────────────────────────────── */
 const fmt = {
   cur:  v => '$' + Number(v||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}),
+  cur2: v => '$' + Number(v||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),
   num:  v => Number(v||0).toLocaleString('en-US'),
   pct:  v => v == null ? '—' : Number(v).toFixed(1) + '%',
   day:  v => { if (!v) return ''; const d = new Date(String(v).replace(' ','T')); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); },
@@ -185,8 +460,10 @@ const fmt = {
 };
 function ptpColor(v) { return v == null ? '#9CA3AF' : v >= 100 ? '#22A06B' : v >= 85 ? '#F59E0B' : '#EF4444'; }
 
+/* ─── LAUNCH ID ──────────────────────────────────────────── */
 const launchId = new URLSearchParams(location.search).get('id') || 'empowershine';
 
+/* ─── STATIC DATA ────────────────────────────────────────── */
 async function loadData() {
   const snapshots = {
     empowershine: {
@@ -199,68 +476,69 @@ async function loadData() {
         planUnits:34011, planSales:0, pctToPlanUnits:157.14, pctToPlanSales:null,
       },
       byVariant:[
-        {sku:'TVG5950',name:'Ragan',shade:'Warm Plum',color:'#7B3FA0',netSales:356969.36,units:14027,orders:13778,newCustomers:4256,retCustomers:9377,planUnits:6851,planSales:0,pctToPlanUnits:204.74},
-        {sku:'TVG5890',name:'Michelle',shade:'Neutral Mauve',color:'#A0888A',netSales:220540.68,units:8637,orders:8449,newCustomers:2556,retCustomers:5788,planUnits:2371,planSales:0,pctToPlanUnits:364.28},
-        {sku:'TVG5880',name:'Ilene',shade:'Natural Rose',color:'#C89EA0',netSales:184950.72,units:7290,orders:7167,newCustomers:2706,retCustomers:4397,planUnits:4021,planSales:0,pctToPlanUnits:181.30},
-        {sku:'TVG5960',name:'Joan',shade:'Cool Rose',color:'#E8748A',netSales:177578.24,units:6961,orders:6887,newCustomers:2097,retCustomers:4725,planUnits:4748,planSales:0,pctToPlanUnits:146.61},
-        {sku:'TVG5920',name:'Kaisa',shade:'Dusty Rose',color:'#D4879A',netSales:135806.99,units:5300,orders:5233,newCustomers:1691,retCustomers:3484,planUnits:4670,planSales:0,pctToPlanUnits:113.49},
-        {sku:'TVG5900',name:'Rosa',shade:'Deep Berry',color:'#7A1840',netSales:129801.68,units:5025,orders:4843,newCustomers:2094,retCustomers:2699,planUnits:1610,planSales:0,pctToPlanUnits:312.11},
-        {sku:'TVG5940',name:'Kathy',shade:'Soft Apricot',color:'#F4A460',netSales:45873.29,units:1795,orders:1767,newCustomers:508,retCustomers:1238,planUnits:2432,planSales:0,pctToPlanUnits:73.81},
-        {sku:'TVG5930',name:'Chanice',shade:'Magenta Pink',color:'#C930B8',netSales:42279.37,units:1663,orders:1624,newCustomers:464,retCustomers:1145,planUnits:2013,planSales:0,pctToPlanUnits:82.61},
-        {sku:'TVG5910',name:'Linda',shade:'Cherry Red',color:'#C01830',netSales:42615.28,units:1659,orders:1634,newCustomers:535,retCustomers:1084,planUnits:1925,planSales:0,pctToPlanUnits:86.18},
-        {sku:'TVG5970',name:'Kackie',shade:'Mocha',color:'#8B6355',netSales:27616.67,units:1089,orders:1051,newCustomers:335,retCustomers:695,planUnits:3370,planSales:0,pctToPlanUnits:32.31},
+        {sku:'TVG5950',name:'Ragan',    shade:'Warm Plum',    color:'#7B3FA0',netSales:356969.36,units:14027,orders:13778,newCustomers:4256,retCustomers:9377, planUnits:6851, pctToPlanUnits:204.74},
+        {sku:'TVG5890',name:'Michelle', shade:'Neutral Mauve',color:'#A0888A',netSales:220540.68,units:8637, orders:8449, newCustomers:2556,retCustomers:5788, planUnits:2371, pctToPlanUnits:364.28},
+        {sku:'TVG5880',name:'Ilene',    shade:'Natural Rose', color:'#C89EA0',netSales:184950.72,units:7290, orders:7167, newCustomers:2706,retCustomers:4397, planUnits:4021, pctToPlanUnits:181.30},
+        {sku:'TVG5960',name:'Joan',     shade:'Cool Rose',    color:'#E8748A',netSales:177578.24,units:6961, orders:6887, newCustomers:2097,retCustomers:4725, planUnits:4748, pctToPlanUnits:146.61},
+        {sku:'TVG5920',name:'Kaisa',    shade:'Dusty Rose',   color:'#D4879A',netSales:135806.99,units:5300, orders:5233, newCustomers:1691,retCustomers:3484, planUnits:4670, pctToPlanUnits:113.49},
+        {sku:'TVG5900',name:'Rosa',     shade:'Deep Berry',   color:'#7A1840',netSales:129801.68,units:5025, orders:4843, newCustomers:2094,retCustomers:2699, planUnits:1610, pctToPlanUnits:312.11},
+        {sku:'TVG5940',name:'Kathy',    shade:'Soft Apricot', color:'#F4A460',netSales:45873.29, units:1795, orders:1767, newCustomers:508, retCustomers:1238, planUnits:2432, pctToPlanUnits:73.81},
+        {sku:'TVG5930',name:'Chanice',  shade:'Magenta Pink', color:'#C930B8',netSales:42279.37, units:1663, orders:1624, newCustomers:464, retCustomers:1145, planUnits:2013, pctToPlanUnits:82.61},
+        {sku:'TVG5910',name:'Linda',    shade:'Cherry Red',   color:'#C01830',netSales:42615.28, units:1659, orders:1634, newCustomers:535, retCustomers:1084, planUnits:1925, pctToPlanUnits:86.18},
+        {sku:'TVG5970',name:'Kackie',   shade:'Mocha',        color:'#8B6355',netSales:27616.67, units:1089, orders:1051, newCustomers:335, retCustomers:695,  planUnits:3370, pctToPlanUnits:32.31},
       ],
       dailySales:[
-        {date:'2026-04-30',units:47,netSales:1244.62,cumUnits:47,cumSales:1244.62},
-        {date:'2026-05-01',units:1821,netSales:47218.36,cumUnits:1868,cumSales:48462.98},
-        {date:'2026-05-02',units:2533,netSales:66493.72,cumUnits:4401,cumSales:114956.70},
-        {date:'2026-05-03',units:1632,netSales:42567.45,cumUnits:6033,cumSales:157524.15},
-        {date:'2026-05-04',units:1315,netSales:34191.09,cumUnits:7348,cumSales:191715.24},
-        {date:'2026-05-05',units:1694,netSales:44075.73,cumUnits:9042,cumSales:235790.97},
-        {date:'2026-05-06',units:1331,netSales:34570.56,cumUnits:10373,cumSales:270361.53},
-        {date:'2026-05-07',units:1497,netSales:38898.19,cumUnits:11870,cumSales:309259.72},
-        {date:'2026-05-08',units:1624,netSales:41967.02,cumUnits:13494,cumSales:351226.74},
-        {date:'2026-05-09',units:1705,netSales:43498.17,cumUnits:15199,cumSales:394724.91},
-        {date:'2026-05-10',units:1996,netSales:51233.57,cumUnits:17195,cumSales:445958.48},
-        {date:'2026-05-11',units:1457,netSales:37694.37,cumUnits:18652,cumSales:483652.85},
-        {date:'2026-05-12',units:1237,netSales:31638.67,cumUnits:19889,cumSales:515291.52},
-        {date:'2026-05-13',units:1336,netSales:34340.53,cumUnits:21225,cumSales:549632.05},
-        {date:'2026-05-14',units:1300,netSales:33217.68,cumUnits:22525,cumSales:582849.73},
-        {date:'2026-05-15',units:1196,netSales:30525.66,cumUnits:23721,cumSales:613375.39},
-        {date:'2026-05-16',units:1432,netSales:36446.65,cumUnits:25153,cumSales:649822.04},
-        {date:'2026-05-17',units:1440,netSales:37131.00,cumUnits:26593,cumSales:686953.04},
-        {date:'2026-05-18',units:1225,netSales:31119.40,cumUnits:27818,cumSales:718072.44},
-        {date:'2026-05-19',units:1274,netSales:32477.67,cumUnits:29092,cumSales:750550.11},
-        {date:'2026-05-20',units:1229,netSales:31610.96,cumUnits:30321,cumSales:782161.07},
-        {date:'2026-05-21',units:1161,netSales:29341.73,cumUnits:31482,cumSales:811502.80},
-        {date:'2026-05-22',units:1434,netSales:36634.04,cumUnits:32916,cumSales:848136.84},
-        {date:'2026-05-23',units:1394,netSales:35464.21,cumUnits:34310,cumSales:883601.05},
-        {date:'2026-05-24',units:1545,netSales:39709.77,cumUnits:35855,cumSales:923310.82},
-        {date:'2026-05-25',units:1943,netSales:49816.54,cumUnits:37798,cumSales:973127.36},
-        {date:'2026-05-26',units:917,netSales:23082.16,cumUnits:38715,cumSales:996209.52},
-        {date:'2026-05-27',units:772,netSales:19376.53,cumUnits:39487,cumSales:1015586.05},
-        {date:'2026-05-28',units:840,netSales:21073.25,cumUnits:40327,cumSales:1036659.30},
-        {date:'2026-05-29',units:844,netSales:21177.68,cumUnits:41171,cumSales:1057836.98},
-        {date:'2026-05-30',units:723,netSales:18110.04,cumUnits:41894,cumSales:1075947.02},
-        {date:'2026-05-31',units:627,netSales:16116.04,cumUnits:42521,cumSales:1092063.06},
-        {date:'2026-06-01',units:817,netSales:20360.54,cumUnits:43338,cumSales:1112423.60},
-        {date:'2026-06-02',units:803,netSales:19834.97,cumUnits:44141,cumSales:1132258.57},
-        {date:'2026-06-03',units:844,netSales:20848.62,cumUnits:44985,cumSales:1153107.19},
-        {date:'2026-06-04',units:752,netSales:18269.80,cumUnits:45737,cumSales:1171376.99},
-        {date:'2026-06-05',units:740,netSales:18538.56,cumUnits:46477,cumSales:1189915.55},
-        {date:'2026-06-06',units:546,netSales:13721.38,cumUnits:47023,cumSales:1203636.93},
-        {date:'2026-06-07',units:628,netSales:16113.65,cumUnits:47651,cumSales:1219750.58},
-        {date:'2026-06-08',units:913,netSales:23285.16,cumUnits:48564,cumSales:1243035.74},
-        {date:'2026-06-09',units:499,netSales:12337.57,cumUnits:49063,cumSales:1255373.31},
-        {date:'2026-06-10',units:395,netSales:9814.55,cumUnits:49458,cumSales:1265187.86},
-        {date:'2026-06-11',units:483,netSales:12313.55,cumUnits:49941,cumSales:1277501.41},
-        {date:'2026-06-12',units:590,netSales:14998.13,cumUnits:50531,cumSales:1292499.54},
-        {date:'2026-06-13',units:1083,netSales:26370.80,cumUnits:51614,cumSales:1318870.34},
-        {date:'2026-06-14',units:1368,netSales:33397.37,cumUnits:52982,cumSales:1352267.71},
-        {date:'2026-06-15',units:450,netSales:11379.29,cumUnits:53432,cumSales:1363646.99},
-        {date:'2026-06-16',units:14,netSales:385.30,cumUnits:53446,cumSales:1364032.29},
+        {date:'2026-04-30',units:47,  netSales:1244.62,  cumUnits:47,   cumSales:1244.62},
+        {date:'2026-05-01',units:1821,netSales:47218.36, cumUnits:1868, cumSales:48462.98},
+        {date:'2026-05-02',units:2533,netSales:66493.72, cumUnits:4401, cumSales:114956.70},
+        {date:'2026-05-03',units:1632,netSales:42567.45, cumUnits:6033, cumSales:157524.15},
+        {date:'2026-05-04',units:1315,netSales:34191.09, cumUnits:7348, cumSales:191715.24},
+        {date:'2026-05-05',units:1694,netSales:44075.73, cumUnits:9042, cumSales:235790.97},
+        {date:'2026-05-06',units:1331,netSales:34570.56, cumUnits:10373,cumSales:270361.53},
+        {date:'2026-05-07',units:1497,netSales:38898.19, cumUnits:11870,cumSales:309259.72},
+        {date:'2026-05-08',units:1624,netSales:41967.02, cumUnits:13494,cumSales:351226.74},
+        {date:'2026-05-09',units:1705,netSales:43498.17, cumUnits:15199,cumSales:394724.91},
+        {date:'2026-05-10',units:1996,netSales:51233.57, cumUnits:17195,cumSales:445958.48},
+        {date:'2026-05-11',units:1457,netSales:37694.37, cumUnits:18652,cumSales:483652.85},
+        {date:'2026-05-12',units:1237,netSales:31638.67, cumUnits:19889,cumSales:515291.52},
+        {date:'2026-05-13',units:1336,netSales:34340.53, cumUnits:21225,cumSales:549632.05},
+        {date:'2026-05-14',units:1300,netSales:33217.68, cumUnits:22525,cumSales:582849.73},
+        {date:'2026-05-15',units:1196,netSales:30525.66, cumUnits:23721,cumSales:613375.39},
+        {date:'2026-05-16',units:1432,netSales:36446.65, cumUnits:25153,cumSales:649822.04},
+        {date:'2026-05-17',units:1440,netSales:37131.00, cumUnits:26593,cumSales:686953.04},
+        {date:'2026-05-18',units:1225,netSales:31119.40, cumUnits:27818,cumSales:718072.44},
+        {date:'2026-05-19',units:1274,netSales:32477.67, cumUnits:29092,cumSales:750550.11},
+        {date:'2026-05-20',units:1229,netSales:31610.96, cumUnits:30321,cumSales:782161.07},
+        {date:'2026-05-21',units:1161,netSales:29341.73, cumUnits:31482,cumSales:811502.80},
+        {date:'2026-05-22',units:1434,netSales:36634.04, cumUnits:32916,cumSales:848136.84},
+        {date:'2026-05-23',units:1394,netSales:35464.21, cumUnits:34310,cumSales:883601.05},
+        {date:'2026-05-24',units:1545,netSales:39709.77, cumUnits:35855,cumSales:923310.82},
+        {date:'2026-05-25',units:1943,netSales:49816.54, cumUnits:37798,cumSales:973127.36},
+        {date:'2026-05-26',units:917, netSales:23082.16, cumUnits:38715,cumSales:996209.52},
+        {date:'2026-05-27',units:772, netSales:19376.53, cumUnits:39487,cumSales:1015586.05},
+        {date:'2026-05-28',units:840, netSales:21073.25, cumUnits:40327,cumSales:1036659.30},
+        {date:'2026-05-29',units:844, netSales:21177.68, cumUnits:41171,cumSales:1057836.98},
+        {date:'2026-05-30',units:723, netSales:18110.04, cumUnits:41894,cumSales:1075947.02},
+        {date:'2026-05-31',units:627, netSales:16116.04, cumUnits:42521,cumSales:1092063.06},
+        {date:'2026-06-01',units:817, netSales:20360.54, cumUnits:43338,cumSales:1112423.60},
+        {date:'2026-06-02',units:803, netSales:19834.97, cumUnits:44141,cumSales:1132258.57},
+        {date:'2026-06-03',units:844, netSales:20848.62, cumUnits:44985,cumSales:1153107.19},
+        {date:'2026-06-04',units:752, netSales:18269.80, cumUnits:45737,cumSales:1171376.99},
+        {date:'2026-06-05',units:740, netSales:18538.56, cumUnits:46477,cumSales:1189915.55},
+        {date:'2026-06-06',units:546, netSales:13721.38, cumUnits:47023,cumSales:1203636.93},
+        {date:'2026-06-07',units:628, netSales:16113.65, cumUnits:47651,cumSales:1219750.58},
+        {date:'2026-06-08',units:913, netSales:23285.16, cumUnits:48564,cumSales:1243035.74},
+        {date:'2026-06-09',units:499, netSales:12337.57, cumUnits:49063,cumSales:1255373.31},
+        {date:'2026-06-10',units:395, netSales:9814.55,  cumUnits:49458,cumSales:1265187.86},
+        {date:'2026-06-11',units:483, netSales:12313.55, cumUnits:49941,cumSales:1277501.41},
+        {date:'2026-06-12',units:590, netSales:14998.13, cumUnits:50531,cumSales:1292499.54},
+        {date:'2026-06-13',units:1083,netSales:26370.80, cumUnits:51614,cumSales:1318870.34},
+        {date:'2026-06-14',units:1368,netSales:33397.37, cumUnits:52982,cumSales:1352267.71},
+        {date:'2026-06-15',units:450, netSales:11379.29, cumUnits:53432,cumSales:1363646.99},
+        {date:'2026-06-16',units:14,  netSales:385.30,   cumUnits:53446,cumSales:1364032.29},
       ],
     },
+
     'becca-brow': {
       launchId:'becca-brow', name:'Becca Brow',
       launchDate:'2026-06-08', status:'LIVE',
@@ -271,22 +549,23 @@ async function loadData() {
         planUnits:3766, planSales:0, pctToPlanUnits:44.42, pctToPlanSales:null,
       },
       byVariant:[
-        {sku:'TVG6690',name:'Brow Gel',shade:'Silver Grey',color:'#6B7A8D',netSales:15426.47,units:692,orders:668,newCustomers:197,retCustomers:470,planUnits:1087,planSales:0,pctToPlanUnits:63.66},
-        {sku:'TVG6680',name:'Brow Pencil',shade:'Silver Grey',color:'#4B5563',netSales:16939.46,units:683,orders:655,newCustomers:226,retCustomers:426,planUnits:874,planSales:0,pctToPlanUnits:78.14},
-        {sku:'TVG6710',name:'Brow Liner',shade:'Silver Grey',color:'#9CA3AF',netSales:6439.07,units:298,orders:267,newCustomers:50,retCustomers:214,planUnits:1805,planSales:0,pctToPlanUnits:16.51},
+        {sku:'TVG6690',name:'Brow Gel',   shade:'Silver Grey',color:'#6B7A8D',netSales:15426.47,units:692,orders:668,newCustomers:197,retCustomers:470,planUnits:1087,pctToPlanUnits:63.66},
+        {sku:'TVG6680',name:'Brow Pencil',shade:'Silver Grey',color:'#4B5563',netSales:16939.46,units:683,orders:655,newCustomers:226,retCustomers:426,planUnits:874, pctToPlanUnits:78.14},
+        {sku:'TVG6710',name:'Brow Liner', shade:'Silver Grey',color:'#9CA3AF',netSales:6439.07, units:298,orders:267,newCustomers:50, retCustomers:214,planUnits:1805,pctToPlanUnits:16.51},
       ],
       dailySales:[
-        {date:'2026-06-08',units:46,netSales:1072.52,cumUnits:46,cumSales:1072.52},
-        {date:'2026-06-09',units:213,netSales:4307.07,cumUnits:259,cumSales:5379.59},
-        {date:'2026-06-10',units:214,netSales:4960.26,cumUnits:473,cumSales:10339.85},
-        {date:'2026-06-11',units:304,netSales:7254.70,cumUnits:777,cumSales:17594.55},
-        {date:'2026-06-12',units:214,netSales:5043.18,cumUnits:991,cumSales:22637.73},
-        {date:'2026-06-13',units:249,netSales:5863.42,cumUnits:1240,cumSales:28501.15},
-        {date:'2026-06-14',units:272,netSales:6441.52,cumUnits:1512,cumSales:34942.67},
-        {date:'2026-06-15',units:158,netSales:3786.45,cumUnits:1670,cumSales:38729.12},
-        {date:'2026-06-16',units:3,netSales:75.89,cumUnits:1673,cumSales:38805.00},
+        {date:'2026-06-08',units:46, netSales:1072.52, cumUnits:46,  cumSales:1072.52},
+        {date:'2026-06-09',units:213,netSales:4307.07, cumUnits:259, cumSales:5379.59},
+        {date:'2026-06-10',units:214,netSales:4960.26, cumUnits:473, cumSales:10339.85},
+        {date:'2026-06-11',units:304,netSales:7254.70, cumUnits:777, cumSales:17594.55},
+        {date:'2026-06-12',units:214,netSales:5043.18, cumUnits:991, cumSales:22637.73},
+        {date:'2026-06-13',units:249,netSales:5863.42, cumUnits:1240,cumSales:28501.15},
+        {date:'2026-06-14',units:272,netSales:6441.52, cumUnits:1512,cumSales:34942.67},
+        {date:'2026-06-15',units:158,netSales:3786.45, cumUnits:1670,cumSales:38729.12},
+        {date:'2026-06-16',units:3,  netSales:75.89,   cumUnits:1673,cumSales:38805.00},
       ],
     },
+
     'llem-shade-extension': {
       launchId:'llem-shade-extension', name:'Liquid Lash™ Extensions Mascara — Shade Extension',
       launchDate:'2026-04-07', status:'LIVE',
@@ -297,212 +576,326 @@ async function loadData() {
         planUnits:37884, planSales:0, pctToPlanUnits:168.38, pctToPlanSales:null,
       },
       byVariant:[
-        {sku:'TVG6380',name:'Iris',shade:'Deep Purple',color:'#4A1E6B',netSales:626285.20,units:26484,orders:25539,newCustomers:7698,retCustomers:17678,planUnits:15000,planSales:0,pctToPlanUnits:176.56},
-        {sku:'TVG6390',name:'Ivy',shade:'Deep Green',color:'#1B4D3E',netSales:460611.46,units:19615,orders:19120,newCustomers:4934,retCustomers:13942,planUnits:10908,planSales:0,pctToPlanUnits:179.82},
-        {sku:'TVG6370',name:'Oceanne',shade:'Deep Navy',color:'#1C3A5C',netSales:415076.99,units:17691,orders:17212,newCustomers:4005,retCustomers:12935,planUnits:11976,planSales:0,pctToPlanUnits:147.71},
+        {sku:'TVG6380',name:'Iris',    shade:'Deep Purple',color:'#4A1E6B',netSales:626285.20,units:26484,orders:25539,newCustomers:7698,retCustomers:17678,planUnits:15000,pctToPlanUnits:176.56},
+        {sku:'TVG6390',name:'Ivy',     shade:'Deep Green', color:'#1B4D3E',netSales:460611.46,units:19615,orders:19120,newCustomers:4934,retCustomers:13942,planUnits:10908,pctToPlanUnits:179.82},
+        {sku:'TVG6370',name:'Oceanne', shade:'Deep Navy',  color:'#1C3A5C',netSales:415076.99,units:17691,orders:17212,newCustomers:4005,retCustomers:12935,planUnits:11976,pctToPlanUnits:147.71},
       ],
       dailySales:[
-        {date:'2026-04-07',units:155,netSales:3667.70,cumUnits:155,cumSales:3667.70},
-        {date:'2026-04-08',units:3433,netSales:81513.10,cumUnits:3588,cumSales:85180.80},
-        {date:'2026-04-09',units:4033,netSales:97328.25,cumUnits:7621,cumSales:182509.04},
-        {date:'2026-04-10',units:2406,netSales:57123.17,cumUnits:10027,cumSales:239632.21},
-        {date:'2026-04-11',units:3176,netSales:74797.34,cumUnits:13203,cumSales:314429.55},
-        {date:'2026-04-12',units:3792,netSales:89151.47,cumUnits:16995,cumSales:403581.02},
-        {date:'2026-04-13',units:1866,netSales:43987.38,cumUnits:18861,cumSales:447568.40},
-        {date:'2026-04-14',units:1582,netSales:37195.90,cumUnits:20443,cumSales:484764.30},
-        {date:'2026-04-15',units:2121,netSales:50320.13,cumUnits:22564,cumSales:535084.43},
-        {date:'2026-04-16',units:2344,netSales:55528.44,cumUnits:24908,cumSales:590612.87},
-        {date:'2026-04-17',units:2022,netSales:48364.03,cumUnits:26930,cumSales:638976.91},
-        {date:'2026-04-18',units:1849,netSales:44136.17,cumUnits:28779,cumSales:683113.08},
-        {date:'2026-04-19',units:2083,netSales:49671.75,cumUnits:30862,cumSales:732784.83},
-        {date:'2026-04-20',units:1779,netSales:42144.72,cumUnits:32641,cumSales:774929.55},
-        {date:'2026-04-21',units:1635,netSales:38827.57,cumUnits:34276,cumSales:813757.12},
-        {date:'2026-04-22',units:1748,netSales:41476.29,cumUnits:36024,cumSales:855233.41},
-        {date:'2026-04-23',units:1577,netSales:37040.31,cumUnits:37601,cumSales:892273.72},
-        {date:'2026-04-24',units:1323,netSales:30876.69,cumUnits:38924,cumSales:923150.41},
-        {date:'2026-04-25',units:2161,netSales:49977.83,cumUnits:41085,cumSales:973128.24},
-        {date:'2026-04-26',units:2581,netSales:59728.44,cumUnits:43666,cumSales:1032856.68},
-        {date:'2026-04-27',units:1328,netSales:31011.08,cumUnits:44994,cumSales:1063867.76},
-        {date:'2026-04-28',units:1113,netSales:25996.46,cumUnits:46107,cumSales:1089864.22},
-        {date:'2026-04-29',units:892,netSales:20808.48,cumUnits:46999,cumSales:1110672.70},
-        {date:'2026-04-30',units:845,netSales:19976.66,cumUnits:47844,cumSales:1130649.36},
-        {date:'2026-05-01',units:936,netSales:21640.09,cumUnits:48780,cumSales:1152289.45},
-        {date:'2026-05-02',units:1065,netSales:25066.46,cumUnits:49845,cumSales:1177355.91},
-        {date:'2026-05-03',units:730,netSales:16976.54,cumUnits:50575,cumSales:1194332.45},
-        {date:'2026-05-04',units:362,netSales:8358.15,cumUnits:50937,cumSales:1202690.60},
-        {date:'2026-05-05',units:343,netSales:7889.57,cumUnits:51280,cumSales:1210580.17},
-        {date:'2026-05-06',units:356,netSales:8029.79,cumUnits:51636,cumSales:1218610.01},
-        {date:'2026-05-07',units:336,netSales:7778.84,cumUnits:51972,cumSales:1226388.84},
-        {date:'2026-05-08',units:240,netSales:5519.75,cumUnits:52212,cumSales:1231908.60},
-        {date:'2026-05-09',units:748,netSales:17231.81,cumUnits:52960,cumSales:1249140.41},
-        {date:'2026-05-10',units:690,netSales:15944.84,cumUnits:53650,cumSales:1265085.25},
-        {date:'2026-05-11',units:224,netSales:5181.31,cumUnits:53874,cumSales:1270266.55},
-        {date:'2026-05-12',units:175,netSales:3884.24,cumUnits:54049,cumSales:1274150.79},
-        {date:'2026-05-13',units:190,netSales:4433.72,cumUnits:54239,cumSales:1278584.51},
-        {date:'2026-05-14',units:147,netSales:3235.34,cumUnits:54386,cumSales:1281819.85},
-        {date:'2026-05-15',units:185,netSales:4230.91,cumUnits:54571,cumSales:1286050.76},
-        {date:'2026-05-16',units:348,netSales:8154.21,cumUnits:54919,cumSales:1294204.97},
-        {date:'2026-05-17',units:249,netSales:5814.98,cumUnits:55168,cumSales:1300019.96},
-        {date:'2026-05-18',units:287,netSales:6646.10,cumUnits:55455,cumSales:1306666.05},
-        {date:'2026-05-19',units:211,netSales:4724.03,cumUnits:55666,cumSales:1311390.08},
-        {date:'2026-05-20',units:214,netSales:4940.54,cumUnits:55880,cumSales:1316330.63},
-        {date:'2026-05-21',units:205,netSales:4709.21,cumUnits:56085,cumSales:1321039.84},
-        {date:'2026-05-22',units:599,netSales:14153.23,cumUnits:56684,cumSales:1335193.07},
-        {date:'2026-05-23',units:494,netSales:11629.26,cumUnits:57178,cumSales:1346822.33},
-        {date:'2026-05-24',units:486,netSales:11546.45,cumUnits:57664,cumSales:1358368.78},
-        {date:'2026-05-25',units:641,netSales:15244.20,cumUnits:58305,cumSales:1373612.98},
-        {date:'2026-05-26',units:182,netSales:4149.34,cumUnits:58487,cumSales:1377762.32},
-        {date:'2026-05-27',units:148,netSales:3371.59,cumUnits:58635,cumSales:1381133.91},
-        {date:'2026-05-28',units:184,netSales:4295.08,cumUnits:58819,cumSales:1385429.00},
-        {date:'2026-05-29',units:167,netSales:3791.25,cumUnits:58986,cumSales:1389220.25},
-        {date:'2026-05-30',units:160,netSales:3773.44,cumUnits:59146,cumSales:1392993.69},
-        {date:'2026-05-31',units:167,netSales:3910.23,cumUnits:59313,cumSales:1396903.92},
-        {date:'2026-06-01',units:239,netSales:5470.51,cumUnits:59552,cumSales:1402374.43},
-        {date:'2026-06-02',units:219,netSales:5000.35,cumUnits:59771,cumSales:1407374.78},
-        {date:'2026-06-03',units:248,netSales:5733.26,cumUnits:60019,cumSales:1413108.04},
-        {date:'2026-06-04',units:174,netSales:3888.17,cumUnits:60193,cumSales:1416996.21},
-        {date:'2026-06-05',units:233,netSales:5414.68,cumUnits:60426,cumSales:1422410.89},
-        {date:'2026-06-06',units:268,netSales:6343.47,cumUnits:60694,cumSales:1428754.36},
-        {date:'2026-06-07',units:225,netSales:5364.10,cumUnits:60919,cumSales:1434118.46},
-        {date:'2026-06-08',units:374,netSales:8799.94,cumUnits:61293,cumSales:1442918.40},
-        {date:'2026-06-09',units:218,netSales:5069.70,cumUnits:61511,cumSales:1447988.10},
-        {date:'2026-06-10',units:223,netSales:5069.41,cumUnits:61734,cumSales:1453057.51},
-        {date:'2026-06-11',units:315,netSales:7333.65,cumUnits:62049,cumSales:1460391.16},
-        {date:'2026-06-12',units:223,netSales:5163.11,cumUnits:62272,cumSales:1465554.27},
-        {date:'2026-06-13',units:422,netSales:10219.86,cumUnits:62694,cumSales:1475774.13},
-        {date:'2026-06-14',units:589,netSales:14194.18,cumUnits:63283,cumSales:1489968.31},
-        {date:'2026-06-15',units:502,netSales:11892.26,cumUnits:63785,cumSales:1501860.57},
-        {date:'2026-06-16',units:5,netSales:113.10,cumUnits:63790,cumSales:1501973.67},
+        {date:'2026-04-07',units:155, netSales:3667.70,  cumUnits:155,  cumSales:3667.70},
+        {date:'2026-04-08',units:3433,netSales:81513.10, cumUnits:3588, cumSales:85180.80},
+        {date:'2026-04-09',units:4033,netSales:97328.25, cumUnits:7621, cumSales:182509.04},
+        {date:'2026-04-10',units:2406,netSales:57123.17, cumUnits:10027,cumSales:239632.21},
+        {date:'2026-04-11',units:3176,netSales:74797.34, cumUnits:13203,cumSales:314429.55},
+        {date:'2026-04-12',units:3792,netSales:89151.47, cumUnits:16995,cumSales:403581.02},
+        {date:'2026-04-13',units:1866,netSales:43987.38, cumUnits:18861,cumSales:447568.40},
+        {date:'2026-04-14',units:1582,netSales:37195.90, cumUnits:20443,cumSales:484764.30},
+        {date:'2026-04-15',units:2121,netSales:50320.13, cumUnits:22564,cumSales:535084.43},
+        {date:'2026-04-16',units:2344,netSales:55528.44, cumUnits:24908,cumSales:590612.87},
+        {date:'2026-04-17',units:2022,netSales:48364.03, cumUnits:26930,cumSales:638976.91},
+        {date:'2026-04-18',units:1849,netSales:44136.17, cumUnits:28779,cumSales:683113.08},
+        {date:'2026-04-19',units:2083,netSales:49671.75, cumUnits:30862,cumSales:732784.83},
+        {date:'2026-04-20',units:1779,netSales:42144.72, cumUnits:32641,cumSales:774929.55},
+        {date:'2026-04-21',units:1635,netSales:38827.57, cumUnits:34276,cumSales:813757.12},
+        {date:'2026-04-22',units:1748,netSales:41476.29, cumUnits:36024,cumSales:855233.41},
+        {date:'2026-04-23',units:1577,netSales:37040.31, cumUnits:37601,cumSales:892273.72},
+        {date:'2026-04-24',units:1323,netSales:30876.69, cumUnits:38924,cumSales:923150.41},
+        {date:'2026-04-25',units:2161,netSales:49977.83, cumUnits:41085,cumSales:973128.24},
+        {date:'2026-04-26',units:2581,netSales:59728.44, cumUnits:43666,cumSales:1032856.68},
+        {date:'2026-04-27',units:1328,netSales:31011.08, cumUnits:44994,cumSales:1063867.76},
+        {date:'2026-04-28',units:1113,netSales:25996.46, cumUnits:46107,cumSales:1089864.22},
+        {date:'2026-04-29',units:892, netSales:20808.48, cumUnits:46999,cumSales:1110672.70},
+        {date:'2026-04-30',units:845, netSales:19976.66, cumUnits:47844,cumSales:1130649.36},
+        {date:'2026-05-01',units:936, netSales:21640.09, cumUnits:48780,cumSales:1152289.45},
+        {date:'2026-05-02',units:1065,netSales:25066.46, cumUnits:49845,cumSales:1177355.91},
+        {date:'2026-05-03',units:730, netSales:16976.54, cumUnits:50575,cumSales:1194332.45},
+        {date:'2026-05-04',units:362, netSales:8358.15,  cumUnits:50937,cumSales:1202690.60},
+        {date:'2026-05-05',units:343, netSales:7889.57,  cumUnits:51280,cumSales:1210580.17},
+        {date:'2026-05-06',units:356, netSales:8029.79,  cumUnits:51636,cumSales:1218610.01},
+        {date:'2026-05-07',units:336, netSales:7778.84,  cumUnits:51972,cumSales:1226388.84},
+        {date:'2026-05-08',units:240, netSales:5519.75,  cumUnits:52212,cumSales:1231908.60},
+        {date:'2026-05-09',units:748, netSales:17231.81, cumUnits:52960,cumSales:1249140.41},
+        {date:'2026-05-10',units:690, netSales:15944.84, cumUnits:53650,cumSales:1265085.25},
+        {date:'2026-05-11',units:224, netSales:5181.31,  cumUnits:53874,cumSales:1270266.55},
+        {date:'2026-05-12',units:175, netSales:3884.24,  cumUnits:54049,cumSales:1274150.79},
+        {date:'2026-05-13',units:190, netSales:4433.72,  cumUnits:54239,cumSales:1278584.51},
+        {date:'2026-05-14',units:147, netSales:3235.34,  cumUnits:54386,cumSales:1281819.85},
+        {date:'2026-05-15',units:185, netSales:4230.91,  cumUnits:54571,cumSales:1286050.76},
+        {date:'2026-05-16',units:348, netSales:8154.21,  cumUnits:54919,cumSales:1294204.97},
+        {date:'2026-05-17',units:249, netSales:5814.98,  cumUnits:55168,cumSales:1300019.96},
+        {date:'2026-05-18',units:287, netSales:6646.10,  cumUnits:55455,cumSales:1306666.05},
+        {date:'2026-05-19',units:211, netSales:4724.03,  cumUnits:55666,cumSales:1311390.08},
+        {date:'2026-05-20',units:214, netSales:4940.54,  cumUnits:55880,cumSales:1316330.63},
+        {date:'2026-05-21',units:205, netSales:4709.21,  cumUnits:56085,cumSales:1321039.84},
+        {date:'2026-05-22',units:599, netSales:14153.23, cumUnits:56684,cumSales:1335193.07},
+        {date:'2026-05-23',units:494, netSales:11629.26, cumUnits:57178,cumSales:1346822.33},
+        {date:'2026-05-24',units:486, netSales:11546.45, cumUnits:57664,cumSales:1358368.78},
+        {date:'2026-05-25',units:641, netSales:15244.20, cumUnits:58305,cumSales:1373612.98},
+        {date:'2026-05-26',units:182, netSales:4149.34,  cumUnits:58487,cumSales:1377762.32},
+        {date:'2026-05-27',units:148, netSales:3371.59,  cumUnits:58635,cumSales:1381133.91},
+        {date:'2026-05-28',units:184, netSales:4295.08,  cumUnits:58819,cumSales:1385429.00},
+        {date:'2026-05-29',units:167, netSales:3791.25,  cumUnits:58986,cumSales:1389220.25},
+        {date:'2026-05-30',units:160, netSales:3773.44,  cumUnits:59146,cumSales:1392993.69},
+        {date:'2026-05-31',units:167, netSales:3910.23,  cumUnits:59313,cumSales:1396903.92},
+        {date:'2026-06-01',units:239, netSales:5470.51,  cumUnits:59552,cumSales:1402374.43},
+        {date:'2026-06-02',units:219, netSales:5000.35,  cumUnits:59771,cumSales:1407374.78},
+        {date:'2026-06-03',units:248, netSales:5733.26,  cumUnits:60019,cumSales:1413108.04},
+        {date:'2026-06-04',units:174, netSales:3888.17,  cumUnits:60193,cumSales:1416996.21},
+        {date:'2026-06-05',units:233, netSales:5414.68,  cumUnits:60426,cumSales:1422410.89},
+        {date:'2026-06-06',units:268, netSales:6343.47,  cumUnits:60694,cumSales:1428754.36},
+        {date:'2026-06-07',units:225, netSales:5364.10,  cumUnits:60919,cumSales:1434118.46},
+        {date:'2026-06-08',units:374, netSales:8799.94,  cumUnits:61293,cumSales:1442918.40},
+        {date:'2026-06-09',units:218, netSales:5069.70,  cumUnits:61511,cumSales:1447988.10},
+        {date:'2026-06-10',units:223, netSales:5069.41,  cumUnits:61734,cumSales:1453057.51},
+        {date:'2026-06-11',units:315, netSales:7333.65,  cumUnits:62049,cumSales:1460391.16},
+        {date:'2026-06-12',units:223, netSales:5163.11,  cumUnits:62272,cumSales:1465554.27},
+        {date:'2026-06-13',units:422, netSales:10219.86, cumUnits:62694,cumSales:1475774.13},
+        {date:'2026-06-14',units:589, netSales:14194.18, cumUnits:63283,cumSales:1489968.31},
+        {date:'2026-06-15',units:502, netSales:11892.26, cumUnits:63785,cumSales:1501860.57},
+        {date:'2026-06-16',units:5,   netSales:113.10,   cumUnits:63790,cumSales:1501973.67},
       ],
     },
   };
+
   const raw = snapshots[launchId];
-  if (!raw) throw new Error('Unknown launch: ' + launchId);
+  if (!raw) throw new Error('Unknown launch ID: ' + launchId);
   const daysLive = Math.max(1, Math.floor((Date.now() - new Date(raw.launchDate + 'T00:00:00').getTime()) / 86400000) + 1);
-  return { ...raw, daysLive };
+  const s = raw.summary;
+  const unitsPerOrder = s.orders > 0 ? (s.units / s.orders) : 0;
+  return { ...raw, daysLive, unitsPerOrder };
 }
 
+/* ─── HEADER ──────────────────────────────────────────────── */
 function renderHeader(d) {
   document.title = d.name + ' | Thrive Causemetics';
   document.getElementById('launch-name').textContent = d.name;
   document.getElementById('launch-sub').textContent =
-    'Launched ' + fmt.date(d.launchDate) + '  ·  ' + d.byVariant.length + ' Variant' + (d.byVariant.length !== 1 ? 's' : '');
-  document.getElementById('hdr-badges').innerHTML =
-    '<span class="badge badge-live">&#9679; ' + d.status + '</span>' +
-    '<span class="badge badge-day">Day ' + d.daysLive + '</span>';
-  document.getElementById('hdr-ts').textContent = 'Snapshot: Jun 16, 2026  ·  Source: DAASITY_DB';
+    'Launched ' + fmt.date(d.launchDate) + ' · ' + d.byVariant.length + ' Variant' + (d.byVariant.length !== 1 ? 's' : '');
+  const s = d.summary;
+  document.getElementById('hdr-chips').innerHTML = [
+    '<span class="chip chip-live">● LIVE</span>',
+    '<span class="chip chip-day">Day ' + d.daysLive + '</span>',
+    '<span class="chip chip-units">' + fmt.num(s.units) + ' units sold</span>',
+    '<span class="chip chip-rev">' + fmt.cur(s.netSales) + ' revenue</span>',
+    '<span class="chip chip-nvr">' + s.newPct.toFixed(1) + '% new · ' + s.retPct.toFixed(1) + '% returning</span>',
+  ].join('');
+  document.getElementById('hdr-sources').innerHTML =
+    'Data as of Jun 16, 2026 &nbsp;&middot;&nbsp; Sources: Shopify + NetSuite via Snowflake DAASITY_DB';
 }
 
+/* ─── KPIs ─────────────────────────────────────────────────── */
 function renderKPIs(d) {
-  const s = d.summary, ptp = s.pctToPlanUnits, ptpW = Math.min(ptp||0,120), ptpC = ptpColor(ptp);
-  document.getElementById('kpi-row').innerHTML = `
-    <div class="kpi-card c-teal"><div class="kpi-label">Net Sales</div><div class="kpi-value">${fmt.cur(s.netSales)}</div><div class="kpi-sub">${fmt.num(s.orders)} orders</div></div>
-    <div class="kpi-card c-gold"><div class="kpi-label">Units Sold</div><div class="kpi-value">${fmt.num(s.units)}</div><div class="kpi-sub">${d.byVariant.length} variants</div></div>
-    <div class="kpi-card c-navy"><div class="kpi-label">Avg Order Value</div><div class="kpi-value">${fmt.cur(s.aov)}</div><div class="kpi-sub">Per order</div></div>
-    <div class="kpi-card c-green"><div class="kpi-label">New Customers</div><div class="kpi-value">${s.newPct.toFixed(1)}%</div><div class="kpi-sub">${fmt.num(s.newCustomers)} new &middot; ${fmt.num(s.retCustomers)} ret.</div></div>
+  const s = d.summary;
+  const ptp = s.pctToPlanUnits, ptpW = Math.min(ptp||0, 120), ptpC = ptpColor(ptp);
+
+  document.getElementById('kpi-row1').innerHTML = `
+    <div class="kpi-card c-teal">
+      <div class="kpi-label">Net Sales</div>
+      <div class="kpi-value">${fmt.cur(s.netSales)}</div>
+      <div class="kpi-sub">${fmt.num(s.orders)} orders</div>
+    </div>
+    <div class="kpi-card c-gold">
+      <div class="kpi-label">Units Sold</div>
+      <div class="kpi-value">${fmt.num(s.units)}</div>
+      <div class="kpi-sub">${d.byVariant.length} variants tracked</div>
+    </div>
+    <div class="kpi-card c-navy">
+      <div class="kpi-label">Avg Order Value</div>
+      <div class="kpi-value">${fmt.cur2(s.aov)}</div>
+      <div class="kpi-sub">Per transaction</div>
+    </div>
+    <div class="kpi-card c-sky">
+      <div class="kpi-label">Units / Order</div>
+      <div class="kpi-value">${d.unitsPerOrder.toFixed(2)}</div>
+      <div class="kpi-sub">Avg items per order</div>
+    </div>`;
+
+  document.getElementById('kpi-row2').innerHTML = `
+    <div class="kpi-card c-green">
+      <div class="kpi-label">New Customers</div>
+      <div class="kpi-value">${s.newPct.toFixed(1)}%</div>
+      <div class="kpi-sub">${fmt.num(s.newCustomers)} new &middot; ${fmt.num(s.retCustomers)} ret.</div>
+    </div>
+    <div class="kpi-card c-purple">
+      <div class="kpi-label">Total Customers</div>
+      <div class="kpi-value">${fmt.num(s.totalCustomers)}</div>
+      <div class="kpi-sub">Unique buyers</div>
+    </div>
     <div class="kpi-card c-warn">
       <div class="kpi-label">% to Plan (Units)</div>
       <div class="kpi-value" style="color:${ptpC}">${ptp!=null?ptp.toFixed(1)+'%':'—'}</div>
       <div class="ptp-bar"><div class="ptp-fill" style="width:${ptpW}%;background:${ptpC}"></div></div>
-      <div class="kpi-sub">${fmt.num(s.units)} / ${fmt.num(s.planUnits)} planned</div>
+      <div class="kpi-sub">${fmt.num(s.units)} of ${fmt.num(s.planUnits)} planned</div>
+    </div>
+    <div class="kpi-card c-gray">
+      <div class="kpi-label">Conversion Rate</div>
+      <div class="kpi-value kpi-na">—</div>
+      <div class="kpi-na-note">Requires GA4 sessions data</div>
     </div>`;
 }
 
+/* ─── CHARTS ───────────────────────────────────────────────── */
 const _ch = {};
 function kill(id) { if (_ch[id]) { _ch[id].destroy(); delete _ch[id]; } }
 
 function renderSales(d) {
+  document.getElementById('cs-revenue-sub').textContent =
+    fmt.cur(d.summary.netSales) + ' total across ' + d.byVariant.length + ' variants';
   kill('s');
   _ch.s = new Chart(document.getElementById('chart-sales'), {
-    type:'bar', data:{ labels:d.byVariant.map(v=>v.name),
-      datasets:[{label:'Net Sales',data:d.byVariant.map(v=>v.netSales),backgroundColor:d.byVariant.map(v=>v.color||'#3A9E98'),borderRadius:4}]},
-    options:{ indexAxis:'y', responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.cur(c.raw)}}},
+    type:'bar',
+    data:{ labels:d.byVariant.map(v=>v.name),
+           datasets:[{label:'Net Sales',data:d.byVariant.map(v=>v.netSales),backgroundColor:d.byVariant.map(v=>v.color||'#3A9E98'),borderRadius:4}]},
+    options:{ indexAxis:'y', responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.cur(c.raw)}}},
       scales:{ x:{ticks:{callback:v=>'$'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:'#E2E8EF'}}, y:{grid:{display:false}} } },
   });
 }
 
 function renderUnits(d) {
+  document.getElementById('cs-units-sub').textContent = fmt.num(d.summary.units) + ' total units sold';
   kill('u');
   _ch.u = new Chart(document.getElementById('chart-units'), {
-    type:'bar', data:{ labels:d.byVariant.map(v=>v.name),
-      datasets:[{label:'Units',data:d.byVariant.map(v=>v.units),backgroundColor:d.byVariant.map(v=>v.color||'#3A9E98'),borderRadius:4}]},
-    options:{ indexAxis:'y', responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.num(c.raw)+' units'}}},
+    type:'bar',
+    data:{ labels:d.byVariant.map(v=>v.name),
+           datasets:[{label:'Units',data:d.byVariant.map(v=>v.units),backgroundColor:d.byVariant.map(v=>v.color||'#3A9E98'),borderRadius:4}]},
+    options:{ indexAxis:'y', responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.num(c.raw)+' units'}}},
       scales:{ x:{ticks:{callback:v=>v.toLocaleString()},grid:{color:'#E2E8EF'}}, y:{grid:{display:false}} } },
   });
 }
 
 function renderDonut(d) {
-  kill('d');
   const s = d.summary;
+  document.getElementById('cs-donut-sub').textContent = fmt.num(s.totalCustomers) + ' unique buyers';
+  kill('d');
   _ch.d = new Chart(document.getElementById('chart-donut'), {
-    type:'doughnut', data:{ labels:['New','Returning'],
-      datasets:[{data:[s.newCustomers,s.retCustomers],backgroundColor:['#3A9E98','#C9A84C'],borderWidth:0,hoverOffset:6}]},
+    type:'doughnut',
+    data:{ labels:['New','Returning'],
+           datasets:[{data:[s.newCustomers,s.retCustomers],backgroundColor:['#3A9E98','#C9A84C'],borderWidth:0,hoverOffset:6}]},
     options:{ responsive:true, cutout:'68%',
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.num(c.raw)+' ('+(c.raw/(s.totalCustomers||1)*100).toFixed(1)+'%)'}}} },
   });
   document.getElementById('nvr-legend').innerHTML = [
-    {label:'New Customers',val:s.newCustomers,pct:s.newPct,color:'#3A9E98'},
-    {label:'Returning',val:s.retCustomers,pct:s.retPct,color:'#C9A84C'},
+    {label:'New Customers', val:s.newCustomers, pct:s.newPct,  color:'#3A9E98'},
+    {label:'Returning',     val:s.retCustomers, pct:s.retPct,  color:'#C9A84C'},
   ].map(it=>`<div class="nvr-item"><div class="nvr-left"><div class="nvr-dot" style="background:${it.color}"></div>${it.label}</div><div><span class="nvr-val">${fmt.num(it.val)}</span><span class="nvr-pct">${it.pct.toFixed(1)}%</span></div></div>`).join('');
 }
 
 function renderNvrShade(d) {
+  document.getElementById('cs-nvr-sub').textContent = 'New vs returning split per variant';
   kill('ns');
   _ch.ns = new Chart(document.getElementById('chart-nvr-shade'), {
-    type:'bar', data:{ labels:d.byVariant.map(v=>v.name),
-      datasets:[{label:'New',data:d.byVariant.map(v=>v.newCustomers),backgroundColor:'#3A9E98',borderRadius:3},
-                {label:'Returning',data:d.byVariant.map(v=>v.retCustomers),backgroundColor:'#C9A84C',borderRadius:3}]},
-    options:{ responsive:true, plugins:{legend:{position:'top',labels:{boxWidth:12}}},
-      scales:{ x:{grid:{display:false},ticks:{maxRotation:45}}, y:{grid:{color:'#E2E8EF'}} } },
+    type:'bar',
+    data:{ labels:d.byVariant.map(v=>v.name),
+           datasets:[{label:'New',      data:d.byVariant.map(v=>v.newCustomers),backgroundColor:'#3A9E98',borderRadius:3},
+                     {label:'Returning',data:d.byVariant.map(v=>v.retCustomers),backgroundColor:'#C9A84C',borderRadius:3}]},
+    options:{ responsive:true,
+      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}},
+      scales:{ x:{grid:{display:false},ticks:{maxRotation:45,font:{size:11}}}, y:{grid:{color:'#E2E8EF'}} } },
   });
 }
 
 function renderTable(d) {
-  const s = d.summary;
   const rows = d.byVariant.map(v => {
-    const aov=v.orders>0?v.netSales/v.orders:0, ptpW=Math.min(v.pctToPlanUnits||0,120), ptpC=ptpColor(v.pctToPlanUnits);
+    const aov = v.orders > 0 ? v.netSales / v.orders : 0;
+    const ptpW = Math.min(v.pctToPlanUnits||0, 120), ptpC = ptpColor(v.pctToPlanUnits);
     return `<tr>
       <td><span class="dot" style="background:${v.color||'#3A9E98'}"></span><strong>${v.name}</strong>${v.shade?'<br><span style="margin-left:18px;font-size:11px;color:var(--muted)">'+v.shade+'</span>':''}</td>
-      <td class="r">${fmt.num(v.units)}</td><td class="r">${fmt.cur(v.netSales)}</td><td class="r">${fmt.cur(aov)}</td>
-      <td class="r">${fmt.num(v.newCustomers)}</td><td class="r">${fmt.num(v.retCustomers)}</td>
+      <td class="r">${fmt.num(v.units)}</td>
+      <td class="r">${fmt.cur(v.netSales)}</td>
+      <td class="r">${fmt.cur2(aov)}</td>
+      <td class="r">${fmt.num(v.newCustomers)}</td>
+      <td class="r">${fmt.num(v.retCustomers)}</td>
       <td class="r"><div class="ptp-cell"><div class="ptp-mini"><div class="ptp-mini-fill" style="width:${ptpW}%;background:${ptpC}"></div></div><span style="color:${ptpC};font-weight:600">${v.pctToPlanUnits!=null?v.pctToPlanUnits.toFixed(1)+'%':'—'}</span></div></td>
     </tr>`;
   });
-  const tc=ptpColor(s.pctToPlanUnits), taov=s.orders>0?s.netSales/s.orders:0;
-  rows.push(`<tr class="tot"><td>Total</td><td class="r">${fmt.num(s.units)}</td><td class="r">${fmt.cur(s.netSales)}</td><td class="r">${fmt.cur(taov)}</td><td class="r">${fmt.num(s.newCustomers)}</td><td class="r">${fmt.num(s.retCustomers)}</td><td class="r" style="color:${tc}">${s.pctToPlanUnits!=null?s.pctToPlanUnits.toFixed(1)+'%':'—'}</td></tr>`);
+  const s = d.summary, tc = ptpColor(s.pctToPlanUnits), taov = s.orders > 0 ? s.netSales / s.orders : 0;
+  rows.push(`<tr class="tot">
+    <td>Total / Avg</td>
+    <td class="r">${fmt.num(s.units)}</td>
+    <td class="r">${fmt.cur(s.netSales)}</td>
+    <td class="r">${fmt.cur2(taov)}</td>
+    <td class="r">${fmt.num(s.newCustomers)}</td>
+    <td class="r">${fmt.num(s.retCustomers)}</td>
+    <td class="r" style="color:${tc}">${s.pctToPlanUnits!=null?s.pctToPlanUnits.toFixed(1)+'%':'—'}</td>
+  </tr>`);
   document.getElementById('tbl-body').innerHTML = rows.join('');
 }
 
 function renderTrend(d) {
   const labels = d.dailySales.map(r => fmt.day(r.date));
+  const last = d.dailySales[d.dailySales.length - 1];
+  document.getElementById('cs-daily-sub').textContent = 'Peak: ' + fmt.cur(Math.max(...d.dailySales.map(r=>r.netSales))) + '  ·  Snapshot through ' + fmt.day(last.date);
+  document.getElementById('cs-cum-sub').textContent  = fmt.num(last.cumUnits) + ' cumulative units through ' + fmt.day(last.date);
   kill('dl'); kill('cu');
   _ch.dl = new Chart(document.getElementById('chart-daily'), {
-    type:'bar', data:{labels,datasets:[{label:'Net Sales',data:d.dailySales.map(r=>r.netSales),backgroundColor:'rgba(58,158,152,.7)',borderColor:'#3A9E98',borderRadius:3}]},
-    options:{ responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.cur(c.raw)}}},
-      scales:{ x:{grid:{display:false},ticks:{maxTicksLimit:16,maxRotation:45}}, y:{ticks:{callback:v=>'$'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:'#E2E8EF'}} } },
+    type:'bar',
+    data:{labels, datasets:[{label:'Net Sales',data:d.dailySales.map(r=>r.netSales),backgroundColor:'rgba(58,158,152,.7)',borderColor:'#3A9E98',borderRadius:3}]},
+    options:{ responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.cur(c.raw)}}},
+      scales:{ x:{grid:{display:false},ticks:{maxTicksLimit:14,maxRotation:45,font:{size:11}}}, y:{ticks:{callback:v=>'$'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:'#E2E8EF'}} } },
   });
   _ch.cu = new Chart(document.getElementById('chart-cum'), {
-    type:'line', data:{labels,datasets:[{label:'Cumulative Units',data:d.dailySales.map(r=>r.cumUnits),borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,.1)',fill:true,tension:0.3,pointRadius:2}]},
-    options:{ responsive:true, plugins:{legend:{display:false}},
-      scales:{ x:{grid:{display:false},ticks:{maxTicksLimit:16,maxRotation:45}}, y:{ticks:{callback:v=>v.toLocaleString()},grid:{color:'#E2E8EF'}} } },
+    type:'line',
+    data:{labels, datasets:[{label:'Cum. Units',data:d.dailySales.map(r=>r.cumUnits),borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,.12)',fill:true,tension:0.3,pointRadius:2}]},
+    options:{ responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{ x:{grid:{display:false},ticks:{maxTicksLimit:14,maxRotation:45,font:{size:11}}}, y:{ticks:{callback:v=>v.toLocaleString()},grid:{color:'#E2E8EF'}} } },
   });
 }
+
+function renderSkuTable(d) {
+  document.getElementById('guide-sku-tbl').innerHTML = d.byVariant.map(v => {
+    const ptpC = ptpColor(v.pctToPlanUnits);
+    return `<tr>
+      <td><code style="font-size:12px;background:var(--bg);padding:2px 6px;border-radius:4px">${v.sku}</code></td>
+      <td>${v.name}</td>
+      <td><span class="dot" style="background:${v.color||'#ccc'}"></span>${v.shade||'—'}</td>
+      <td class="r">${fmt.cur(v.netSales)}</td>
+      <td class="r">${fmt.num(v.units)}</td>
+      <td class="r" style="color:${ptpC};font-weight:600">${v.pctToPlanUnits!=null?v.pctToPlanUnits.toFixed(1)+'%':'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ─── TABS ─────────────────────────────────────────────────── */
+const PANELS = ['overview','traffic','landing','pdp','crosssells','upcoming','guide'];
 
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
-    document.getElementById('panel-overview').style.display = t.dataset.tab==='overview'?'':'none';
-    document.getElementById('panel-trend').style.display    = t.dataset.tab==='trend'?'':'none';
+    PANELS.forEach(id => {
+      document.getElementById('panel-' + id).style.display = (t.dataset.tab === id) ? '' : 'none';
+    });
   });
 });
 
+/* ─── REFRESH / ISSUE ──────────────────────────────────────── */
+function onRefreshClick() {
+  alert('This dashboard uses a static snapshot from Jun 16, 2026.\n\nTo refresh the data, Claude must re-query Snowflake DAASITY_DB and regenerate the HTML file. Contact your Data team to request an update.');
+}
+
+function onReportIssue() {
+  const sub = encodeURIComponent('[Launch Dashboard] Issue Report — ' + document.title);
+  const body = encodeURIComponent('Dashboard: ' + location.href + '\nSnapshot: Jun 16, 2026\n\nDescribe the issue:\n');
+  window.location.href = 'mailto:?subject=' + sub + '&body=' + body;
+}
+
+/* ─── INIT ─────────────────────────────────────────────────── */
 async function init() {
   try {
     const d = await loadData();
     document.getElementById('loading').style.display = 'none';
-    renderHeader(d); renderKPIs(d); renderSales(d); renderUnits(d);
-    renderDonut(d); renderNvrShade(d); renderTable(d); renderTrend(d);
+    renderHeader(d);
+    renderKPIs(d);
+    renderSales(d);
+    renderUnits(d);
+    renderDonut(d);
+    renderNvrShade(d);
+    renderTable(d);
+    renderTrend(d);
+    renderSkuTable(d);
   } catch (e) {
     document.getElementById('loading').style.display = 'none';
     const b = document.getElementById('error-banner');
