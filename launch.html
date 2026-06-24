@@ -804,7 +804,7 @@ function renderDonut(d) {
   _ch.d = new Chart(document.getElementById('chart-donut'), {
     type:'doughnut',
     data:{ labels:['New','Returning'], datasets:[{data:[s.newCustomers,s.retCustomers],backgroundColor:['#3A9E98','#C9A84C'],borderWidth:0,hoverOffset:6}]},
-    options:{ responsive:true, cutout:'68%', plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.num(c.raw)+' ('+(c.raw/(s.totalCustomers||1)*100).toFixed(1)+'%)'}}}} },
+    options:{ responsive:true, cutout:'68%', plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt.num(c.raw)+' ('+(c.raw/(s.totalCustomers||1)*100).toFixed(1)+'%)'}}}} ,
   });
   document.getElementById('nvr-legend').innerHTML = [
     {label:'New Customers',val:s.newCustomers,pct:s.newPct,color:'#3A9E98'},
