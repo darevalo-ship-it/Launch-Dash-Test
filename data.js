@@ -8,7 +8,17 @@ window.DASHBOARD_DATA = {
     "generatedAt": "2026-07-23",
     "mode": "automated",
     "sourceDb": "DAASITY_DB",
-    "retentionDays": 122
+    "retentionDays": 122,
+    "sourceStatus": {
+      "uos": "live",
+      "uts": "unavailable",
+      "drp": "live",
+      "uss": "unavailable",
+      "gsheets": "fallback",
+      "uos_products": "live",
+      "ga4_api": "unavailable",
+      "ga4_bq": "unavailable"
+    }
   },
   "launches": [
     {
