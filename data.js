@@ -30,8 +30,8 @@ window.DASHBOARD_DATA = {
         "totalCustomers": 49241,
         "newPct": 34.1,
         "retPct": 65.9,
-        "planUnits": null,
-        "pctToPlanUnits": null,
+        "planUnits": 52849,
+        "pctToPlanUnits": 124.6,
         "subscriptionOrders": 0,
         "subscriptionUnits": 0,
         "pdpViews": 0,
@@ -49,8 +49,8 @@ window.DASHBOARD_DATA = {
           "orders": 16912,
           "newCustomers": 5597,
           "retCustomers": 10947,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 10656,
+          "pctToPlanUnits": 161.7
         },
         {
           "sku": "TVG5880",
@@ -62,8 +62,8 @@ window.DASHBOARD_DATA = {
           "orders": 10929,
           "newCustomers": 3740,
           "retCustomers": 6942,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 6019,
+          "pctToPlanUnits": 185.0
         },
         {
           "sku": "TVG5890",
@@ -75,8 +75,8 @@ window.DASHBOARD_DATA = {
           "orders": 8585,
           "newCustomers": 2716,
           "retCustomers": 5722,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 3594,
+          "pctToPlanUnits": 244.2
         },
         {
           "sku": "TVG5960",
@@ -88,8 +88,8 @@ window.DASHBOARD_DATA = {
           "orders": 8547,
           "newCustomers": 2785,
           "retCustomers": 5581,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 7198,
+          "pctToPlanUnits": 120.2
         },
         {
           "sku": "TVG5920",
@@ -101,8 +101,8 @@ window.DASHBOARD_DATA = {
           "orders": 6538,
           "newCustomers": 2241,
           "retCustomers": 4192,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 7151,
+          "pctToPlanUnits": 92.8
         },
         {
           "sku": "TVG5900",
@@ -114,8 +114,8 @@ window.DASHBOARD_DATA = {
           "orders": 5486,
           "newCustomers": 2292,
           "retCustomers": 3049,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 2575,
+          "pctToPlanUnits": 221.3
         },
         {
           "sku": "TVG5940",
@@ -127,8 +127,8 @@ window.DASHBOARD_DATA = {
           "orders": 2198,
           "newCustomers": 689,
           "retCustomers": 1470,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 3976,
+          "pctToPlanUnits": 56.4
         },
         {
           "sku": "TVG5910",
@@ -140,8 +140,8 @@ window.DASHBOARD_DATA = {
           "orders": 1993,
           "newCustomers": 666,
           "retCustomers": 1287,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 3051,
+          "pctToPlanUnits": 66.7
         },
         {
           "sku": "TVG5930",
@@ -153,8 +153,8 @@ window.DASHBOARD_DATA = {
           "orders": 1990,
           "newCustomers": 583,
           "retCustomers": 1366,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 2939,
+          "pctToPlanUnits": 69.5
         },
         {
           "sku": "TVG5970",
@@ -166,8 +166,8 @@ window.DASHBOARD_DATA = {
           "orders": 1353,
           "newCustomers": 435,
           "retCustomers": 861,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 5690,
+          "pctToPlanUnits": 24.7
         }
       ],
       "dailySales": [
@@ -813,7 +813,74 @@ window.DASHBOARD_DATA = {
           "pairs": 32
         }
       ],
-      "categoryCustomers": null
+      "categoryCustomers": {
+        "category": "Lip",
+        "total": 49242,
+        "existingCategory": 23888,
+        "newToCategory": 25354,
+        "byVariant": [
+          {
+            "sku": "TVG5960",
+            "name": "Joan",
+            "newToCategory": 4314,
+            "existingCategory": 4053
+          },
+          {
+            "sku": "TVG5900",
+            "name": "Rosa",
+            "newToCategory": 3102,
+            "existingCategory": 2239
+          },
+          {
+            "sku": "TVG5940",
+            "name": "Kathy",
+            "newToCategory": 1016,
+            "existingCategory": 1143
+          },
+          {
+            "sku": "TVG5910",
+            "name": "Linda",
+            "newToCategory": 960,
+            "existingCategory": 993
+          },
+          {
+            "sku": "TVG5880",
+            "name": "Ilene",
+            "newToCategory": 5512,
+            "existingCategory": 5170
+          },
+          {
+            "sku": "TVG5930",
+            "name": "Chanice",
+            "newToCategory": 870,
+            "existingCategory": 1079
+          },
+          {
+            "sku": "TVG5890",
+            "name": "Michelle",
+            "newToCategory": 4123,
+            "existingCategory": 4315
+          },
+          {
+            "sku": "TVG5920",
+            "name": "Kaisa",
+            "newToCategory": 3411,
+            "existingCategory": 3022
+          },
+          {
+            "sku": "TVG5970",
+            "name": "Kackie",
+            "newToCategory": 623,
+            "existingCategory": 673
+          },
+          {
+            "sku": "TVG5950",
+            "name": "Ragan",
+            "newToCategory": 8328,
+            "existingCategory": 8216
+          }
+        ]
+      }
     },
     {
       "launchId": "becca-brow",
@@ -834,8 +901,8 @@ window.DASHBOARD_DATA = {
         "totalCustomers": 4102,
         "newPct": 36.1,
         "retPct": 63.9,
-        "planUnits": null,
-        "pctToPlanUnits": null,
+        "planUnits": 12566,
+        "pctToPlanUnits": 38.9,
         "subscriptionOrders": 0,
         "subscriptionUnits": 0,
         "pdpViews": 0,
@@ -853,8 +920,8 @@ window.DASHBOARD_DATA = {
           "orders": 2425,
           "newCustomers": 980,
           "retCustomers": 1394,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 3967,
+          "pctToPlanUnits": 63.2
         },
         {
           "sku": "TVG6680",
@@ -866,8 +933,8 @@ window.DASHBOARD_DATA = {
           "orders": 1429,
           "newCustomers": 418,
           "retCustomers": 974,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 3000,
+          "pctToPlanUnits": 50.1
         },
         {
           "sku": "TVG6710",
@@ -879,8 +946,8 @@ window.DASHBOARD_DATA = {
           "orders": 800,
           "newCustomers": 210,
           "retCustomers": 567,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 5599,
+          "pctToPlanUnits": 15.6
         }
       ],
       "dailySales": [
@@ -1253,7 +1320,32 @@ window.DASHBOARD_DATA = {
           "pairs": 3
         }
       ],
-      "categoryCustomers": null
+      "categoryCustomers": {
+        "category": "Brow",
+        "total": 4102,
+        "existingCategory": 2074,
+        "newToCategory": 2028,
+        "byVariant": [
+          {
+            "sku": "TVG6680",
+            "name": "Brow Pencil",
+            "newToCategory": 624,
+            "existingCategory": 768
+          },
+          {
+            "sku": "TVG6690",
+            "name": "Brow Gel",
+            "newToCategory": 1283,
+            "existingCategory": 1091
+          },
+          {
+            "sku": "TVG6710",
+            "name": "Brow Liner",
+            "newToCategory": 291,
+            "existingCategory": 486
+          }
+        ]
+      }
     },
     {
       "launchId": "llem-shade-extension",
@@ -1274,8 +1366,8 @@ window.DASHBOARD_DATA = {
         "totalCustomers": 55783,
         "newPct": 28.2,
         "retPct": 71.8,
-        "planUnits": null,
-        "pctToPlanUnits": null,
+        "planUnits": 45244,
+        "pctToPlanUnits": 151.9,
         "subscriptionOrders": 0,
         "subscriptionUnits": 0,
         "pdpViews": 0,
@@ -1293,8 +1385,8 @@ window.DASHBOARD_DATA = {
           "orders": 25522,
           "newCustomers": 7795,
           "retCustomers": 17533,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 17387,
+          "pctToPlanUnits": 152.2
         },
         {
           "sku": "TVG6370",
@@ -1306,8 +1398,8 @@ window.DASHBOARD_DATA = {
           "orders": 21896,
           "newCustomers": 5171,
           "retCustomers": 16109,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 15209,
+          "pctToPlanUnits": 148.5
         },
         {
           "sku": "TVG6390",
@@ -1319,8 +1411,8 @@ window.DASHBOARD_DATA = {
           "orders": 19171,
           "newCustomers": 5107,
           "retCustomers": 13775,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 12648,
+          "pctToPlanUnits": 155.5
         }
       ],
       "dailySales": [
@@ -2127,7 +2219,32 @@ window.DASHBOARD_DATA = {
           "pairs": 55
         }
       ],
-      "categoryCustomers": null
+      "categoryCustomers": {
+        "category": "Mascara",
+        "total": 55783,
+        "existingCategory": 35690,
+        "newToCategory": 20093,
+        "byVariant": [
+          {
+            "sku": "TVG6390",
+            "name": "Ivy",
+            "newToCategory": 6611,
+            "existingCategory": 12271
+          },
+          {
+            "sku": "TVG6370",
+            "name": "Oceanne",
+            "newToCategory": 6479,
+            "existingCategory": 14801
+          },
+          {
+            "sku": "TVG6380",
+            "name": "Iris",
+            "newToCategory": 10055,
+            "existingCategory": 15273
+          }
+        ]
+      }
     },
     {
       "launchId": "eyeshadow-quads",
@@ -2148,8 +2265,8 @@ window.DASHBOARD_DATA = {
         "totalCustomers": 344,
         "newPct": 9.6,
         "retPct": 90.4,
-        "planUnits": null,
-        "pctToPlanUnits": null,
+        "planUnits": 558,
+        "pctToPlanUnits": 74.6,
         "subscriptionOrders": 0,
         "subscriptionUnits": 0,
         "pdpViews": 0,
@@ -2167,8 +2284,8 @@ window.DASHBOARD_DATA = {
           "orders": 220,
           "newCustomers": 23,
           "retCustomers": 195,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 254,
+          "pctToPlanUnits": 89.0
         },
         {
           "sku": "TVG6720",
@@ -2180,8 +2297,8 @@ window.DASHBOARD_DATA = {
           "orders": 186,
           "newCustomers": 13,
           "retCustomers": 173,
-          "planUnits": null,
-          "pctToPlanUnits": null
+          "planUnits": 304,
+          "pctToPlanUnits": 62.5
         }
       ],
       "dailySales": [
@@ -2195,7 +2312,26 @@ window.DASHBOARD_DATA = {
       ],
       "pdp": [],
       "crossSell": [],
-      "categoryCustomers": null
+      "categoryCustomers": {
+        "category": "Eyeshadow",
+        "total": 344,
+        "existingCategory": 289,
+        "newToCategory": 55,
+        "byVariant": [
+          {
+            "sku": "TVG6700",
+            "name": "Warm Neutrals",
+            "newToCategory": 38,
+            "existingCategory": 180
+          },
+          {
+            "sku": "TVG6720",
+            "name": "Cool Neutrals",
+            "newToCategory": 22,
+            "existingCategory": 164
+          }
+        ]
+      }
     }
   ],
   "traffic": {
