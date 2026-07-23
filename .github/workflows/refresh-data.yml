@@ -1,0 +1,69 @@
+name: Refresh dashboard data
+
+on:
+  schedule:
+    # Daily at 10:30 UTC (~3:30am PT), after Daasity's overnight loads
+    - cron: '30 10 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-dashboard-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Snowflake secrets
+        id: creds
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+        run: |
+          if [ -z "$SNOWFLAKE_ACCOUNT" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Snowflake secrets not configured yet — skipping refresh. Add SNOWFLAKE_* repository secrets to activate."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.creds.outputs.configured == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: steps.creds.outputs.configured == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        if: steps.creds.outputs.configured == 'true'
+        run: pip install "snowflake-connector-python[secure-local-storage]" cryptography
+
+      - name: Regenerate data.js from Snowflake
+        if: steps.creds.outputs.configured == 'true'
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_PRIVATE_KEY_B64: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_B64 }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+        run: python scripts/refresh_data.py
+
+      - name: Commit and push if data changed
+        if: steps.creds.outputs.configured == 'true'
+        run: |
+          if git diff --quiet data.js; then
+            echo "data.js unchanged — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.js
+          git commit -m "chore: refresh dashboard data ($(date -u +%F))"
+          git push

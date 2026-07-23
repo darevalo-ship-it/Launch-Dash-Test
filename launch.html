@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Launch Dashboard | Thrive Causemetics</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="vendor/chart.umd.min.js"></script>
+  <script src="data.js"></script>
   <style>
     :root {
       --tc-teal: #3A9E98; --tc-teal-dark: #1F6E6A; --tc-teal-light: #E6F4F3;
@@ -32,6 +33,8 @@
     .hdr-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
     .refresh-btn { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.25); border-radius:8px; padding:7px 14px; font-size:12px; font-weight:500; color:rgba(255,255,255,.85); cursor:pointer; transition:all .15s; user-select:none; }
     .refresh-btn:hover { background:rgba(255,255,255,.22); }
+    .launch-select { background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.25); border-radius:8px; padding:7px 10px; font-size:12px; font-weight:500; color:#fff; cursor:pointer; max-width:240px; }
+    .launch-select option { color:var(--text); }
     .refresh-note { font-size:10px; opacity:.4; text-align:right; max-width:180px; line-height:1.4; }
     .hdr-sources { font-size:11px; opacity:.45; margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,.1); }
     .tabs-wrap { background:var(--card); border-bottom:2px solid var(--border); padding:0 36px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
@@ -140,6 +143,7 @@
       <div class="hdr-chips" id="hdr-chips"></div>
     </div>
     <div class="hdr-right">
+      <select id="launch-select" class="launch-select" onchange="location.search = '?id=' + this.value"></select>
       <button class="refresh-btn" onclick="onRefreshClick()">&#8635;&nbsp; Refresh</button>
       <div class="refresh-note" id="refresh-note">Static snapshot &mdash;<br>no live connection</div>
     </div>
@@ -154,6 +158,7 @@
     <div class="tab" data-tab="landing">Landing Page</div>
     <div class="tab" data-tab="pdp">PDP Health</div>
     <div class="tab" data-tab="crosssells">Cross-Sells &amp; Pairings</div>
+    <div class="tab" data-tab="category">Category Customers</div>
     <div class="tab" data-tab="upcoming">Upcoming Launches</div>
     <div class="tab" data-tab="guide">Data Guide</div>
   </div>
@@ -232,59 +237,13 @@
   <!-- CROSS-SELLS -->
   <div id="panel-crosssells" style="display:none"></div>
 
+  <!-- CATEGORY CUSTOMERS -->
+  <div id="panel-category" style="display:none"></div>
+
   <!-- UPCOMING -->
   <div id="panel-upcoming" style="display:none">
     <div class="section-title">Upcoming Launches — 2026</div>
-    <div class="upcoming-grid">
-      <div class="upc-card near">
-        <span class="upc-badge ub-near">Jun 17</span>
-        <div class="upc-name">BEB Extension: Hoda &amp; Mila</div>
-        <div class="upc-dates">
-          <div class="upc-date"><strong>Jun 17, 2026</strong>Launch Date</div>
-          <div class="upc-date"><strong>May 29, 2026</strong>Internal</div>
-        </div>
-      </div>
-      <div class="upc-card">
-        <span class="upc-badge ub-far">Jul 1</span>
-        <div class="upc-name">Summer Promo</div>
-        <div class="upc-dates">
-          <div class="upc-date"><strong>Jul 1, 2026</strong>Launch Date</div>
-          <div class="upc-date"><strong>Jun 23, 2026</strong>Internal</div>
-        </div>
-      </div>
-      <div class="upc-card">
-        <span class="upc-badge ub-far">Jul 22</span>
-        <div class="upc-name">Eyeshadow Quads</div>
-        <div class="upc-dates">
-          <div class="upc-date"><strong>Jul 22, 2026</strong>Launch Date</div>
-          <div class="upc-date"><strong>Jul 14, 2026</strong>Internal</div>
-        </div>
-      </div>
-      <div class="upc-card">
-        <span class="upc-badge ub-far">Aug 20</span>
-        <div class="upc-name">Back to Me + Triple Threat</div>
-        <div class="upc-dates">
-          <div class="upc-date"><strong>Aug 20, 2026</strong>Launch Date</div>
-          <div class="upc-date"><strong>Jul 24, 2026</strong>Internal</div>
-        </div>
-      </div>
-      <div class="upc-card">
-        <span class="upc-badge ub-far">Sep 9</span>
-        <div class="upc-name">Lip Stain Marker</div>
-        <div class="upc-dates">
-          <div class="upc-date"><strong>Sep 9, 2026</strong>Launch Date</div>
-          <div class="upc-date"><strong>Sep 2, 2026</strong>Internal</div>
-        </div>
-      </div>
-      <div class="upc-card">
-        <span class="upc-badge ub-far">Oct 12</span>
-        <div class="upc-name">Holiday 2026 + Limited Edition</div>
-        <div class="upc-dates">
-          <div class="upc-date"><strong>Oct 12, 2026</strong>Launch Date</div>
-          <div class="upc-date"><strong>Oct 6, 2026</strong>Internal</div>
-        </div>
-      </div>
-    </div>
+    <div class="upcoming-grid" id="upcoming-grid"></div>
   </div>
 
   <!-- DATA GUIDE -->
@@ -303,9 +262,9 @@
         </ul>
       </div>
       <div class="guide-card">
-        <h3>Data Freshness</h3>
-        <p>This dashboard uses a <strong>static snapshot queried Jun 23, 2026</strong> from Snowflake DAASITY_DB. Sales data covers through Jun 23 (yesterday). GA4 traffic data through Jun 21 (GA4 sync lag of ~2 days).</p>
-        <p style="margin-top:8px">To refresh, re-query Snowflake and regenerate the HTML. Contact your Data &amp; Analytics team.</p>
+        <h3>Data Freshness &amp; Refresh</h3>
+        <p>All data lives in <strong>data.js</strong>, regenerated from Snowflake DAASITY_DB by <strong>scripts/refresh_data.py</strong> (scheduled daily via GitHub Actions once Snowflake credentials are added as repository secrets). Current data cutoff: <strong>Jun 23, 2026</strong>; GA4 traffic lags ~2 days behind.</p>
+        <p style="margin-top:8px"><strong>Launch lifecycle:</strong> a launch appears automatically once its launch date passes and the refresh returns data, and is removed 122 days after its launch date.</p>
       </div>
       <div class="guide-card">
         <h3>Metric Definitions</h3>
@@ -317,6 +276,7 @@
           <li><strong>ATC Rate</strong> — Add-to-Cart ÷ PDP Views</li>
           <li><strong>Site CVR</strong> — Transactions ÷ Sessions (GA4, site-wide)</li>
           <li><strong>% to Plan</strong> — Actual Units ÷ Planned Units from GSHEETS.SKU_LAUNCH_DAY_FORECAST</li>
+          <li><strong>New to Category</strong> — launch buyers with no prior purchase in the launch's category before launch date (UOS order history)</li>
         </ul>
       </div>
       <div class="guide-card">
@@ -357,367 +317,67 @@ const fmt = {
 };
 function ptpColor(v) { return v == null ? '#9CA3AF' : v >= 100 ? '#22A06B' : v >= 85 ? '#F59E0B' : '#EF4444'; }
 
-const launchId = new URLSearchParams(location.search).get('id') || 'empowershine';
+/* ── DATA ACCESS ──
+   All data lives in data.js (window.DASHBOARD_DATA), regenerated by
+   scripts/refresh_data.py via .github/workflows/refresh-data.yml. */
+const DD = window.DASHBOARD_DATA;
+const META = DD ? DD.meta : {};
+const RETENTION_DAYS = META.retentionDays || 122;
 
-/* ── STATIC SNAPSHOT DATA (Snowflake DAASITY_DB · Jun 23, 2026) ── */
-async function loadData() {
-  const snapshots = {
-    empowershine: {
-      launchId:'empowershine', name:'EmpowerShine Satin Lip Cream',
-      launchDate:'2026-04-30', status:'LIVE',
-      summary:{
-        netSales:1393855.74, units:54491, orders:44551, aov:31.29,
-        newCustomers:14498, retCustomers:29356, totalCustomers:43854,
-        newPct:33.1, retPct:66.9,
-        planUnits:34011, pctToPlanUnits:160.2,
-        subscriptionOrders:1645, subscriptionUnits:1685,
-        pdpViews:1541151, pdpAtcRate:9.6, pdpCvr:3.6,
-      },
-      byVariant:[
-        {sku:'TVG5950',name:'Ragan',   shade:'Warm Plum',    color:'#7B3FA0',netSales:369424.94,units:14497,orders:14787,newCustomers:4793,retCustomers:9705,planUnits:6851, pctToPlanUnits:211.6},
-        {sku:'TVG5890',name:'Michelle',shade:'Neutral Mauve',color:'#A0888A',netSales:215064.08,units:8417, orders:8584, newCustomers:2782,retCustomers:5635,planUnits:2371, pctToPlanUnits:355.1},
-        {sku:'TVG5880',name:'Ilene',   shade:'Natural Rose', color:'#C89EA0',netSales:197353.85,units:7744, orders:7962, newCustomers:2561,retCustomers:5183,planUnits:4021, pctToPlanUnits:192.6},
-        {sku:'TVG5960',name:'Joan',    shade:'Cool Rose',    color:'#E8748A',netSales:179734.45,units:7023, orders:7316, newCustomers:2322,retCustomers:4701,planUnits:4748, pctToPlanUnits:148.0},
-        {sku:'TVG5920',name:'Kaisa',   shade:'Dusty Rose',   color:'#D4879A',netSales:138894.43,units:5393, orders:5663, newCustomers:1785,retCustomers:3608,planUnits:4670, pctToPlanUnits:115.5},
-        {sku:'TVG5900',name:'Rosa',    shade:'Deep Berry',   color:'#7A1840',netSales:129485.40,units:5005, orders:4983, newCustomers:1655,retCustomers:3350,planUnits:1610, pctToPlanUnits:310.9},
-        {sku:'TVG5940',name:'Kathy',   shade:'Soft Apricot', color:'#F4A460',netSales:46547.42, units:1815, orders:1873, newCustomers:600, retCustomers:1215,planUnits:2432, pctToPlanUnits:74.6},
-        {sku:'TVG5930',name:'Chanice', shade:'Magenta Pink', color:'#C930B8',netSales:44462.29, units:1749, orders:1758, newCustomers:578, retCustomers:1171,planUnits:2013, pctToPlanUnits:86.9},
-        {sku:'TVG5910',name:'Linda',   shade:'Cherry Red',   color:'#C01830',netSales:44153.11, units:1718, orders:1741, newCustomers:568, retCustomers:1150,planUnits:1925, pctToPlanUnits:89.2},
-        {sku:'TVG5970',name:'Kackie',  shade:'Mocha',        color:'#8B6355',netSales:28735.78, units:1130, orders:1124, newCustomers:374, retCustomers:756, planUnits:3370, pctToPlanUnits:33.5},
-      ],
-      dailySales:[
-        {date:'2026-04-30',units:47,  netSales:1244.62,  cumUnits:47,   cumSales:1244.62},
-        {date:'2026-05-01',units:1742,netSales:45231.50, cumUnits:1789, cumSales:46476.12},
-        {date:'2026-05-02',units:2419,netSales:63572.60, cumUnits:4208, cumSales:110048.72},
-        {date:'2026-05-03',units:1568,netSales:40962.48, cumUnits:5776, cumSales:151011.20},
-        {date:'2026-05-04',units:1257,netSales:32700.86, cumUnits:7033, cumSales:183712.06},
-        {date:'2026-05-05',units:1608,netSales:41930.18, cumUnits:8641, cumSales:225642.24},
-        {date:'2026-05-06',units:1253,netSales:32587.98, cumUnits:9894, cumSales:258230.22},
-        {date:'2026-05-07',units:1412,netSales:36757.49, cumUnits:11306,cumSales:294987.71},
-        {date:'2026-05-08',units:1551,netSales:40212.65, cumUnits:12857,cumSales:335200.36},
-        {date:'2026-05-09',units:1612,netSales:41210.17, cumUnits:14469,cumSales:376410.53},
-        {date:'2026-05-10',units:1909,netSales:49010.34, cumUnits:16378,cumSales:425420.87},
-        {date:'2026-05-11',units:1358,netSales:35300.95, cumUnits:17736,cumSales:460721.82},
-        {date:'2026-05-12',units:1191,netSales:30527.59, cumUnits:18927,cumSales:491249.41},
-        {date:'2026-05-13',units:1277,netSales:32907.17, cumUnits:20204,cumSales:524156.58},
-        {date:'2026-05-14',units:1227,netSales:31503.48, cumUnits:21431,cumSales:555660.06},
-        {date:'2026-05-15',units:1128,netSales:28842.18, cumUnits:22559,cumSales:584502.24},
-        {date:'2026-05-16',units:1358,netSales:34630.06, cumUnits:23917,cumSales:619132.30},
-        {date:'2026-05-17',units:1360,netSales:35177.26, cumUnits:25277,cumSales:654309.56},
-        {date:'2026-05-18',units:1157,netSales:29557.47, cumUnits:26434,cumSales:683867.03},
-        {date:'2026-05-19',units:1200,netSales:30799.72, cumUnits:27634,cumSales:714666.75},
-        {date:'2026-05-20',units:1179,netSales:30411.21, cumUnits:28813,cumSales:745077.96},
-        {date:'2026-05-21',units:1109,netSales:28096.08, cumUnits:29922,cumSales:773174.04},
-        {date:'2026-05-22',units:1356,netSales:34735.31, cumUnits:31278,cumSales:807909.35},
-        {date:'2026-05-23',units:1322,netSales:33653.70, cumUnits:32600,cumSales:841563.05},
-        {date:'2026-05-24',units:1460,netSales:37567.70, cumUnits:34060,cumSales:879130.75},
-        {date:'2026-05-25',units:1842,netSales:47267.99, cumUnits:35902,cumSales:926398.74},
-        {date:'2026-05-26',units:858, netSales:21789.01, cumUnits:36760,cumSales:948187.75},
-        {date:'2026-05-27',units:735, netSales:18561.11, cumUnits:37495,cumSales:966748.86},
-        {date:'2026-05-28',units:795, netSales:20036.18, cumUnits:38290,cumSales:986785.04},
-        {date:'2026-05-29',units:811, netSales:20375.40, cumUnits:39101,cumSales:1007160.44},
-        {date:'2026-05-30',units:662, netSales:16839.51, cumUnits:39763,cumSales:1023999.95},
-        {date:'2026-05-31',units:584, netSales:15064.80, cumUnits:40347,cumSales:1039064.75},
-        {date:'2026-06-01',units:775, netSales:19365.68, cumUnits:41122,cumSales:1058430.43},
-        {date:'2026-06-02',units:757, netSales:18688.85, cumUnits:41879,cumSales:1077119.28},
-        {date:'2026-06-03',units:813, netSales:20066.32, cumUnits:42692,cumSales:1097185.60},
-        {date:'2026-06-04',units:691, netSales:16920.50, cumUnits:43383,cumSales:1114106.10},
-        {date:'2026-06-05',units:709, netSales:17846.90, cumUnits:44092,cumSales:1131953.00},
-        {date:'2026-06-06',units:523, netSales:13271.58, cumUnits:44615,cumSales:1145224.58},
-        {date:'2026-06-07',units:601, netSales:15438.43, cumUnits:45216,cumSales:1160663.01},
-        {date:'2026-06-08',units:872, netSales:22236.33, cumUnits:46088,cumSales:1182899.34},
-        {date:'2026-06-09',units:468, netSales:11561.91, cumUnits:46556,cumSales:1194461.25},
-        {date:'2026-06-10',units:368, netSales:9270.67,  cumUnits:46924,cumSales:1203731.92},
-        {date:'2026-06-11',units:466, netSales:11934.75, cumUnits:47390,cumSales:1215666.67},
-        {date:'2026-06-12',units:567, netSales:14387.73, cumUnits:47957,cumSales:1230054.40},
-        {date:'2026-06-13',units:1040,netSales:25317.54, cumUnits:48997,cumSales:1255371.94},
-        {date:'2026-06-14',units:1342,netSales:32736.57, cumUnits:50339,cumSales:1288108.51},
-        {date:'2026-06-15',units:440, netSales:11109.81, cumUnits:50779,cumSales:1299218.32},
-        {date:'2026-06-16',units:342, netSales:8441.29,  cumUnits:51121,cumSales:1307659.61},
-        {date:'2026-06-17',units:379, netSales:9487.16,  cumUnits:51500,cumSales:1317146.77},
-        {date:'2026-06-18',units:401, netSales:10157.58, cumUnits:51901,cumSales:1327304.35},
-        {date:'2026-06-19',units:456, netSales:11954.08, cumUnits:52357,cumSales:1339258.43},
-        {date:'2026-06-20',units:666, netSales:17105.70, cumUnits:53023,cumSales:1356364.13},
-        {date:'2026-06-21',units:744, netSales:19404.66, cumUnits:53767,cumSales:1375768.79},
-        {date:'2026-06-22',units:371, netSales:9365.72,  cumUnits:54138,cumSales:1385134.51},
-        {date:'2026-06-23',units:353, netSales:8721.21,  cumUnits:54491,cumSales:1393855.72},
-      ],
-    },
+function daysBetween(a, b) { return Math.floor((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000); }
 
-    'becca-brow': {
-      launchId:'becca-brow', name:'Becca Brow',
-      launchDate:'2026-06-08', status:'LIVE',
-      summary:{
-        netSales:59472.27, units:2566, orders:2212, aov:26.89,
-        newCustomers:691, retCustomers:1491, totalCustomers:2182,
-        newPct:31.7, retPct:68.3,
-        planUnits:3766, pctToPlanUnits:68.1,
-        subscriptionOrders:135, subscriptionUnits:137,
-        pdpViews:35546, pdpAtcRate:20.5, pdpCvr:6.8,
-      },
-      byVariant:[
-        {sku:'TVG6690',name:'Brow Gel',   shade:'Semi-Perm. Gel', color:'#6B7A8D',netSales:26549.24,units:1183,orders:1148,newCustomers:374,retCustomers:809, planUnits:1087,pctToPlanUnits:108.8},
-        {sku:'TVG6680',name:'Brow Pencil',shade:'Quick Fill Pencil',color:'#4B5563',netSales:23618.54,units:959, orders:925, newCustomers:304,retCustomers:621, planUnits:874, pctToPlanUnits:109.7},
-        {sku:'TVG6710',name:'Brow Liner', shade:'Waterproof Liner',color:'#9CA3AF',netSales:9304.49, units:424, orders:388, newCustomers:134,retCustomers:290, planUnits:1805,pctToPlanUnits:23.5},
-      ],
-      dailySales:[
-        {date:'2026-06-03',units:2,  netSales:48.00,   cumUnits:2,   cumSales:48.00},
-        {date:'2026-06-05',units:1,  netSales:24.00,   cumUnits:3,   cumSales:72.00},
-        {date:'2026-06-06',units:1,  netSales:24.00,   cumUnits:4,   cumSales:96.00},
-        {date:'2026-06-07',units:2,  netSales:46.96,   cumUnits:6,   cumSales:142.96},
-        {date:'2026-06-08',units:46, netSales:1072.52, cumUnits:52,  cumSales:1215.48},
-        {date:'2026-06-09',units:210,netSales:4231.07, cumUnits:262, cumSales:5446.55},
-        {date:'2026-06-10',units:212,netSales:4921.86, cumUnits:474, cumSales:10368.41},
-        {date:'2026-06-11',units:298,netSales:7106.70, cumUnits:772, cumSales:17475.11},
-        {date:'2026-06-12',units:210,netSales:4956.29, cumUnits:982, cumSales:22431.40},
-        {date:'2026-06-13',units:246,netSales:5790.62, cumUnits:1228,cumSales:28222.02},
-        {date:'2026-06-14',units:270,netSales:6389.52, cumUnits:1498,cumSales:34611.54},
-        {date:'2026-06-15',units:154,netSales:3686.45, cumUnits:1652,cumSales:38297.99},
-        {date:'2026-06-16',units:121,netSales:2855.30, cumUnits:1773,cumSales:41153.29},
-        {date:'2026-06-17',units:87, netSales:2006.39, cumUnits:1860,cumSales:43159.68},
-        {date:'2026-06-18',units:91, netSales:2117.78, cumUnits:1951,cumSales:45277.46},
-        {date:'2026-06-19',units:91, netSales:2084.12, cumUnits:2042,cumSales:47361.58},
-        {date:'2026-06-20',units:182,netSales:4177.95, cumUnits:2224,cumSales:51539.53},
-        {date:'2026-06-21',units:206,netSales:4802.62, cumUnits:2430,cumSales:56342.15},
-        {date:'2026-06-22',units:81, netSales:1845.02, cumUnits:2511,cumSales:58187.17},
-        {date:'2026-06-23',units:55, netSales:1285.11, cumUnits:2566,cumSales:59472.28},
-      ],
-    },
-
-    'llem-shade-extension': {
-      launchId:'llem-shade-extension', name:'Liquid Lash™ Extensions Mascara — Shade Extension',
-      launchDate:'2026-04-07', status:'LIVE',
-      summary:{
-        netSales:1501861.47, units:63769, orders:54160, aov:27.73,
-        newCustomers:14948, retCustomers:38475, totalCustomers:53423,
-        newPct:28.0, retPct:72.0,
-        planUnits:37884, pctToPlanUnits:168.3,
-        subscriptionOrders:1096, subscriptionUnits:1114,
-        pdpViews:850738, pdpAtcRate:20.2, pdpCvr:7.4,
-      },
-      byVariant:[
-        {sku:'TVG6380',name:'Iris',   shade:'Deep Purple',color:'#4A1E6B',netSales:611706.57,units:25856,orders:25536,newCustomers:7240,retCustomers:18616,planUnits:15000,pctToPlanUnits:172.4},
-        {sku:'TVG6390',name:'Ivy',    shade:'Deep Green', color:'#1B4D3E',netSales:455047.25,units:19374,orders:19238,newCustomers:5425,retCustomers:13949,planUnits:10908,pctToPlanUnits:177.6},
-        {sku:'TVG6370',name:'Oceanne',shade:'Deep Navy',  color:'#1C3A5C',netSales:435107.66,units:18539,orders:18256,newCustomers:5193,retCustomers:13346,planUnits:11976,pctToPlanUnits:154.8},
-      ],
-      dailySales:[
-        {date:'2026-04-07',units:151, netSales:3576.70,  cumUnits:151,  cumSales:3576.70},
-        {date:'2026-04-08',units:3385,netSales:80378.61, cumUnits:3536, cumSales:83955.31},
-        {date:'2026-04-09',units:3959,netSales:95597.47, cumUnits:7495, cumSales:179552.78},
-        {date:'2026-04-10',units:2363,netSales:56076.53, cumUnits:9858, cumSales:235629.31},
-        {date:'2026-04-11',units:3113,netSales:73359.45, cumUnits:12971,cumSales:308988.76},
-        {date:'2026-04-12',units:3702,netSales:87078.72, cumUnits:16673,cumSales:396067.48},
-        {date:'2026-04-13',units:1816,netSales:42823.44, cumUnits:18489,cumSales:438890.92},
-        {date:'2026-04-14',units:1543,netSales:36320.99, cumUnits:20032,cumSales:475211.91},
-        {date:'2026-04-15',units:2071,netSales:49191.05, cumUnits:22103,cumSales:524402.96},
-        {date:'2026-04-16',units:2307,netSales:54658.03, cumUnits:24410,cumSales:579060.99},
-        {date:'2026-04-17',units:1977,netSales:47289.59, cumUnits:26387,cumSales:626350.58},
-        {date:'2026-04-18',units:1814,netSales:43300.47, cumUnits:28201,cumSales:669651.05},
-        {date:'2026-04-19',units:2040,netSales:48667.70, cumUnits:30241,cumSales:718318.75},
-        {date:'2026-04-20',units:1738,netSales:41165.87, cumUnits:31979,cumSales:759484.62},
-        {date:'2026-04-21',units:1602,netSales:38031.77, cumUnits:33581,cumSales:797516.39},
-        {date:'2026-04-22',units:1718,netSales:40798.34, cumUnits:35299,cumSales:838314.73},
-        {date:'2026-04-23',units:1546,netSales:36321.91, cumUnits:36845,cumSales:874636.64},
-        {date:'2026-04-24',units:1297,netSales:30252.98, cumUnits:38142,cumSales:904889.62},
-        {date:'2026-04-25',units:2121,netSales:49080.73, cumUnits:40263,cumSales:953970.35},
-        {date:'2026-04-26',units:2503,netSales:57981.46, cumUnits:42766,cumSales:1011951.81},
-        {date:'2026-04-27',units:1293,netSales:30257.98, cumUnits:44059,cumSales:1042209.79},
-        {date:'2026-04-28',units:1088,netSales:25427.52, cumUnits:45147,cumSales:1067637.31},
-        {date:'2026-04-29',units:880, netSales:20558.48, cumUnits:46027,cumSales:1088195.79},
-        {date:'2026-04-30',units:831, netSales:19648.19, cumUnits:46858,cumSales:1107843.98},
-        {date:'2026-05-01',units:915, netSales:21142.87, cumUnits:47773,cumSales:1128986.85},
-        {date:'2026-05-02',units:1049,netSales:24686.66, cumUnits:48822,cumSales:1153673.51},
-        {date:'2026-05-03',units:703, netSales:16366.85, cumUnits:49525,cumSales:1170040.36},
-        {date:'2026-05-04',units:357, netSales:8251.35,  cumUnits:49882,cumSales:1178291.71},
-        {date:'2026-05-05',units:337, netSales:7749.28,  cumUnits:50219,cumSales:1186040.99},
-        {date:'2026-05-06',units:352, netSales:7924.99,  cumUnits:50571,cumSales:1193965.98},
-        {date:'2026-05-07',units:334, netSales:7735.94,  cumUnits:50905,cumSales:1201701.92},
-        {date:'2026-05-08',units:236, netSales:5421.68,  cumUnits:51141,cumSales:1207123.60},
-        {date:'2026-05-09',units:737, netSales:17003.01, cumUnits:51878,cumSales:1224126.61},
-        {date:'2026-05-10',units:677, netSales:15627.64, cumUnits:52555,cumSales:1239754.25},
-        {date:'2026-05-11',units:219, netSales:5071.63,  cumUnits:52774,cumSales:1244825.88},
-        {date:'2026-05-12',units:169, netSales:3747.78,  cumUnits:52943,cumSales:1248573.66},
-        {date:'2026-05-13',units:185, netSales:4319.32,  cumUnits:53128,cumSales:1252892.98},
-        {date:'2026-05-14',units:146, netSales:3209.34,  cumUnits:53274,cumSales:1256102.32},
-        {date:'2026-05-15',units:182, netSales:4163.31,  cumUnits:53456,cumSales:1260265.63},
-        {date:'2026-05-16',units:341, netSales:7998.01,  cumUnits:53797,cumSales:1268263.64},
-        {date:'2026-05-17',units:247, netSales:5768.18,  cumUnits:54044,cumSales:1274031.82},
-        {date:'2026-05-18',units:284, netSales:6573.30,  cumUnits:54328,cumSales:1280605.12},
-        {date:'2026-05-19',units:210, netSales:4703.23,  cumUnits:54538,cumSales:1285308.35},
-        {date:'2026-05-20',units:207, netSales:4764.60,  cumUnits:54745,cumSales:1290072.95},
-        {date:'2026-05-21',units:202, netSales:4633.81,  cumUnits:54947,cumSales:1294706.76},
-        {date:'2026-05-22',units:580, netSales:13699.53, cumUnits:55527,cumSales:1308406.29},
-        {date:'2026-05-23',units:489, netSales:11528.90, cumUnits:56016,cumSales:1319935.19},
-        {date:'2026-05-24',units:483, netSales:11475.13, cumUnits:56499,cumSales:1331410.32},
-        {date:'2026-05-25',units:628, netSales:14927.00, cumUnits:57127,cumSales:1346337.32},
-        {date:'2026-05-26',units:177, netSales:4046.64,  cumUnits:57304,cumSales:1350383.96},
-        {date:'2026-05-27',units:143, netSales:3249.39,  cumUnits:57447,cumSales:1353633.35},
-        {date:'2026-05-28',units:183, netSales:4269.08,  cumUnits:57630,cumSales:1357902.43},
-        {date:'2026-05-29',units:166, netSales:3765.25,  cumUnits:57796,cumSales:1361667.68},
-        {date:'2026-05-30',units:156, netSales:3674.64,  cumUnits:57952,cumSales:1365342.32},
-        {date:'2026-05-31',units:163, netSales:3811.43,  cumUnits:58115,cumSales:1369153.75},
-        {date:'2026-06-01',units:229, netSales:5236.51,  cumUnits:58344,cumSales:1374390.26},
-        {date:'2026-06-02',units:212, netSales:4833.71,  cumUnits:58556,cumSales:1379223.97},
-        {date:'2026-06-03',units:237, netSales:5466.76,  cumUnits:58793,cumSales:1384690.73},
-        {date:'2026-06-04',units:169, netSales:3777.14,  cumUnits:58962,cumSales:1388467.87},
-        {date:'2026-06-05',units:229, netSales:5318.48,  cumUnits:59191,cumSales:1393786.35},
-        {date:'2026-06-06',units:266, netSales:6294.07,  cumUnits:59457,cumSales:1400080.42},
-        {date:'2026-06-07',units:218, netSales:5192.50,  cumUnits:59675,cumSales:1405272.92},
-        {date:'2026-06-08',units:370, netSales:8708.94,  cumUnits:60045,cumSales:1413981.86},
-        {date:'2026-06-09',units:218, netSales:5069.70,  cumUnits:60263,cumSales:1419051.56},
-        {date:'2026-06-10',units:219, netSales:4968.01,  cumUnits:60482,cumSales:1424019.57},
-        {date:'2026-06-11',units:313, netSales:7291.65,  cumUnits:60795,cumSales:1431311.22},
-        {date:'2026-06-12',units:221, netSales:5111.11,  cumUnits:61016,cumSales:1436422.33},
-        {date:'2026-06-13',units:420, netSales:10167.86, cumUnits:61436,cumSales:1446590.19},
-        {date:'2026-06-14',units:585, netSales:14092.78, cumUnits:62021,cumSales:1460682.97},
-        {date:'2026-06-15',units:500, netSales:11850.26, cumUnits:62521,cumSales:1472533.23},
-        {date:'2026-06-16',units:250, netSales:5823.04,  cumUnits:62771,cumSales:1478356.27},
-        {date:'2026-06-17',units:135, netSales:3133.55,  cumUnits:62906,cumSales:1481489.82},
-        {date:'2026-06-18',units:112, netSales:2634.88,  cumUnits:63018,cumSales:1484124.70},
-        {date:'2026-06-19',units:88,  netSales:2130.00,  cumUnits:63106,cumSales:1486254.70},
-        {date:'2026-06-20',units:227, netSales:5352.00,  cumUnits:63333,cumSales:1491606.70},
-        {date:'2026-06-21',units:217, netSales:5179.92,  cumUnits:63550,cumSales:1496786.62},
-        {date:'2026-06-22',units:126, netSales:2970.27,  cumUnits:63676,cumSales:1499756.89},
-        {date:'2026-06-23',units:93,  netSales:2104.57,  cumUnits:63769,cumSales:1501861.46},
-      ],
-    },
-  };
-
-  const raw = snapshots[launchId];
-  if (!raw) throw new Error('Unknown launch ID: ' + launchId);
-  const daysLive = Math.max(1, Math.floor((Date.now() - new Date(raw.launchDate + 'T00:00:00').getTime()) / 86400000) + 1);
-  const s = raw.summary;
-  const unitsPerOrder = s.orders > 0 ? (s.units / s.orders) : 0;
-  return { ...raw, daysLive, unitsPerOrder };
+/* Launch lifecycle, driven by launch dates:
+   - archived: more than RETENTION_DAYS days past launch (removed from views)
+   - live:     has data
+   - pending:  launched but no data yet (awaiting next refresh)
+   - upcoming: launch date still in the future */
+function launchState(l) {
+  if (daysBetween(l.launchDate, META.dataCutoff) > RETENTION_DAYS) return 'archived';
+  if (l.summary && l.dailySales && l.dailySales.length) return 'live';
+  return daysBetween(l.launchDate, META.generatedAt) >= 0 ? 'pending' : 'upcoming';
 }
 
-/* ── GA4 SITE-WIDE TRAFFIC DATA (Apr 7 – Jun 21, GA4_API.BASE_TRAFFIC) ── */
-const trafficData = {
-  byChannel:[
-    {ch:'Paid Social',     sessions:5482699,txns:128182,rev:7024628,cvr:2.34,eng:76.8},
-    {ch:'Direct',          sessions:2563004,txns:56059, rev:3322736,cvr:2.19,eng:60.6},
-    {ch:'Email',           sessions:1335118,txns:111637,rev:6829968,cvr:8.36,eng:74.3},
-    {ch:'Paid Search',     sessions:1138902,txns:125695,rev:8372400,cvr:11.04,eng:84.7},
-    {ch:'SMS',             sessions:999560, txns:64485, rev:3978429,cvr:6.45,eng:76.2},
-    {ch:'Paid Other',      sessions:935609, txns:5814,  rev:364848, cvr:0.62,eng:67.3},
-    {ch:'Unassigned',      sessions:831975, txns:176318,rev:7312046,cvr:21.19,eng:52.1},
-    {ch:'Cross-network',   sessions:503226, txns:9627,  rev:568174, cvr:1.91,eng:73.5},
-    {ch:'Paid Shopping',   sessions:318050, txns:32164, rev:1769564,cvr:10.11,eng:86.2},
-    {ch:'Organic Social',  sessions:312996, txns:4139,  rev:237681, cvr:1.32,eng:65.8},
-    {ch:'Organic Search',  sessions:262364, txns:24636, rev:1635756,cvr:9.39,eng:82.9},
-    {ch:'Organic Shopping',sessions:117797, txns:39679, rev:1925982,cvr:33.68,eng:83.2},
-    {ch:'Referral',        sessions:47155,  txns:1928,  rev:132044, cvr:4.09,eng:69.2},
-    {ch:'Display',         sessions:13570,  txns:20,    rev:1275,   cvr:0.15,eng:60.4},
-    {ch:'Paid Video',      sessions:9103,   txns:15,    rev:1059,   cvr:0.16,eng:72.1},
-  ],
-  monthly:[
-    {month:'Apr 2026',chs:{
-      'Paid Social':2159973,'Email':462425,'Paid Search':379352,'SMS':372367,'Direct':364832,
-      'Organic Search':100364,'Organic Shopping':31436,
-    }},
-    {month:'May 2026',chs:{
-      'Paid Social':2188680,'Direct':1836431,'Email':530117,'Paid Search':477762,'SMS':392780,
-      'Organic Search':102908,'Organic Shopping':52647,
-    }},
-    {month:'Jun 2026',chs:{
-      'Paid Social':1134046,'Direct':361741,'Email':342576,'Paid Search':281788,'SMS':234413,
-      'Organic Search':59092,'Organic Shopping':33714,
-    }},
-  ],
-};
+const launchId = new URLSearchParams(location.search).get('id')
+  || ((DD && DD.launches.find(l => launchState(l) === 'live')) || {launchId: 'empowershine'}).launchId;
 
-/* ── LANDING PAGE DATA (GA4_BQ_STG.BASE_LANDING_PAGE_STG2 · Apr 7 – Jun 21) ── */
-const landingData = [
-  {label:'LLEM PDP (.com)',        page:'thrivecausemetics.com/products/liquid-lash-extensions-mascara',     pageviews:542097,sessions:104920,txns:7890,rev:366388,eng:45.0,cvr:7.52},
-  {label:'LLEM PDP (.ca)',         page:'thrivecausemetics.ca/products/liquid-lash-extensions-mascara',      pageviews:276531,sessions:80955, txns:2580,rev:170095,eng:1.3, cvr:3.19},
-  {label:'IBF PDP (.ca)',          page:'thrivecausemetics.ca/products/instant-brow-fix-semi-permanent...',  pageviews:143885,sessions:63459, txns:1021,rev:56514, eng:0.9, cvr:1.61},
-  {label:'IBF PDP (.com)',         page:'thrivecausemetics.com/products/instant-brow-fix-semi-permanent...', pageviews:286456,sessions:53090, txns:2133,rev:89274, eng:48.6,cvr:4.02},
-  {label:'EmpowerShine PDP (.com)',page:'thrivecausemetics.com/products/empowershine-satin-lip-cream',       pageviews:165188,sessions:25262, txns:1037,rev:56444, eng:51.1,cvr:4.10},
-  {label:'EmpowerShine PDP (.ca)', page:'thrivecausemetics.ca/products/empowershine-satin-lip-cream',        pageviews:90969, sessions:22131, txns:702, rev:49286, eng:1.5, cvr:3.17},
-  {label:'EmpowerShine Landing',   page:'thrivecausemetics.ca/pages/empowershinesatinlipcream',              pageviews:60949, sessions:22113, txns:353, rev:24186, eng:1.2, cvr:1.60},
-  {label:'Brow Routine Builder',   page:'thrivecausemetics.com/pages/build-your-own-brow-routine',           pageviews:22098, sessions:10531, txns:193, rev:11273, eng:0.3, cvr:1.83},
-  {label:'IBF Quick Fill PDP',     page:'thrivecausemetics.com/products/instant-brow-fix-quick-fill...',     pageviews:49414, sessions:8156,  txns:589, rev:29579, eng:45.5,cvr:7.22},
-  {label:'Brow Liner PDP',         page:'thrivecausemetics.com/products/infinity-waterproof-brow-liner',     pageviews:12345, sessions:1673,  txns:291, rev:16035, eng:41.7,cvr:17.39},
-];
+function loadData() {
+  if (!DD) throw new Error('data.js failed to load — regenerate it with scripts/refresh_data.py');
+  const raw = DD.launches.find(l => l.launchId === launchId);
+  if (!raw) throw new Error('Unknown launch ID: ' + launchId);
+  const state = launchState(raw);
+  const daysLive = Math.max(1, daysBetween(raw.launchDate, raw.summary ? META.dataCutoff : META.generatedAt) + 1);
+  const s = raw.summary;
+  const unitsPerOrder = s && s.orders > 0 ? (s.units / s.orders) : 0;
+  return { ...raw, state, daysLive, unitsPerOrder };
+}
 
-/* ── PDP HEALTH DATA (UTS.PRODUCT_PAGE · Apr 7 – Jun 23) ── */
-const pdpData = {
-  empowershine:[
-    {sku:'TVG5920',name:'Kaisa',   pdpViews:385528,atc:16528,ckts:5758, purch:5593, rev:156445,atcRate:4.29, purchRate:1.45},
-    {sku:'TVG5960',name:'Joan',    pdpViews:229127,atc:21290,ckts:6906, purch:7217, rev:201718,atcRate:9.29, purchRate:3.15},
-    {sku:'TVG5890',name:'Michelle',pdpViews:211543,atc:27094,ckts:9039, purch:8798, rev:245957,atcRate:12.81,purchRate:4.16},
-    {sku:'TVG5880',name:'Ilene',   pdpViews:191751,atc:24573,ckts:8290, purch:7943, rev:221910,atcRate:12.81,purchRate:4.14},
-    {sku:'TVG5950',name:'Ragan',   pdpViews:155694,atc:44087,ckts:15613,purch:14663,rev:409695,atcRate:28.32,purchRate:9.42},
-    {sku:'TVG5900',name:'Rosa',    pdpViews:124073,atc:19535,ckts:5962, purch:5134, rev:143688,atcRate:15.75,purchRate:4.14},
-    {sku:'TVG5940',name:'Kathy',   pdpViews:74615, atc:5308, ckts:1961, purch:1839, rev:51385, atcRate:7.11, purchRate:2.47},
-    {sku:'TVG5910',name:'Linda',   pdpViews:60296, atc:5482, ckts:1688, purch:1728, rev:48284, atcRate:9.09, purchRate:2.87},
-    {sku:'TVG5930',name:'Chanice', pdpViews:59655, atc:5002, ckts:1714, purch:1711, rev:47823, atcRate:8.38, purchRate:2.87},
-    {sku:'TVG5970',name:'Kackie',  pdpViews:48869, atc:3409, ckts:1306, purch:1135, rev:31740, atcRate:6.98, purchRate:2.32},
-  ],
-  llem:[
-    {sku:'TVG6380',name:'Iris',   pdpViews:360915,atc:71589,ckts:25283,purch:26112,rev:678838,atcRate:19.83,purchRate:7.23},
-    {sku:'TVG6370',name:'Oceanne',pdpViews:260055,atc:46438,ckts:16273,purch:17853,rev:462661,atcRate:17.86,purchRate:6.87},
-    {sku:'TVG6390',name:'Ivy',    pdpViews:229768,atc:54630,ckts:18294,purch:19191,rev:497915,atcRate:23.78,purchRate:8.35},
-  ],
-  'becca-brow':[
-    {sku:'TVG6690',name:'Brow Gel',   pdpViews:19046,atc:3295,ckts:1195,purch:1089,rev:26106,atcRate:17.30,purchRate:5.72},
-    {sku:'TVG6680',name:'Brow Pencil',pdpViews:13791,atc:2773,ckts:852, purch:923, rev:23993,atcRate:20.11,purchRate:6.69},
-    {sku:'TVG6710',name:'Brow Liner', pdpViews:2709, atc:1032,ckts:340, purch:401, rev:9623, atcRate:38.09,purchRate:14.80},
-  ],
-};
-
-/* ── CROSS-SELL DATA (DRP.PRODUCT_AFFINITY_SETS · Apr 7 – Jun 23) ── */
-const crossSellData = {
-  empowershine:[
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG355', pairs:72},
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG349', pairs:44},
-    {product:'Brilliant Under Eye Brightener™ Illuminating Corrector',sku:'TVG478',pairs:29},
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG358', pairs:24},
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG6610',pairs:21},
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG6630',pairs:20},
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG534', pairs:17},
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG357', pairs:17},
-    {product:'EmpowerGloss™ Ultra-Glossy Lip Serum',              sku:'TVG581', pairs:12},
-    {product:'Brilliant Under Eye Brightener™ Loose Setting Powder',sku:'TVG463',pairs:12},
-  ],
-  llem:[
-    {product:'Liquid Lash™ Extensions Tubing Mascara',            sku:'TVG284', pairs:108},
-    {product:'Liquid Lash™ Extensions Tubing Mascara',            sku:'TVG299', pairs:61},
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG355', pairs:54},
-    {product:'Infinity Waterproof™ Eyeliner',                     sku:'TVG289', pairs:51},
-    {product:'Instant Brow Fix™ Semi-Permanent Eyebrow Gel',      sku:'TVG094', pairs:48},
-    {product:'Infinity Waterproof™ Eyeliner',                     sku:'TVG180', pairs:35},
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG349', pairs:35},
-    {product:'Liquid Lash™ Extensions Tubing Mascara',            sku:'TVG5870',pairs:27},
-    {product:'Infinity Waterproof™ Eyeliner',                     sku:'TVG181', pairs:25},
-    {product:'Infinity Waterproof™ Eyeliner',                     sku:'TVG182', pairs:24},
-  ],
-  'becca-brow':[
-    {product:'Brilliant Under Eye Brightener™ Illuminating Corrector',sku:'TVG478',pairs:4},
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG351', pairs:3},
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG509', pairs:3},
-    {product:'Brilliant Eye Brightener™',                         sku:'TVG6640',pairs:3},
-    {product:'Impact-FULL™ Smoothing Lipstick',                   sku:'TVG385', pairs:2},
-    {product:'EmpowerGloss™ Ultra-Glossy Lip Serum',              sku:'TVG584', pairs:2},
-  ],
-};
+const trafficData = DD ? DD.traffic : {byChannel: [], monthly: []};
+const landingData = DD ? DD.landing : [];
 
 /* ── HEADER ── */
 function renderHeader(d) {
   document.title = d.name + ' | Thrive Causemetics';
   document.getElementById('launch-name').textContent = d.name;
   document.getElementById('launch-sub').textContent =
-    'Launched ' + fmt.date(d.launchDate) + ' · ' + d.byVariant.length + ' Variant' + (d.byVariant.length !== 1 ? 's' : '');
+    'Launched ' + fmt.date(d.launchDate) + ' · ' + (d.byVariant.length ? d.byVariant.length + ' Variant' + (d.byVariant.length !== 1 ? 's' : '') : (d.subtitle || d.category || ''));
   const s = d.summary;
-  document.getElementById('hdr-chips').innerHTML = [
+  const chips = [
     '<span class="chip chip-live">● LIVE</span>',
     '<span class="chip chip-day">Day ' + d.daysLive + '</span>',
-    '<span class="chip chip-units">' + fmt.num(s.units) + ' units sold</span>',
-    '<span class="chip chip-rev">' + fmt.cur(s.netSales) + ' revenue</span>',
-    '<span class="chip chip-nvr">' + s.newPct.toFixed(1) + '% new · ' + s.retPct.toFixed(1) + '% returning</span>',
-  ].join('');
+  ];
+  if (s) {
+    chips.push('<span class="chip chip-units">' + fmt.num(s.units) + ' units sold</span>');
+    chips.push('<span class="chip chip-rev">' + fmt.cur(s.netSales) + ' revenue</span>');
+    chips.push('<span class="chip chip-nvr">' + s.newPct.toFixed(1) + '% new · ' + s.retPct.toFixed(1) + '% returning</span>');
+  } else {
+    chips.push('<span class="chip chip-units">Awaiting first data refresh</span>');
+  }
+  document.getElementById('hdr-chips').innerHTML = chips.join('');
   document.getElementById('hdr-sources').innerHTML =
-    'Data as of Jun 23, 2026  ·  Sources: UOS · GA4_API · UTS · DRP · USS via Snowflake DAASITY_DB';
+    'Data as of ' + fmt.date(META.dataCutoff) + ' ·  Sources: UOS · GA4_API · UTS · DRP · USS via Snowflake ' + (META.sourceDb || 'DAASITY_DB');
+  document.getElementById('refresh-note').innerHTML = META.mode === 'automated'
+    ? 'Auto-refreshed daily via GitHub Actions<br>Generated ' + fmt.date(META.generatedAt)
+    : 'Static snapshot &mdash; automation ready,<br>awaiting Snowflake credentials';
 }
 
 /* ── KPIs ── */
@@ -887,12 +547,12 @@ function renderTraffic() {
 
   const panel = document.getElementById('panel-traffic');
   panel.innerHTML = `
-    <div class="section-title">Site-Wide Traffic · Apr 7 – Jun 21, 2026 (GA4)</div>
+    <div class="section-title">Site-Wide Traffic · ${fmt.date(META.trafficStart)} – ${fmt.date(META.gaCutoff)} (GA4)</div>
     <div class="kpi-row1" style="margin-bottom:18px">
       <div class="kpi-card c-teal"><div class="kpi-label">Total Sessions</div><div class="kpi-value">${(total.sessions/1e6).toFixed(2)}M</div><div class="kpi-sub">All channels</div></div>
       <div class="kpi-card c-gold"><div class="kpi-label">Total Transactions</div><div class="kpi-value">${fmt.num(total.txns)}</div><div class="kpi-sub">Site-wide purchases</div></div>
       <div class="kpi-card c-navy"><div class="kpi-label">Overall Site CVR</div><div class="kpi-value">${overallCvr}%</div><div class="kpi-sub">Transactions ÷ Sessions</div></div>
-      <div class="kpi-card c-green"><div class="kpi-label">Top Channel</div><div class="kpi-value" style="font-size:16px">Paid Social</div><div class="kpi-sub">${(trafficData.byChannel[0].sessions/1e6).toFixed(1)}M sessions · 2.34% CVR</div></div>
+      <div class="kpi-card c-green"><div class="kpi-label">Top Channel</div><div class="kpi-value" style="font-size:16px">${trafficData.byChannel[0]?.ch || '—'}</div><div class="kpi-sub">${(trafficData.byChannel[0]?.sessions/1e6).toFixed(1)}M sessions · ${trafficData.byChannel[0]?.cvr.toFixed(2)}% CVR</div></div>
     </div>
     <div class="row-1-1">
       <div class="chart-card">
@@ -907,7 +567,7 @@ function renderTraffic() {
       </div>
     </div>
     <div class="table-card">
-      <div class="table-hdr"><h3>Channel Breakdown — Apr 7 to Jun 21, 2026</h3></div>
+      <div class="table-hdr"><h3>Channel Breakdown — ${fmt.date(META.trafficStart)} to ${fmt.date(META.gaCutoff)}</h3></div>
       <div class="table-wrap"><table>
         <thead><tr><th>Channel</th><th class="r">Sessions</th><th class="r">Transactions</th><th class="r">Revenue</th><th class="r">CVR</th><th class="r">Engagement Rate</th></tr></thead>
         <tbody>${trafficData.byChannel.map(c=>`<tr>
@@ -920,7 +580,7 @@ function renderTraffic() {
         </tr>`).join('')}</tbody>
       </table></div>
     </div>
-    <p class="data-note">Source: GA4_API.BASE_TRAFFIC via Snowflake DAASITY_DB · Site-wide data (all products), not launch-specific. GA4 data lags ~2 days; traffic reflects through Jun 21.</p>`;
+    <p class="data-note">Source: GA4_API.BASE_TRAFFIC via Snowflake ${META.sourceDb || 'DAASITY_DB'} · Site-wide data (all products), not launch-specific. GA4 data lags ~2 days; traffic reflects through ${fmt.date(META.gaCutoff)}.</p>`;
 
   kill('tch');
   _ch.tch = new Chart(document.getElementById('chart-tch'), {
@@ -953,14 +613,15 @@ function renderLanding() {
   const totalSessions = landingData.reduce((s,r)=>s+r.sessions,0);
   const totalTxns = landingData.reduce((s,r)=>s+r.txns,0);
   const totalRev = landingData.reduce((s,r)=>s+r.rev,0);
+  const bestCvr = landingData.reduce((best,r)=>(!best || r.cvr > best.cvr) ? r : best, null);
 
   const panel = document.getElementById('panel-landing');
   panel.innerHTML = `
-    <div class="section-title">Launch Landing Pages · Apr 7 – Jun 21, 2026 (GA4)</div>
+    <div class="section-title">Launch Landing Pages · ${fmt.date(META.trafficStart)} – ${fmt.date(META.gaCutoff)} (GA4)</div>
     <div class="kpi-row1" style="margin-bottom:18px">
-      <div class="kpi-card c-teal"><div class="kpi-label">Top Page Sessions</div><div class="kpi-value">${fmt.num(landingData[0].sessions)}</div><div class="kpi-sub">LLEM PDP .com</div></div>
-      <div class="kpi-card c-gold"><div class="kpi-label">Top Page Revenue</div><div class="kpi-value">${fmt.cur(landingData[0].rev)}</div><div class="kpi-sub">LLEM PDP .com</div></div>
-      <div class="kpi-card c-navy"><div class="kpi-label">Best CVR</div><div class="kpi-value">17.39%</div><div class="kpi-sub">Brow Liner PDP .com</div></div>
+      <div class="kpi-card c-teal"><div class="kpi-label">Top Page Sessions</div><div class="kpi-value">${fmt.num(landingData[0]?.sessions)}</div><div class="kpi-sub">${landingData[0]?.label || '—'}</div></div>
+      <div class="kpi-card c-gold"><div class="kpi-label">Top Page Revenue</div><div class="kpi-value">${fmt.cur(landingData[0]?.rev)}</div><div class="kpi-sub">${landingData[0]?.label || '—'}</div></div>
+      <div class="kpi-card c-navy"><div class="kpi-label">Best CVR</div><div class="kpi-value">${bestCvr ? bestCvr.cvr.toFixed(2) + '%' : '—'}</div><div class="kpi-sub">${bestCvr?.label || '—'}</div></div>
       <div class="kpi-card c-green"><div class="kpi-label">Total Landing Rev.</div><div class="kpi-value">${fmt.cur(totalRev)}</div><div class="kpi-sub">Across top ${landingData.length} pages</div></div>
     </div>
     <div class="table-card">
@@ -983,8 +644,7 @@ function renderLanding() {
 
 /* ── PDP HEALTH TAB ── */
 function renderPDP(d) {
-  const key = d.launchId === 'llem-shade-extension' ? 'llem' : d.launchId;
-  const rows = pdpData[key] || [];
+  const rows = d.pdp || [];
   const totalViews = rows.reduce((s,r)=>s+r.pdpViews,0);
   const totalAtc   = rows.reduce((s,r)=>s+r.atc,0);
   const totalPurch = rows.reduce((s,r)=>s+r.purch,0);
@@ -993,7 +653,7 @@ function renderPDP(d) {
 
   const panel = document.getElementById('panel-pdp');
   panel.innerHTML = `
-    <div class="section-title">PDP Health · ${d.name} · Launch – Jun 23, 2026 (UTS.PRODUCT_PAGE)</div>
+    <div class="section-title">PDP Health · ${d.name} · Launch – ${fmt.date(META.dataCutoff)} (UTS.PRODUCT_PAGE)</div>
     <div class="kpi-row1" style="margin-bottom:18px">
       <div class="kpi-card c-teal"><div class="kpi-label">Total PDP Views</div><div class="kpi-value">${fmt.num(totalViews)}</div><div class="kpi-sub">All variants combined</div></div>
       <div class="kpi-card c-gold"><div class="kpi-label">Avg ATC Rate</div><div class="kpi-value">${avgAtcRate.toFixed(1)}%</div><div class="kpi-sub">Add-to-cart ÷ views</div></div>
@@ -1059,12 +719,11 @@ function renderPDP(d) {
 
 /* ── CROSS-SELLS TAB ── */
 function renderCrossSells(d) {
-  const key = d.launchId === 'llem-shade-extension' ? 'llem' : d.launchId;
-  const rows = crossSellData[key] || [];
+  const rows = d.crossSell || [];
   const maxPairs = rows.length > 0 ? rows[0].pairs : 1;
 
   document.getElementById('panel-crosssells').innerHTML = `
-    <div class="section-title">Cross-Sells &amp; Pairings · ${d.name} · Apr 7 – Jun 23, 2026</div>
+    <div class="section-title">Cross-Sells &amp; Pairings · ${d.name} · ${fmt.date(d.launchDate)} – ${fmt.date(META.dataCutoff)}</div>
     <div class="kpi-row1" style="margin-bottom:18px">
       <div class="kpi-card c-teal"><div class="kpi-label">Top Cross-Sell</div><div class="kpi-value" style="font-size:14px">${rows[0]?.product.split('™')[0]+'™'||'—'}</div><div class="kpi-sub">${fmt.num(rows[0]?.pairs||0)} paired orders</div></div>
       <div class="kpi-card c-gold"><div class="kpi-label">Unique Pairings Found</div><div class="kpi-value">${rows.length}</div><div class="kpi-sub">Distinct co-purchase products</div></div>
@@ -1086,8 +745,89 @@ function renderCrossSells(d) {
     <p class="data-note">Source: DRP.PRODUCT_AFFINITY_SETS via Snowflake DAASITY_DB · Shows products purchased in the same order as a launch SKU during the launch window. Pair count = distinct order basket co-occurrences. Same-launch-family SKUs excluded.</p>`;
 }
 
+/* ── CATEGORY CUSTOMERS TAB ── */
+function renderCategory(d) {
+  const panel = document.getElementById('panel-category');
+  const cc = d.categoryCustomers;
+  const catLabel = d.category ? d.category + ' category' : 'category';
+  if (!cc) {
+    panel.innerHTML = `
+      <div class="section-title">Category Customers · ${d.name}</div>
+      <div class="guide-card" style="max-width:780px">
+        <h3>New-to-${catLabel} vs existing ${catLabel} customers</h3>
+        <p>This view shows how many customers buying <strong>${d.name}</strong> had already purchased from the <strong>${catLabel}</strong> before launch (${fmt.date(d.launchDate)}), and how many are buying the category for the first time — i.e., how many net-new category customers this launch is driving.</p>
+        <p style="margin-top:10px"><span class="tag-warn">Awaiting data</span>&nbsp; This metric is computed by the automated refresh (scripts/refresh_data.py) from UOS order history and will populate on the first run after Snowflake credentials are configured.</p>
+        <p style="margin-top:10px"><strong>Method:</strong> distinct customers with a non-refunded order containing a launch SKU since launch, split by whether the same customer had any earlier non-refunded ${catLabel} purchase before the launch date (full order-history lookback).</p>
+      </div>`;
+    return;
+  }
+  const total = cc.total || (cc.newToCategory + cc.existingCategory);
+  const newPct = total ? cc.newToCategory / total * 100 : 0;
+  const extPct = total ? cc.existingCategory / total * 100 : 0;
+  panel.innerHTML = `
+    <div class="section-title">Category Customers · ${d.name} · ${fmt.date(d.launchDate)} – ${fmt.date(META.dataCutoff)}</div>
+    <div class="kpi-row1" style="margin-bottom:18px">
+      <div class="kpi-card c-green"><div class="kpi-label">New to ${d.category}</div><div class="kpi-value">${fmt.num(cc.newToCategory)}</div><div class="kpi-sub">${newPct.toFixed(1)}% of launch buyers — first ${catLabel} purchase</div></div>
+      <div class="kpi-card c-teal"><div class="kpi-label">Existing ${d.category} Customers</div><div class="kpi-value">${fmt.num(cc.existingCategory)}</div><div class="kpi-sub">${extPct.toFixed(1)}% bought ${catLabel} before launch</div></div>
+      <div class="kpi-card c-navy"><div class="kpi-label">Launch Buyers</div><div class="kpi-value">${fmt.num(total)}</div><div class="kpi-sub">Unique customers</div></div>
+      <div class="kpi-card c-purple"><div class="kpi-label">New to Brand</div><div class="kpi-value">${d.summary ? fmt.num(d.summary.newCustomers) : '—'}</div><div class="kpi-sub">First Thrive Causemetics purchase (context)</div></div>
+    </div>
+    <div class="row-1-1">
+      <div class="chart-card">
+        <div class="chart-title">New vs Existing ${d.category} Customers</div>
+        <div class="chart-sub">${fmt.num(total)} unique launch buyers</div>
+        <div class="nvr-wrap"><canvas id="chart-cat-donut" style="max-height:220px"></canvas></div>
+      </div>
+      ${cc.byVariant && cc.byVariant.length ? `<div class="chart-card">
+        <div class="chart-title">Split by Variant</div>
+        <div class="chart-sub">New-to-category vs existing per variant</div>
+        <canvas id="chart-cat-var" height="240"></canvas>
+      </div>` : ''}
+    </div>
+    <p class="data-note">Source: UOS.ORDERS + UOS.ORDER_LINE_ITEMS via Snowflake ${META.sourceDb || 'DAASITY_DB'} · Existing = customer had a non-refunded ${catLabel} order before ${fmt.date(d.launchDate)}; New = no prior ${catLabel} purchase (full history lookback). Refunded orders excluded.</p>`;
+  kill('cd');
+  _ch.cd = new Chart(document.getElementById('chart-cat-donut'), {
+    type:'doughnut',
+    data:{labels:['New to category','Existing category'],datasets:[{data:[cc.newToCategory,cc.existingCategory],backgroundColor:['#22A06B','#3A9E98'],borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,cutout:'66%',plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:c=>' '+fmt.num(c.raw)+' ('+(c.raw/(total||1)*100).toFixed(1)+'%)'}}}},
+  });
+  if (cc.byVariant && cc.byVariant.length) {
+    kill('cv');
+    _ch.cv = new Chart(document.getElementById('chart-cat-var'), {
+      type:'bar',
+      data:{labels:cc.byVariant.map(v=>v.name),datasets:[
+        {label:'New to category',data:cc.byVariant.map(v=>v.newToCategory),backgroundColor:'#22A06B',borderRadius:3},
+        {label:'Existing category',data:cc.byVariant.map(v=>v.existingCategory),backgroundColor:'#3A9E98',borderRadius:3}]},
+      options:{responsive:true,plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}},
+        scales:{x:{stacked:true,grid:{display:false},ticks:{maxRotation:45,font:{size:11}}},y:{stacked:true,grid:{color:'#E2E8EF'}}}},
+    });
+  }
+}
+
+/* ── UPCOMING LAUNCHES TAB ── */
+function renderUpcoming() {
+  const cards = [];
+  (DD.launches || []).forEach(l => {
+    if (launchState(l) === 'pending') cards.push({name:l.name, launchDate:l.launchDate, internal:l.internalDate, badge:'Live · data pending', near:true});
+  });
+  (DD.upcoming || []).forEach(u => {
+    if (daysBetween(META.generatedAt, u.launchDate) < 0) return;                                   // already launched
+    if (u.trackedId && (DD.launches || []).some(l => l.launchId === u.trackedId)) return;          // tracked above
+    cards.push({name:u.name, launchDate:u.launchDate, internal:u.internalDate, badge:fmt.day(u.launchDate), near:daysBetween(META.generatedAt, u.launchDate) <= 21});
+  });
+  document.getElementById('upcoming-grid').innerHTML = cards.map(c => `
+    <div class="upc-card${c.near ? ' near' : ''}">
+      <span class="upc-badge ${c.near ? 'ub-near' : 'ub-far'}">${c.badge}</span>
+      <div class="upc-name">${c.name}</div>
+      <div class="upc-dates">
+        <div class="upc-date"><strong>${fmt.date(c.launchDate)}</strong>Launch Date</div>
+        ${c.internal ? `<div class="upc-date"><strong>${fmt.date(c.internal)}</strong>Internal</div>` : ''}
+      </div>
+    </div>`).join('') || '<p class="data-note">No upcoming launches configured.</p>';
+}
+
 /* ── TABS ── */
-const PANELS = ['overview','traffic','landing','pdp','crosssells','upcoming','guide'];
+const PANELS = ['overview','traffic','landing','pdp','crosssells','category','upcoming','guide'];
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
@@ -1100,7 +840,9 @@ document.querySelectorAll('.tab').forEach(t => {
 
 /* ── REFRESH / ISSUE ── */
 function onRefreshClick() {
-  alert('This dashboard uses a static snapshot as of Jun 23, 2026.\n\nTo refresh the data, re-query Snowflake DAASITY_DB and regenerate the HTML. Contact your Data & Analytics team.');
+  alert(META.mode === 'automated'
+    ? 'Data auto-refreshes daily via GitHub Actions (scripts/refresh_data.py).\n\nData cutoff: ' + fmt.date(META.dataCutoff) + '\nLast generated: ' + fmt.date(META.generatedAt)
+    : 'This dashboard uses a static snapshot with data through ' + fmt.date(META.dataCutoff) + '.\n\nAutomated refresh is wired up (scripts/refresh_data.py + GitHub Actions) and activates once Snowflake credentials are added as repository secrets.');
 }
 function onReportIssue() {
   const sub = encodeURIComponent('[Launch Dashboard] Issue Report — ' + document.title);
@@ -1109,23 +851,47 @@ function onReportIssue() {
 }
 
 /* ── INIT ── */
-async function init() {
+function init() {
   try {
-    const d = await loadData();
+    const d = loadData();
     document.getElementById('loading').style.display = 'none';
+
+    // launch switcher: live + pending launches only (archived drop off after RETENTION_DAYS)
+    const sel = document.getElementById('launch-select');
+    const selectable = (DD.launches || []).filter(l => ['live','pending'].includes(launchState(l)));
+    sel.innerHTML = selectable.map(l => `<option value="${l.launchId}"${l.launchId === launchId ? ' selected' : ''}>${l.name}</option>`).join('');
+    if (!selectable.some(l => l.launchId === launchId)) sel.innerHTML = `<option selected>${d.name}</option>` + sel.innerHTML;
+
     renderHeader(d);
-    renderKPIs(d);
-    renderSales(d);
-    renderUnits(d);
-    renderDonut(d);
-    renderNvrShade(d);
-    renderTable(d);
-    renderTrend(d);
-    renderSkuTable(d);
+    renderUpcoming();
+    renderCategory(d);
     renderTraffic();
     renderLanding();
-    renderPDP(d);
-    renderCrossSells(d);
+
+    if (d.state === 'live') {
+      renderKPIs(d);
+      renderSales(d);
+      renderUnits(d);
+      renderDonut(d);
+      renderNvrShade(d);
+      renderTable(d);
+      renderTrend(d);
+      renderSkuTable(d);
+      renderPDP(d);
+      renderCrossSells(d);
+    } else {
+      const b = document.getElementById('error-banner');
+      b.style.display = '';
+      if (d.state === 'pending') {
+        b.style.background = '#FFFBEB'; b.style.borderColor = '#FDE68A'; b.style.color = '#92400E';
+        b.textContent = d.name + ' launched ' + fmt.date(d.launchDate) + ' — sales data will appear here after the next automated data refresh' +
+          (d.skusPending ? ' (launch SKUs still need to be added to config/launches.json)' : '') + '.';
+      } else if (d.state === 'archived') {
+        b.textContent = d.name + ' is archived — launches are removed from the dashboard ' + RETENTION_DAYS + ' days after their launch date (launched ' + fmt.date(d.launchDate) + ').';
+      } else {
+        b.textContent = d.name + ' has not launched yet (launch date ' + fmt.date(d.launchDate) + ').';
+      }
+    }
   } catch (e) {
     document.getElementById('loading').style.display = 'none';
     const b = document.getElementById('error-banner');
