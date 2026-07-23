@@ -5,11 +5,11 @@
     "The dashboard shows a launch automatically once its launch date passes and the",
     "refresh returns data, and removes it 122 days after the launch date (retention_days).",
     "Launches with an empty 'skus' list are skipped by the refresh (shown as 'data pending').",
-    "ASSUMPTION to verify on first dry run: 'category_product_types' values must match the",
-    "product-type values in DAASITY_DB (column set by 'category_type_column'). Adjust as needed."
+    "'category_type_patterns' are ILIKE patterns matched against UOS.PRODUCTS.PRODUCT_TYPE",
+    "(verified 2026-07-23: values are granular, e.g. 'Lip Gloss', 'Lip Tint', 'Brow Gel',",
+    "'Mascara', 'Eyeshadow') to define which products count as the launch's category."
   ],
   "retention_days": 122,
-  "category_type_column": "PRODUCT_TYPE",
   "launches": [
     {
       "id": "empowershine",
@@ -18,18 +18,70 @@
       "accent": "#3A9E98",
       "launch_date": "2026-04-30",
       "category": "Lip",
-      "category_product_types": ["Lip"],
       "skus": [
-        {"sku": "TVG5950", "name": "Ragan",    "shade": "Warm Plum",     "color": "#7B3FA0"},
-        {"sku": "TVG5890", "name": "Michelle", "shade": "Neutral Mauve", "color": "#A0888A"},
-        {"sku": "TVG5880", "name": "Ilene",    "shade": "Natural Rose",  "color": "#C89EA0"},
-        {"sku": "TVG5960", "name": "Joan",     "shade": "Cool Rose",     "color": "#E8748A"},
-        {"sku": "TVG5920", "name": "Kaisa",    "shade": "Dusty Rose",    "color": "#D4879A"},
-        {"sku": "TVG5900", "name": "Rosa",     "shade": "Deep Berry",    "color": "#7A1840"},
-        {"sku": "TVG5940", "name": "Kathy",    "shade": "Soft Apricot",  "color": "#F4A460"},
-        {"sku": "TVG5930", "name": "Chanice",  "shade": "Magenta Pink",  "color": "#C930B8"},
-        {"sku": "TVG5910", "name": "Linda",    "shade": "Cherry Red",    "color": "#C01830"},
-        {"sku": "TVG5970", "name": "Kackie",   "shade": "Mocha",         "color": "#8B6355"}
+        {
+          "sku": "TVG5950",
+          "name": "Ragan",
+          "shade": "Warm Plum",
+          "color": "#7B3FA0"
+        },
+        {
+          "sku": "TVG5890",
+          "name": "Michelle",
+          "shade": "Neutral Mauve",
+          "color": "#A0888A"
+        },
+        {
+          "sku": "TVG5880",
+          "name": "Ilene",
+          "shade": "Natural Rose",
+          "color": "#C89EA0"
+        },
+        {
+          "sku": "TVG5960",
+          "name": "Joan",
+          "shade": "Cool Rose",
+          "color": "#E8748A"
+        },
+        {
+          "sku": "TVG5920",
+          "name": "Kaisa",
+          "shade": "Dusty Rose",
+          "color": "#D4879A"
+        },
+        {
+          "sku": "TVG5900",
+          "name": "Rosa",
+          "shade": "Deep Berry",
+          "color": "#7A1840"
+        },
+        {
+          "sku": "TVG5940",
+          "name": "Kathy",
+          "shade": "Soft Apricot",
+          "color": "#F4A460"
+        },
+        {
+          "sku": "TVG5930",
+          "name": "Chanice",
+          "shade": "Magenta Pink",
+          "color": "#C930B8"
+        },
+        {
+          "sku": "TVG5910",
+          "name": "Linda",
+          "shade": "Cherry Red",
+          "color": "#C01830"
+        },
+        {
+          "sku": "TVG5970",
+          "name": "Kackie",
+          "shade": "Mocha",
+          "color": "#8B6355"
+        }
+      ],
+      "category_type_patterns": [
+        "%lip%"
       ]
     },
     {
@@ -39,11 +91,28 @@
       "accent": "#C9A84C",
       "launch_date": "2026-06-08",
       "category": "Brow",
-      "category_product_types": ["Brow"],
       "skus": [
-        {"sku": "TVG6690", "name": "Brow Gel",    "shade": "Semi-Perm. Gel",    "color": "#6B7A8D"},
-        {"sku": "TVG6680", "name": "Brow Pencil", "shade": "Quick Fill Pencil", "color": "#4B5563"},
-        {"sku": "TVG6710", "name": "Brow Liner",  "shade": "Waterproof Liner",  "color": "#9CA3AF"}
+        {
+          "sku": "TVG6690",
+          "name": "Brow Gel",
+          "shade": "Semi-Perm. Gel",
+          "color": "#6B7A8D"
+        },
+        {
+          "sku": "TVG6680",
+          "name": "Brow Pencil",
+          "shade": "Quick Fill Pencil",
+          "color": "#4B5563"
+        },
+        {
+          "sku": "TVG6710",
+          "name": "Brow Liner",
+          "shade": "Waterproof Liner",
+          "color": "#9CA3AF"
+        }
+      ],
+      "category_type_patterns": [
+        "%brow%"
       ]
     },
     {
@@ -53,11 +122,28 @@
       "accent": "#6B4C8A",
       "launch_date": "2026-04-07",
       "category": "Mascara",
-      "category_product_types": ["Mascara"],
       "skus": [
-        {"sku": "TVG6380", "name": "Iris",    "shade": "Deep Purple", "color": "#4A1E6B"},
-        {"sku": "TVG6390", "name": "Ivy",     "shade": "Deep Green",  "color": "#1B4D3E"},
-        {"sku": "TVG6370", "name": "Oceanne", "shade": "Deep Navy",   "color": "#1C3A5C"}
+        {
+          "sku": "TVG6380",
+          "name": "Iris",
+          "shade": "Deep Purple",
+          "color": "#4A1E6B"
+        },
+        {
+          "sku": "TVG6390",
+          "name": "Ivy",
+          "shade": "Deep Green",
+          "color": "#1B4D3E"
+        },
+        {
+          "sku": "TVG6370",
+          "name": "Oceanne",
+          "shade": "Deep Navy",
+          "color": "#1C3A5C"
+        }
+      ],
+      "category_type_patterns": [
+        "%mascara%"
       ]
     },
     {
@@ -68,17 +154,44 @@
       "launch_date": "2026-07-22",
       "internal_date": "2026-07-14",
       "category": "Eyeshadow",
-      "category_product_types": ["Eyeshadow"],
       "skus": [],
-      "_todo": "Launched Jul 22, 2026 — add the launch SKUs here so the refresh can pull its data."
+      "_todo": "Launched Jul 22, 2026 — add the launch SKUs here so the refresh can pull its data.",
+      "category_type_patterns": [
+        "%shadow%"
+      ]
     }
   ],
   "upcoming": [
-    {"name": "BEB Extension: Hoda & Mila",     "launch_date": "2026-06-17", "internal_date": "2026-05-29"},
-    {"name": "Summer Promo",                   "launch_date": "2026-07-01", "internal_date": "2026-06-23"},
-    {"name": "Eyeshadow Quads",                "launch_date": "2026-07-22", "internal_date": "2026-07-14", "tracked_id": "eyeshadow-quads"},
-    {"name": "Back to Me + Triple Threat",     "launch_date": "2026-08-20", "internal_date": "2026-07-24"},
-    {"name": "Lip Stain Marker",               "launch_date": "2026-09-09", "internal_date": "2026-09-02"},
-    {"name": "Holiday 2026 + Limited Edition", "launch_date": "2026-10-12", "internal_date": "2026-10-06"}
+    {
+      "name": "BEB Extension: Hoda & Mila",
+      "launch_date": "2026-06-17",
+      "internal_date": "2026-05-29"
+    },
+    {
+      "name": "Summer Promo",
+      "launch_date": "2026-07-01",
+      "internal_date": "2026-06-23"
+    },
+    {
+      "name": "Eyeshadow Quads",
+      "launch_date": "2026-07-22",
+      "internal_date": "2026-07-14",
+      "tracked_id": "eyeshadow-quads"
+    },
+    {
+      "name": "Back to Me + Triple Threat",
+      "launch_date": "2026-08-20",
+      "internal_date": "2026-07-24"
+    },
+    {
+      "name": "Lip Stain Marker",
+      "launch_date": "2026-09-09",
+      "internal_date": "2026-09-02"
+    },
+    {
+      "name": "Holiday 2026 + Limited Edition",
+      "launch_date": "2026-10-12",
+      "internal_date": "2026-10-06"
+    }
   ]
 }

@@ -9,15 +9,21 @@ already consumes (window.DASHBOARD_DATA).
 REVIEW & DRY-RUN FIRST
 ----------------------
 Every query is a read-only SELECT, but they run against production data
-(Shopify + NetSuite via Daasity, GA4, Recharge). Before the first live run:
-  1. `python scripts/refresh_data.py --dry-run` prints every query without
-     connecting, so column names can be validated against the schema.
-  2. Column names marked VERIFY in COLS below are assumptions taken from the
-     dashboard's documented metric definitions — confirm them against
-     DAASITY_DB's INFORMATION_SCHEMA and adjust COLS in one place.
-  3. category_product_types values in config/launches.json must match real
-     product-type values in the data — verify before trusting the
-     "New to Category" numbers.
+(Shopify + NetSuite via Daasity, GA4, Recharge). `--dry-run` prints every
+query without connecting.
+
+All column names in COLS were verified against DAASITY_DB INFORMATION_SCHEMA
+on 2026-07-23. Methodology notes (documented deviations from the old manual
+snapshot, which may differ by a low single-digit %):
+  - Net sales = SUM((PRICE - DISCOUNT_AMOUNT/QTY) * QTY) on line items with
+    REFUND_FLAG = FALSE, converted to USD via CURRENCY_CONVERSION_RATE.
+  - New vs returning customers = first-ever UOS order date on/after launch
+    date (the old snapshot estimated this from a historical ratio).
+  - % to Plan = units vs SUM(PLAN_UNITS) between launch date and cutoff.
+  - Cross-sell pairs = same-cart co-occurrence events from
+    DRP.PRODUCT_AFFINITY_SETS (launch SKU as primary, ordered in window).
+  - Category membership = UOS.PRODUCTS.PRODUCT_TYPE matched with the ILIKE
+    patterns in config/launches.json (category_type_patterns).
 
 Credentials come from environment variables (set as GitHub Actions secrets):
   SNOWFLAKE_ACCOUNT     e.g. abc12345.us-east-1
@@ -45,80 +51,83 @@ OUT_PATH = ROOT / "data.js"
 GA4_LAG_DAYS = 2  # GA4 sync lag: traffic data trails the sales cutoff
 
 # ---------------------------------------------------------------------------
-# Column-name assumptions, centralized so fixes happen in one place.
-# VERIFY each against DAASITY_DB INFORMATION_SCHEMA on the first dry run.
+# Column names, centralized so fixes happen in one place.
+# Verified against DAASITY_DB INFORMATION_SCHEMA on 2026-07-23.
 # ---------------------------------------------------------------------------
 COLS = {
     "orders": {
         "table": "UOS.ORDERS",
-        "order_id": "ORDER_ID",          # VERIFY
-        "customer_id": "CUSTOMER_ID",    # VERIFY
-        "order_date": "ORDER_DATE",      # VERIFY (date or timestamp)
+        "order_id": "ORDER_ID",
+        "customer_id": "CUSTOMER_ID",
+        "order_date": "ORDER_DATE",      # TIMESTAMP_NTZ
     },
     "lines": {
         "table": "UOS.ORDER_LINE_ITEMS",
-        "order_id": "ORDER_ID",          # VERIFY
-        "sku": "SKU",                    # VERIFY
-        "qty": "QUANTITY",               # VERIFY
-        "price": "PRICE",                # VERIFY (unit price)
-        "discount": "DISCOUNT",          # VERIFY (line-level discount)
-        "refund_flag": "REFUND_FLAG",    # confirmed used by current snapshot
-        "product_type": "PRODUCT_TYPE",  # VERIFY — used for category matching
+        "order_id": "ORDER_ID",
+        "product_id": "PRODUCT_ID",
+        "sku": "SKU",
+        "qty": "QUANTITY",
+        "price": "PRICE",                # unit price, original currency
+        "discount": "DISCOUNT_AMOUNT",   # line-level discount
+        "fx": "CURRENCY_CONVERSION_RATE",  # original currency -> USD
+        "refund_flag": "REFUND_FLAG",
+    },
+    "products": {
+        "table": "UOS.PRODUCTS",
+        "product_id": "PRODUCT_ID",
+        "product_type": "PRODUCT_TYPE",  # granular values, matched via ILIKE
     },
     "traffic": {
         "table": "GA4_API.BASE_TRAFFIC",
-        "date": "CREATED_ON",            # YYYYMMDD text (confirmed)
-        "channel": "SESSION_DEFAULT_CHANNEL_GROUPING",  # VERIFY
-        "sessions": "SESSIONS",          # VERIFY
-        "transactions": "TRANSACTIONS",  # VERIFY
-        "revenue": "PURCHASE_REVENUE",   # VERIFY
-        "engaged_sessions": "ENGAGED_SESSIONS",  # VERIFY
+        "date": "CREATED_ON",            # YYYYMMDD text
+        "channel": "SESSION_DEFAULT_CHANNEL_GROUPING",
+        "sessions": "SESSIONS",
+        "transactions": "TRANSACTIONS",
+        "revenue": "PURCHASE_REVENUE",
+        "engaged_sessions": "ENGAGED_SESSIONS",
     },
     "landing": {
         "table": "GA4_BQ_STG.BASE_LANDING_PAGE_STG2",
-        "date": "CREATED_ON",            # VERIFY format
-        "page": "LANDING_PAGE",          # VERIFY
-        "pageviews": "PAGEVIEWS",        # VERIFY
-        "sessions": "SESSIONS",          # VERIFY
-        "transactions": "TRANSACTIONS",  # VERIFY
-        "revenue": "PURCHASE_REVENUE",   # VERIFY
-        "engagement_rate": "ENGAGEMENT_RATE",  # VERIFY
+        "date": "CREATED_ON",            # TIMESTAMP_NTZ
+        "page": "LANDING_PAGE_PATH",     # full URL incl. domain
+        "pageviews": "PAGEVIEWS",
+        "sessions": "SESSIONS",
+        "transactions": "TRANSACTIONS",
+        "revenue": "TRANSACTION_REVENUE",
+        "engaged_sessions": "ENGAGED_SESSIONS",
     },
     "pdp": {
         "table": "UTS.PRODUCT_PAGE",
-        "date": "CREATED_ON",            # VERIFY
-        "sku": "SKU",                    # VERIFY
-        "views": "PRODUCT_DETAIL_VIEWS", # VERIFY
-        "atc": "ADD_TO_CARTS",           # VERIFY
-        "checkouts": "CHECKOUTS",        # VERIFY
-        "purchases": "PURCHASES",        # VERIFY
-        "revenue": "PURCHASE_REVENUE",   # VERIFY
+        "date": "TRAFFIC_DATE",          # TIMESTAMP_NTZ
+        "sku": "PRODUCT_SKU",
+        "views": "PRODUCT_DETAIL_VIEWS",
+        "atc": "PRODUCT_ADDS_TO_CART",
+        "checkouts": "PRODUCT_CHECKOUTS",
+        "purchases": "PURCHASES",
+        "revenue": "REVENUE",
     },
     "affinity": {
+        # One row per same-cart basket; paired products live in the
+        # secondary..quinary slot columns.
         "table": "DRP.PRODUCT_AFFINITY_SETS",
-        "sku_a": "SKU_A",                # VERIFY
-        "sku_b": "SKU_B",                # VERIFY
-        "product_b": "PRODUCT_TITLE_B",  # VERIFY
-        "pairs": "PAIR_COUNT",           # VERIFY
+        "primary_sku": "PRIMARY_SKU",
+        "order_date": "PRIMARY_ORDER_DATE",
+        "slots": ["SECONDARY", "TERTIARY", "QUATERNARY", "QUINARY"],
     },
     "subs": {
         "table": "USS.ORDER_LINE_ITEMS",  # Recharge; no order dates — all-time
-        "order_id": "ORDER_ID",          # VERIFY
-        "sku": "SKU",                    # VERIFY
-        "qty": "QUANTITY",               # VERIFY
+        "order_id": "SUBSCRIPTION_ORDER_ID",
+        "sku": "SKU",
+        "qty": "QUANTITY",
+        "onetime_flag": "IS_ONETIME",    # FALSE = true subscription line
     },
     "plan": {
         "table": "GSHEETS.SKU_LAUNCH_DAY_FORECAST",
-        "sku": "SKU",                    # VERIFY
-        "units": "PLAN_UNITS",           # VERIFY
+        "date": "DATE",                  # daily plan rows
+        "sku": "SKU",
+        "units": "PLAN_UNITS",
     },
 }
-
-# Net revenue per the dashboard's documented definition:
-# SUM((price - discount/qty) * qty) on non-refunded line items.
-NET_SALES_EXPR = (
-    "SUM(({p}.{price} - {p}.{discount} / NULLIF({p}.{qty}, 0)) * {p}.{qty})"
-)
 
 
 def sku_list_sql(skus):
@@ -147,7 +156,8 @@ def q_launch_lines_cte(skus):
     return f"""
 WITH launch_lines AS (
   SELECT li.{li['sku']} AS SKU, li.{li['qty']} AS QTY,
-         (li.{li['price']} - li.{li['discount']} / NULLIF(li.{li['qty']}, 0)) * li.{li['qty']} AS NET_LINE,
+         (li.{li['price']} - li.{li['discount']} / NULLIF(li.{li['qty']}, 0)) * li.{li['qty']}
+           * COALESCE(li.{li['fx']}, 1) AS NET_LINE,
          o.{o['order_id']} AS ORDER_ID, o.{o['customer_id']} AS CUSTOMER_ID,
          CAST(o.{o['order_date']} AS DATE) AS ORDER_DAY
   FROM {li['table']} li
@@ -205,26 +215,36 @@ FROM launch_lines GROUP BY 1 ORDER BY 1
 """
 
 
-def q_category_customers(skus, cat_types, cat_col):
+def _prior_category_cte(cat_patterns):
+    """Distinct customers with a pre-launch non-refunded purchase in the
+    category (matched on UOS.PRODUCTS.PRODUCT_TYPE via ILIKE patterns)."""
+    o, li, pr = COLS["orders"], COLS["lines"], COLS["products"]
+    pattern_match = " OR ".join(
+        f"pr.{pr['product_type']} ILIKE {v}" for v in str_list_sql(cat_patterns).split(", ")
+    )
+    return f"""
+prior_category_buyers AS (
+  SELECT DISTINCT o.{o['customer_id']} AS CUSTOMER_ID
+  FROM {li['table']} li
+  JOIN {o['table']} o ON o.{o['order_id']} = li.{li['order_id']}
+  JOIN {pr['table']} pr ON pr.{pr['product_id']} = li.{li['product_id']}
+  WHERE ({pattern_match})
+    AND CAST(o.{o['order_date']} AS DATE) < %(launch_date)s
+    AND COALESCE(li.{li['refund_flag']}, FALSE) = FALSE
+)"""
+
+
+def q_category_customers(skus, cat_patterns):
     """New-to-category vs existing-category customers for a launch.
 
     Launch buyers = distinct customers with a non-refunded order containing a
     launch SKU between launch date and cutoff. 'Existing' = same customer had
     any earlier non-refunded order containing a product in the launch's
     category (full history lookback before launch date)."""
-    o, li = COLS["orders"], COLS["lines"]
     return q_launch_lines_cte(skus) + f""",
 launch_buyers AS (
   SELECT DISTINCT CUSTOMER_ID FROM launch_lines
-),
-prior_category_buyers AS (
-  SELECT DISTINCT o.{o['customer_id']} AS CUSTOMER_ID
-  FROM {li['table']} li
-  JOIN {o['table']} o ON o.{o['order_id']} = li.{li['order_id']}
-  WHERE li.{cat_col} IN ({str_list_sql(cat_types)})
-    AND CAST(o.{o['order_date']} AS DATE) < %(launch_date)s
-    AND COALESCE(li.{li['refund_flag']}, FALSE) = FALSE
-)
+),{_prior_category_cte(cat_patterns)}
 SELECT COUNT(*)                            AS TOTAL,
        COUNT(p.CUSTOMER_ID)                AS EXISTING_CATEGORY,
        COUNT(*) - COUNT(p.CUSTOMER_ID)     AS NEW_TO_CATEGORY
@@ -233,20 +253,11 @@ LEFT JOIN prior_category_buyers p ON p.CUSTOMER_ID = b.CUSTOMER_ID
 """
 
 
-def q_category_by_variant(skus, cat_types, cat_col):
-    o, li = COLS["orders"], COLS["lines"]
+def q_category_by_variant(skus, cat_patterns):
     return q_launch_lines_cte(skus) + f""",
 buyer_variants AS (
   SELECT DISTINCT SKU, CUSTOMER_ID FROM launch_lines
-),
-prior_category_buyers AS (
-  SELECT DISTINCT o.{o['customer_id']} AS CUSTOMER_ID
-  FROM {li['table']} li
-  JOIN {o['table']} o ON o.{o['order_id']} = li.{li['order_id']}
-  WHERE li.{cat_col} IN ({str_list_sql(cat_types)})
-    AND CAST(o.{o['order_date']} AS DATE) < %(launch_date)s
-    AND COALESCE(li.{li['refund_flag']}, FALSE) = FALSE
-)
+),{_prior_category_cte(cat_patterns)}
 SELECT bv.SKU,
        COUNT(*) - COUNT(p.CUSTOMER_ID) AS NEW_TO_CATEGORY,
        COUNT(p.CUSTOMER_ID)            AS EXISTING_CATEGORY
@@ -274,11 +285,23 @@ GROUP BY 1 ORDER BY PDP_VIEWS DESC
 
 def q_cross_sell(skus):
     c = COLS["affinity"]
+    in_list = sku_list_sql(skus)
+    slot_selects = "\n  UNION ALL\n".join(
+        f"  SELECT {s}_PRODUCT_NAME AS PRODUCT, {s}_SKU AS SKU FROM baskets WHERE {s}_SKU IS NOT NULL"
+        for s in c["slots"]
+    )
     return f"""
-SELECT {c['product_b']} AS PRODUCT, {c['sku_b']} AS SKU, SUM({c['pairs']}) AS PAIRS
-FROM {c['table']}
-WHERE {c['sku_a']} IN ({sku_list_sql(skus)})
-  AND {c['sku_b']} NOT IN ({sku_list_sql(skus)})
+WITH baskets AS (
+  SELECT * FROM {c['table']}
+  WHERE {c['primary_sku']} IN ({in_list})
+    AND CAST({c['order_date']} AS DATE) BETWEEN %(launch_date)s AND %(cutoff)s
+),
+paired AS (
+{slot_selects}
+)
+SELECT PRODUCT, SKU, COUNT(*) AS PAIRS
+FROM paired
+WHERE SKU NOT IN ({in_list})
 GROUP BY 1, 2 ORDER BY PAIRS DESC LIMIT 10
 """
 
@@ -289,6 +312,7 @@ def q_subs(skus):
 SELECT COUNT(DISTINCT {c['order_id']}) AS SUB_ORDERS, SUM({c['qty']}) AS SUB_UNITS
 FROM {c['table']}
 WHERE {c['sku']} IN ({sku_list_sql(skus)})
+  AND COALESCE({c['onetime_flag']}, FALSE) = FALSE
 """
 
 
@@ -298,6 +322,7 @@ def q_plan(skus):
 SELECT {c['sku']} AS SKU, SUM({c['units']}) AS PLAN_UNITS
 FROM {c['table']}
 WHERE {c['sku']} IN ({sku_list_sql(skus)})
+  AND CAST({c['date']} AS DATE) BETWEEN %(launch_date)s AND %(cutoff)s
 GROUP BY 1
 """
 
@@ -341,7 +366,7 @@ SELECT {c['page']} AS PAGE,
        SUM({c['sessions']})     AS SESSIONS,
        SUM({c['transactions']}) AS TXNS,
        SUM({c['revenue']})      AS REV,
-       AVG({c['engagement_rate']}) AS ENG
+       SUM({c['engaged_sessions']}) AS ENGAGED
 FROM {c['table']}
 WHERE ({like})
   AND CAST({c['date']} AS DATE) BETWEEN %(traffic_start)s AND %(ga_cutoff)s
@@ -389,7 +414,7 @@ def f2(v):
     return round(float(v or 0), 2)
 
 
-def build_launch(cur, lc, cutoff, cat_col):
+def build_launch(cur, lc, cutoff):
     launch_date = lc["launch_date"]
     skus = [s["sku"] for s in lc["skus"]]
     sku_meta = {s["sku"]: s for s in lc["skus"]}
@@ -399,15 +424,15 @@ def build_launch(cur, lc, cutoff, cat_col):
     variant_rows = rows(cur, q_by_variant(skus), params)
     daily_rows = rows(cur, q_daily(skus), params)
     pdp_rows = rows(cur, q_pdp(skus), params)
-    cross_rows = rows(cur, q_cross_sell(skus), {})
+    cross_rows = rows(cur, q_cross_sell(skus), params)
     subs_row = rows(cur, q_subs(skus), {})[0]
-    plan_rows = {r["SKU"]: int(r["PLAN_UNITS"] or 0) for r in rows(cur, q_plan(skus), {})}
+    plan_rows = {r["SKU"]: int(r["PLAN_UNITS"] or 0) for r in rows(cur, q_plan(skus), params)}
 
-    cat_types = lc.get("category_product_types") or []
+    cat_patterns = lc.get("category_type_patterns") or []
     cc = None
-    if cat_types:
-        cc_row = rows(cur, q_category_customers(skus, cat_types, cat_col), params)[0]
-        cc_var = rows(cur, q_category_by_variant(skus, cat_types, cat_col), params)
+    if cat_patterns:
+        cc_row = rows(cur, q_category_customers(skus, cat_patterns), params)[0]
+        cc_var = rows(cur, q_category_by_variant(skus, cat_patterns), params)
         cc = {
             "category": lc.get("category"),
             "total": int(cc_row["TOTAL"] or 0),
@@ -562,15 +587,17 @@ def build_landing(cur, cfg, params):
     out = []
     for r in lrows:
         sessions = int(r["SESSIONS"] or 0)
-        page = r["PAGE"] or ""
+        page = (r["PAGE"] or "").replace("https://", "").rstrip("/")
+        slug = page.split("/")[-1].replace("-", " ").title()
+        domain = page.split("/")[0].replace("thrivecausemetics", "").replace("www.", "")
         out.append({
-            "label": page.split("/")[-1][:40] or page[:40],
+            "label": (slug[:34] + (" (" + domain.lstrip(".") + ")" if domain else "")) or page[:40],
             "page": page,
             "pageviews": int(r["PAGEVIEWS"] or 0),
             "sessions": sessions,
             "txns": int(r["TXNS"] or 0),
             "rev": f2(r["REV"]),
-            "eng": round(float(r["ENG"] or 0), 1),
+            "eng": round(int(r["ENGAGED"] or 0) / sessions * 100, 1) if sessions else 0,
             "cvr": round(int(r["TXNS"] or 0) / sessions * 100, 2) if sessions else 0,
         })
     return out
@@ -584,7 +611,6 @@ def main():
 
     cfg = json.loads(CONFIG_PATH.read_text())
     retention = int(cfg.get("retention_days", 122))
-    cat_col = cfg.get("category_type_column", "PRODUCT_TYPE")
 
     today = dt.date.today()
     cutoff = os.environ.get("DATA_CUTOFF") or str(today - dt.timedelta(days=1))
@@ -608,14 +634,14 @@ def main():
         print(f"-- skipped (no SKUs yet): {[lc['id'] for lc in no_skus]}")
         for lc in with_skus:
             skus = [s["sku"] for s in lc["skus"]]
-            cat_types = lc.get("category_product_types") or []
+            cat_patterns = lc.get("category_type_patterns") or []
             print(f"\n-- ========== {lc['id']} ==========")
             for name, sql in [
                 ("summary", q_summary(skus)), ("by_variant", q_by_variant(skus)),
                 ("daily", q_daily(skus)), ("pdp", q_pdp(skus)),
                 ("cross_sell", q_cross_sell(skus)), ("subs", q_subs(skus)),
                 ("plan", q_plan(skus)),
-                ("category_customers", q_category_customers(skus, cat_types, cat_col) if cat_types else "-- no category types configured"),
+                ("category_customers", q_category_customers(skus, cat_patterns) if cat_patterns else "-- no category patterns configured"),
             ]:
                 print(f"\n-- {lc['id']}.{name}\n{sql}")
         print(f"\n-- traffic_by_channel\n{q_traffic_by_channel()}")
@@ -630,7 +656,7 @@ def main():
     conn = connect()
     try:
         cur = conn.cursor()
-        launches = [build_launch(cur, lc, cutoff, cat_col) for lc in with_skus]
+        launches = [build_launch(cur, lc, cutoff) for lc in with_skus]
         launches += [pending_launch(lc) for lc in no_skus + too_new]
         traffic = build_traffic(cur, params)
         landing = build_landing(cur, cfg, params)

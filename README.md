@@ -50,12 +50,14 @@ Add these repository secrets (Settings → Secrets and variables → Actions):
 | `SNOWFLAKE_DATABASE` | no | defaults to `DAASITY_DB` |
 
 **Review & dry-run first:** all queries are read-only SELECTs, but they hit
-production data. Before the first live run, execute
-`python scripts/refresh_data.py --dry-run` and validate the column names
-marked `VERIFY` in the `COLS` dict at the top of the script against
-`DAASITY_DB` — they are centralized there so fixes happen in one place. Also
-verify the `category_product_types` values in `config/launches.json` match
-real product-type values before trusting the Category Customers numbers.
+production data. Column names in the `COLS` dict were verified against
+`DAASITY_DB.INFORMATION_SCHEMA` on 2026-07-23; if a schema changes, fix them
+there in one place (`python scripts/refresh_data.py --dry-run` prints every
+query). Category membership is matched via the `category_type_patterns`
+ILIKE patterns in `config/launches.json` against `UOS.PRODUCTS.PRODUCT_TYPE`.
+Note the refresh methodology is documented in the script docstring and may
+differ from the old manual snapshot by a low single-digit percent (USD
+conversion, first-order-based new/returning split, plan window).
 
 ## Data rules
 

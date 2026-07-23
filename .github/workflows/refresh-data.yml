@@ -2,8 +2,9 @@ name: Refresh dashboard data
 
 on:
   schedule:
-    # Daily at 10:30 UTC (~3:30am PT), after Daasity's overnight loads
-    - cron: '30 10 * * *'
+    # Daily at 13:00 UTC (6:00am PT / 9:00am ET) — data is refreshed and
+    # committed before the workday starts, after Daasity's overnight loads.
+    - cron: '0 13 * * *'
   workflow_dispatch: {}
 
 permissions:
