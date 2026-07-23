@@ -221,10 +221,14 @@ FROM launch_lines GROUP BY 1 ORDER BY 1
 
 def _prior_category_cte(cat_patterns):
     """Distinct customers with a pre-launch non-refunded purchase in the
-    category (matched on UOS.PRODUCTS.PRODUCT_TYPE via ILIKE patterns)."""
+    category (matched on UOS.PRODUCTS.PRODUCT_TYPE via ILIKE patterns).
+
+    Literal % is doubled: these queries run with bound params, so the
+    connector treats single % as a pyformat placeholder."""
     o, li, pr = COLS["orders"], COLS["lines"], COLS["products"]
     pattern_match = " OR ".join(
-        f"pr.{pr['product_type']} ILIKE {v}" for v in str_list_sql(cat_patterns).split(", ")
+        f"pr.{pr['product_type']} ILIKE {v}".replace("%", "%%")
+        for v in str_list_sql(cat_patterns).split(", ")
     )
     return f"""
 prior_category_buyers AS (
@@ -361,8 +365,9 @@ GROUP BY 1, 3 ORDER BY MONTH_START
 
 def q_landing(all_skus_and_slugs):
     c = COLS["landing"]
+    # %% because this query runs with bound params (pyformat)
     like = " OR ".join(
-        f"{c['page']} ILIKE '%{s}%'" for s in all_skus_and_slugs
+        f"{c['page']} ILIKE '%%{s}%%'" for s in all_skus_and_slugs
     )
     return f"""
 SELECT {c['page']} AS PAGE,
@@ -413,13 +418,34 @@ def connect():
 
 
 def rows(cur, sql, params):
-    cur.execute(sql, params)
+    # No-params queries skip pyformat entirely so literal % needs no escaping.
+    cur.execute(sql, params or None)
     cols = [c[0] for c in cur.description]
     return [dict(zip(cols, r)) for r in cur.fetchall()]
 
 
 def f2(v):
     return round(float(v or 0), 2)
+
+
+_PLAN_FALLBACK = None
+
+
+def plan_from_fallback(skus, launch_date, cutoff):
+    """Per-SKU plan units summed from the committed GSHEETS snapshot
+    (config/plan_fallback.json), for when the workflow's Snowflake user has
+    no grant on the GSHEETS schema. The live query takes precedence."""
+    global _PLAN_FALLBACK
+    if _PLAN_FALLBACK is None:
+        path = ROOT / "config" / "plan_fallback.json"
+        _PLAN_FALLBACK = (json.loads(path.read_text()) if path.exists() else {})
+    by_sku = _PLAN_FALLBACK.get("plan_units_by_sku_date", {})
+    out = {}
+    for sku in skus:
+        total = sum(u for d, u in by_sku.get(sku, {}).items() if launch_date <= d <= cutoff)
+        if total:
+            out[sku] = total
+    return out
 
 
 def safe_fetch(label, fn, default):
@@ -473,6 +499,11 @@ def build_launch(cur, lc, cutoff):
     plan_rows = safe_fetch(f"{lid}.plan (GSHEETS)",
                            lambda: {r["SKU"]: int(r["PLAN_UNITS"] or 0) for r in rows(cur, q_plan(skus), params)},
                            {})
+    if not plan_rows:
+        plan_rows = plan_from_fallback(skus, launch_date, cutoff)
+        if plan_rows:
+            print(f"NOTE: {lid}.plan using committed config/plan_fallback.json "
+                  f"(GSHEETS snapshot) instead of a live query.")
 
     cat_patterns = lc.get("category_type_patterns") or []
     cc = None
