@@ -422,40 +422,63 @@ def f2(v):
     return round(float(v or 0), 2)
 
 
+def safe_fetch(label, fn, default):
+    """Run one data-source fetch; on failure (e.g. schema not granted to the
+    workflow's Snowflake user) log a warning and continue with a default so a
+    single inaccessible source doesn't kill the whole refresh."""
+    try:
+        return fn()
+    except Exception as e:
+        first_line = str(e).replace("\n", " ")[:160]
+        print(f"WARNING: {label} unavailable — {first_line} (continuing without it)")
+        return default
+
+
+def _build_category(cur, skus, cat_patterns, params, lc, sku_meta):
+    cc_row = rows(cur, q_category_customers(skus, cat_patterns), params)[0]
+    cc_var = rows(cur, q_category_by_variant(skus, cat_patterns), params)
+    return {
+        "category": lc.get("category"),
+        "total": int(cc_row["TOTAL"] or 0),
+        "existingCategory": int(cc_row["EXISTING_CATEGORY"] or 0),
+        "newToCategory": int(cc_row["NEW_TO_CATEGORY"] or 0),
+        "byVariant": [
+            {
+                "sku": r["SKU"],
+                "name": sku_meta.get(r["SKU"], {}).get("name", r["SKU"]),
+                "newToCategory": int(r["NEW_TO_CATEGORY"] or 0),
+                "existingCategory": int(r["EXISTING_CATEGORY"] or 0),
+            }
+            for r in cc_var
+        ],
+    }
+
+
 def build_launch(cur, lc, cutoff):
     launch_date = lc["launch_date"]
     skus = [s["sku"] for s in lc["skus"]]
     sku_meta = {s["sku"]: s for s in lc["skus"]}
     params = {"launch_date": launch_date, "cutoff": cutoff}
 
+    lid = lc["id"]
+    # Core sales data (UOS) — a failure here is a real failure.
     summary_row = rows(cur, q_summary(skus), params)[0]
     variant_rows = rows(cur, q_by_variant(skus), params)
     daily_rows = rows(cur, q_daily(skus), params)
-    pdp_rows = rows(cur, q_pdp(skus), params)
-    cross_rows = rows(cur, q_cross_sell(skus), params)
-    subs_row = rows(cur, q_subs(skus), {})[0]
-    plan_rows = {r["SKU"]: int(r["PLAN_UNITS"] or 0) for r in rows(cur, q_plan(skus), params)}
+    # Optional sources degrade gracefully if the schema isn't granted.
+    pdp_rows = safe_fetch(f"{lid}.pdp (UTS)", lambda: rows(cur, q_pdp(skus), params), [])
+    cross_rows = safe_fetch(f"{lid}.cross_sell (DRP)", lambda: rows(cur, q_cross_sell(skus), params), [])
+    subs_row = safe_fetch(f"{lid}.subscriptions (USS)", lambda: rows(cur, q_subs(skus), {})[0],
+                          {"SUB_ORDERS": 0, "SUB_UNITS": 0})
+    plan_rows = safe_fetch(f"{lid}.plan (GSHEETS)",
+                           lambda: {r["SKU"]: int(r["PLAN_UNITS"] or 0) for r in rows(cur, q_plan(skus), params)},
+                           {})
 
     cat_patterns = lc.get("category_type_patterns") or []
     cc = None
     if cat_patterns:
-        cc_row = rows(cur, q_category_customers(skus, cat_patterns), params)[0]
-        cc_var = rows(cur, q_category_by_variant(skus, cat_patterns), params)
-        cc = {
-            "category": lc.get("category"),
-            "total": int(cc_row["TOTAL"] or 0),
-            "existingCategory": int(cc_row["EXISTING_CATEGORY"] or 0),
-            "newToCategory": int(cc_row["NEW_TO_CATEGORY"] or 0),
-            "byVariant": [
-                {
-                    "sku": r["SKU"],
-                    "name": sku_meta.get(r["SKU"], {}).get("name", r["SKU"]),
-                    "newToCategory": int(r["NEW_TO_CATEGORY"] or 0),
-                    "existingCategory": int(r["EXISTING_CATEGORY"] or 0),
-                }
-                for r in cc_var
-            ],
-        }
+        cc = safe_fetch(f"{lid}.category_customers (UOS.PRODUCTS)",
+                        lambda: _build_category(cur, skus, cat_patterns, params, lc, sku_meta), None)
 
     total_units = int(summary_row["UNITS"] or 0)
     total_orders = int(summary_row["ORDERS"] or 0)
@@ -666,8 +689,9 @@ def main():
         cur = conn.cursor()
         launches = [build_launch(cur, lc, cutoff) for lc in with_skus]
         launches += [pending_launch(lc) for lc in no_skus + too_new]
-        traffic = build_traffic(cur, params)
-        landing = build_landing(cur, cfg, params)
+        traffic = safe_fetch("traffic (GA4_API)", lambda: build_traffic(cur, params),
+                             {"byChannel": [], "monthly": []})
+        landing = safe_fetch("landing (GA4_BQ_STG)", lambda: build_landing(cur, cfg, params), [])
     finally:
         conn.close()
 

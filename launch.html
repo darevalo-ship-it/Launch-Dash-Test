@@ -538,6 +538,11 @@ function renderSkuTable(d) {
 
 /* ── TRAFFIC TAB ── */
 function renderTraffic() {
+  if (!trafficData.byChannel.length) {
+    document.getElementById('panel-traffic').innerHTML =
+      '<p class="data-note">GA4 traffic data was not available in the latest refresh (GA4_API.BASE_TRAFFIC not accessible to the refresh credentials).</p>';
+    return;
+  }
   const total = trafficData.byChannel.reduce((a,c)=>({sessions:a.sessions+c.sessions,txns:a.txns+c.txns,rev:a.rev+c.rev}),{sessions:0,txns:0,rev:0});
   const overallCvr = (total.txns/total.sessions*100).toFixed(2);
   const top5 = ['Paid Social','Email','Paid Search','SMS','Direct'];
@@ -610,6 +615,11 @@ function renderTraffic() {
 
 /* ── LANDING PAGE TAB ── */
 function renderLanding() {
+  if (!landingData.length) {
+    document.getElementById('panel-landing').innerHTML =
+      '<p class="data-note">Landing page data was not available in the latest refresh (GA4_BQ_STG.BASE_LANDING_PAGE_STG2 not accessible to the refresh credentials).</p>';
+    return;
+  }
   const totalSessions = landingData.reduce((s,r)=>s+r.sessions,0);
   const totalTxns = landingData.reduce((s,r)=>s+r.txns,0);
   const totalRev = landingData.reduce((s,r)=>s+r.rev,0);
@@ -725,7 +735,7 @@ function renderCrossSells(d) {
   document.getElementById('panel-crosssells').innerHTML = `
     <div class="section-title">Cross-Sells &amp; Pairings · ${d.name} · ${fmt.date(d.launchDate)} – ${fmt.date(META.dataCutoff)}</div>
     <div class="kpi-row1" style="margin-bottom:18px">
-      <div class="kpi-card c-teal"><div class="kpi-label">Top Cross-Sell</div><div class="kpi-value" style="font-size:14px">${rows[0]?.product.split('™')[0]+'™'||'—'}</div><div class="kpi-sub">${fmt.num(rows[0]?.pairs||0)} paired orders</div></div>
+      <div class="kpi-card c-teal"><div class="kpi-label">Top Cross-Sell</div><div class="kpi-value" style="font-size:14px">${rows[0] ? rows[0].product.split('™')[0]+'™' : '—'}</div><div class="kpi-sub">${fmt.num(rows[0]?.pairs||0)} paired orders</div></div>
       <div class="kpi-card c-gold"><div class="kpi-label">Unique Pairings Found</div><div class="kpi-value">${rows.length}</div><div class="kpi-sub">Distinct co-purchase products</div></div>
       <div class="kpi-card c-navy"><div class="kpi-label">Total Pair Events</div><div class="kpi-value">${fmt.num(rows.reduce((s,r)=>s+r.pairs,0))}</div><div class="kpi-sub">Orders with cross-sell</div></div>
       <div class="kpi-card c-green"><div class="kpi-label">Subscriptions</div><div class="kpi-value">${fmt.num(d.summary.subscriptionOrders)}</div><div class="kpi-sub">${fmt.num(d.summary.subscriptionUnits)} sub units (all-time)</div></div>

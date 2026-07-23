@@ -149,13 +149,25 @@
     {
       "id": "eyeshadow-quads",
       "name": "Eyeshadow Quads",
-      "subtitle": "SKUs pending",
+      "subtitle": "Focus Eyeshadow™ Palette · 2 Palettes",
       "accent": "#8B5CF6",
       "launch_date": "2026-07-22",
       "internal_date": "2026-07-14",
       "category": "Eyeshadow",
-      "skus": [],
-      "_todo": "Launched Jul 22, 2026 — add the launch SKUs here so the refresh can pull its data.",
+      "skus": [
+        {
+          "sku": "TVG6700",
+          "name": "Warm Neutrals",
+          "shade": "Focus Eyeshadow™ Palette",
+          "color": "#C68E5E"
+        },
+        {
+          "sku": "TVG6720",
+          "name": "Cool Neutrals",
+          "shade": "Focus Eyeshadow™ Palette",
+          "color": "#8D8A96"
+        }
+      ],
       "category_type_patterns": [
         "%shadow%"
       ]
