@@ -420,7 +420,7 @@ function renderKPIs(d) {
       <div class="kpi-label">% to Plan (Units)</div>
       <div class="kpi-value" style="color:${ptpC}">${ptp!=null?ptp.toFixed(1)+'%':'—'}</div>
       <div class="ptp-bar"><div class="ptp-fill" style="width:${ptpW}%;background:${ptpC}"></div></div>
-      <div class="kpi-sub">${fmt.num(s.units)} of ${fmt.num(s.planUnits)} planned</div>
+      <div class="kpi-sub">${s.planUnits != null ? fmt.num(s.units) + ' of ' + fmt.num(s.planUnits) + ' planned' : 'Plan data unavailable'}</div>
     </div>
     <div class="kpi-card c-teal">
       <div class="kpi-label">PDP Conversion Rate</div>
