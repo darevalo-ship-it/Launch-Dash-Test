@@ -405,7 +405,11 @@ def connect():
         )
     else:
         kwargs["password"] = os.environ["SNOWFLAKE_PASSWORD"]
-    return snowflake.connector.connect(**{k: v for k, v in kwargs.items() if v})
+    conn = snowflake.connector.connect(**{k: v for k, v in kwargs.items() if v})
+    # Activate every role granted to the user, not just the primary one —
+    # schema grants (e.g. DAASITY_DB.UTS) are often split across roles.
+    conn.cursor().execute("USE SECONDARY ROLES ALL")
+    return conn
 
 
 def rows(cur, sql, params):
