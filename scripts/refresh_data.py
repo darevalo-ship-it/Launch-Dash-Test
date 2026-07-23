@@ -50,6 +50,10 @@ OUT_PATH = ROOT / "data.js"
 
 GA4_LAG_DAYS = 2  # GA4 sync lag: traffic data trails the sales cutoff
 
+# Tables are always resolved in this database, regardless of the connection's
+# default database context (SNOWFLAKE_DATABASE).
+SRC_DB = os.environ.get("SNOWFLAKE_SOURCE_DB", "DAASITY_DB")
+
 # ---------------------------------------------------------------------------
 # Column names, centralized so fixes happen in one place.
 # Verified against DAASITY_DB INFORMATION_SCHEMA on 2026-07-23.
@@ -160,8 +164,8 @@ WITH launch_lines AS (
            * COALESCE(li.{li['fx']}, 1) AS NET_LINE,
          o.{o['order_id']} AS ORDER_ID, o.{o['customer_id']} AS CUSTOMER_ID,
          CAST(o.{o['order_date']} AS DATE) AS ORDER_DAY
-  FROM {li['table']} li
-  JOIN {o['table']} o ON o.{o['order_id']} = li.{li['order_id']}
+  FROM {SRC_DB}.{li['table']} li
+  JOIN {SRC_DB}.{o['table']} o ON o.{o['order_id']} = li.{li['order_id']}
   WHERE li.{li['sku']} IN ({sku_list_sql(skus)})
     AND CAST(o.{o['order_date']} AS DATE) BETWEEN %(launch_date)s AND %(cutoff)s
     AND COALESCE(li.{li['refund_flag']}, FALSE) = FALSE
@@ -173,7 +177,7 @@ def q_summary(skus):
     sql = q_launch_lines_cte(skus) + f""",
 first_orders AS (
   SELECT {o['customer_id']} AS CUSTOMER_ID, MIN(CAST({o['order_date']} AS DATE)) AS FIRST_ORDER_DAY
-  FROM {o['table']}
+  FROM {SRC_DB}.{o['table']}
   GROUP BY 1
 )
 SELECT
@@ -193,7 +197,7 @@ def q_by_variant(skus):
     return q_launch_lines_cte(skus) + f""",
 first_orders AS (
   SELECT {o['customer_id']} AS CUSTOMER_ID, MIN(CAST({o['order_date']} AS DATE)) AS FIRST_ORDER_DAY
-  FROM {o['table']}
+  FROM {SRC_DB}.{o['table']}
   GROUP BY 1
 )
 SELECT ll.SKU,
@@ -225,9 +229,9 @@ def _prior_category_cte(cat_patterns):
     return f"""
 prior_category_buyers AS (
   SELECT DISTINCT o.{o['customer_id']} AS CUSTOMER_ID
-  FROM {li['table']} li
-  JOIN {o['table']} o ON o.{o['order_id']} = li.{li['order_id']}
-  JOIN {pr['table']} pr ON pr.{pr['product_id']} = li.{li['product_id']}
+  FROM {SRC_DB}.{li['table']} li
+  JOIN {SRC_DB}.{o['table']} o ON o.{o['order_id']} = li.{li['order_id']}
+  JOIN {SRC_DB}.{pr['table']} pr ON pr.{pr['product_id']} = li.{li['product_id']}
   WHERE ({pattern_match})
     AND CAST(o.{o['order_date']} AS DATE) < %(launch_date)s
     AND COALESCE(li.{li['refund_flag']}, FALSE) = FALSE
@@ -276,7 +280,7 @@ SELECT {c['sku']} AS SKU,
        SUM({c['checkouts']}) AS CKTS,
        SUM({c['purchases']}) AS PURCH,
        SUM({c['revenue']})   AS REV
-FROM {c['table']}
+FROM {SRC_DB}.{c['table']}
 WHERE {c['sku']} IN ({sku_list_sql(skus)})
   AND CAST({c['date']} AS DATE) BETWEEN %(launch_date)s AND %(cutoff)s
 GROUP BY 1 ORDER BY PDP_VIEWS DESC
@@ -292,7 +296,7 @@ def q_cross_sell(skus):
     )
     return f"""
 WITH baskets AS (
-  SELECT * FROM {c['table']}
+  SELECT * FROM {SRC_DB}.{c['table']}
   WHERE {c['primary_sku']} IN ({in_list})
     AND CAST({c['order_date']} AS DATE) BETWEEN %(launch_date)s AND %(cutoff)s
 ),
@@ -310,7 +314,7 @@ def q_subs(skus):
     c = COLS["subs"]
     return f"""
 SELECT COUNT(DISTINCT {c['order_id']}) AS SUB_ORDERS, SUM({c['qty']}) AS SUB_UNITS
-FROM {c['table']}
+FROM {SRC_DB}.{c['table']}
 WHERE {c['sku']} IN ({sku_list_sql(skus)})
   AND COALESCE({c['onetime_flag']}, FALSE) = FALSE
 """
@@ -320,7 +324,7 @@ def q_plan(skus):
     c = COLS["plan"]
     return f"""
 SELECT {c['sku']} AS SKU, SUM({c['units']}) AS PLAN_UNITS
-FROM {c['table']}
+FROM {SRC_DB}.{c['table']}
 WHERE {c['sku']} IN ({sku_list_sql(skus)})
   AND CAST({c['date']} AS DATE) BETWEEN %(launch_date)s AND %(cutoff)s
 GROUP BY 1
@@ -336,7 +340,7 @@ SELECT {c['channel']} AS CH,
        SUM({c['transactions']})  AS TXNS,
        SUM({c['revenue']})       AS REV,
        SUM({c['engaged_sessions']}) AS ENGAGED
-FROM {c['table']}
+FROM {SRC_DB}.{c['table']}
 WHERE TO_DATE({c['date']}, 'YYYYMMDD') BETWEEN %(traffic_start)s AND %(ga_cutoff)s
 GROUP BY 1 ORDER BY SESSIONS DESC
 """
@@ -349,7 +353,7 @@ SELECT TO_CHAR(TO_DATE({c['date']}, 'YYYYMMDD'), 'Mon YYYY') AS MONTH,
        MIN(TO_DATE({c['date']}, 'YYYYMMDD'))                  AS MONTH_START,
        {c['channel']} AS CH,
        SUM({c['sessions']}) AS SESSIONS
-FROM {c['table']}
+FROM {SRC_DB}.{c['table']}
 WHERE TO_DATE({c['date']}, 'YYYYMMDD') BETWEEN %(traffic_start)s AND %(ga_cutoff)s
 GROUP BY 1, 3 ORDER BY MONTH_START
 """
@@ -367,7 +371,7 @@ SELECT {c['page']} AS PAGE,
        SUM({c['transactions']}) AS TXNS,
        SUM({c['revenue']})      AS REV,
        SUM({c['engaged_sessions']}) AS ENGAGED
-FROM {c['table']}
+FROM {SRC_DB}.{c['table']}
 WHERE ({like})
   AND CAST({c['date']} AS DATE) BETWEEN %(traffic_start)s AND %(ga_cutoff)s
 GROUP BY 1 ORDER BY SESSIONS DESC LIMIT 10
@@ -670,7 +674,7 @@ def main():
             "trafficStart": traffic_start,
             "generatedAt": str(today),
             "mode": "automated",
-            "sourceDb": os.environ.get("SNOWFLAKE_DATABASE", "DAASITY_DB"),
+            "sourceDb": SRC_DB,
             "retentionDays": retention,
         },
         "launches": launches,
