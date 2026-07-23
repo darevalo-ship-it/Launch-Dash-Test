@@ -448,15 +448,33 @@ def plan_from_fallback(skus, launch_date, cutoff):
     return out
 
 
-def safe_fetch(label, fn, default):
+# Per-source outcome across the whole run: 'live', 'fallback', or
+# 'unavailable'. Written to meta.sourceStatus so the dashboard's Data Guide
+# can show which sources the refresh could actually reach.
+SOURCE_STATUS = {"uos": "live"}
+
+
+def _mark_source(key, ok):
+    if not key:
+        return
+    if not ok:
+        SOURCE_STATUS[key] = "unavailable"
+    elif SOURCE_STATUS.get(key) != "unavailable":
+        SOURCE_STATUS[key] = "live"
+
+
+def safe_fetch(label, fn, default, key=None):
     """Run one data-source fetch; on failure (e.g. schema not granted to the
     workflow's Snowflake user) log a warning and continue with a default so a
     single inaccessible source doesn't kill the whole refresh."""
     try:
-        return fn()
+        result = fn()
+        _mark_source(key, True)
+        return result
     except Exception as e:
         first_line = str(e).replace("\n", " ")[:160]
         print(f"WARNING: {label} unavailable — {first_line} (continuing without it)")
+        _mark_source(key, False)
         return default
 
 
@@ -492,16 +510,17 @@ def build_launch(cur, lc, cutoff):
     variant_rows = rows(cur, q_by_variant(skus), params)
     daily_rows = rows(cur, q_daily(skus), params)
     # Optional sources degrade gracefully if the schema isn't granted.
-    pdp_rows = safe_fetch(f"{lid}.pdp (UTS)", lambda: rows(cur, q_pdp(skus), params), [])
-    cross_rows = safe_fetch(f"{lid}.cross_sell (DRP)", lambda: rows(cur, q_cross_sell(skus), params), [])
+    pdp_rows = safe_fetch(f"{lid}.pdp (UTS)", lambda: rows(cur, q_pdp(skus), params), [], key="uts")
+    cross_rows = safe_fetch(f"{lid}.cross_sell (DRP)", lambda: rows(cur, q_cross_sell(skus), params), [], key="drp")
     subs_row = safe_fetch(f"{lid}.subscriptions (USS)", lambda: rows(cur, q_subs(skus), {})[0],
-                          {"SUB_ORDERS": 0, "SUB_UNITS": 0})
+                          {"SUB_ORDERS": 0, "SUB_UNITS": 0}, key="uss")
     plan_rows = safe_fetch(f"{lid}.plan (GSHEETS)",
                            lambda: {r["SKU"]: int(r["PLAN_UNITS"] or 0) for r in rows(cur, q_plan(skus), params)},
-                           {})
+                           {}, key="gsheets")
     if not plan_rows:
         plan_rows = plan_from_fallback(skus, launch_date, cutoff)
         if plan_rows:
+            SOURCE_STATUS["gsheets"] = "fallback"
             print(f"NOTE: {lid}.plan using committed config/plan_fallback.json "
                   f"(GSHEETS snapshot) instead of a live query.")
 
@@ -509,7 +528,8 @@ def build_launch(cur, lc, cutoff):
     cc = None
     if cat_patterns:
         cc = safe_fetch(f"{lid}.category_customers (UOS.PRODUCTS)",
-                        lambda: _build_category(cur, skus, cat_patterns, params, lc, sku_meta), None)
+                        lambda: _build_category(cur, skus, cat_patterns, params, lc, sku_meta), None,
+                        key="uos_products")
 
     total_units = int(summary_row["UNITS"] or 0)
     total_orders = int(summary_row["ORDERS"] or 0)
@@ -721,8 +741,8 @@ def main():
         launches = [build_launch(cur, lc, cutoff) for lc in with_skus]
         launches += [pending_launch(lc) for lc in no_skus + too_new]
         traffic = safe_fetch("traffic (GA4_API)", lambda: build_traffic(cur, params),
-                             {"byChannel": [], "monthly": []})
-        landing = safe_fetch("landing (GA4_BQ_STG)", lambda: build_landing(cur, cfg, params), [])
+                             {"byChannel": [], "monthly": []}, key="ga4_api")
+        landing = safe_fetch("landing (GA4_BQ_STG)", lambda: build_landing(cur, cfg, params), [], key="ga4_bq")
     finally:
         conn.close()
 
@@ -735,6 +755,7 @@ def main():
             "mode": "automated",
             "sourceDb": SRC_DB,
             "retentionDays": retention,
+            "sourceStatus": SOURCE_STATUS,
         },
         "launches": launches,
         "traffic": traffic,

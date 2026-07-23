@@ -258,25 +258,28 @@
           <li><strong>UTS.PRODUCT_PAGE</strong> — Unified Traffic Schema: PDP views, add-to-cart, purchases by SKU</li>
           <li><strong>DRP.PRODUCT_AFFINITY_SETS</strong> — Product affinity / basket co-occurrence pairs</li>
           <li><strong>USS.ORDER_LINE_ITEMS</strong> — Recharge subscription orders</li>
-          <li><strong>GSHEETS.SKU_LAUNCH_DAY_FORECAST</strong> — Daily unit plan from Google Sheets</li>
+          <li><strong>GSHEETS.SKU_LAUNCH_DAY_FORECAST</strong> — Daily unit plan from Google Sheets (falls back to the committed snapshot in config/plan_fallback.json when the schema isn't granted)</li>
         </ul>
       </div>
       <div class="guide-card">
         <h3>Data Freshness &amp; Refresh</h3>
-        <p>All data lives in <strong>data.js</strong>, regenerated from Snowflake DAASITY_DB by <strong>scripts/refresh_data.py</strong> (scheduled daily via GitHub Actions once Snowflake credentials are added as repository secrets). Current data cutoff: <strong>Jun 23, 2026</strong>; GA4 traffic lags ~2 days behind.</p>
+        <p id="guide-fresh">Loading&hellip;</p>
         <p style="margin-top:8px"><strong>Launch lifecycle:</strong> a launch appears automatically once its launch date passes and the refresh returns data, and is removed 122 days after its launch date.</p>
+        <p style="margin-top:8px"><strong>Source status (latest refresh):</strong></p>
+        <ul id="guide-sources-status"></ul>
       </div>
       <div class="guide-card">
         <h3>Metric Definitions</h3>
         <ul>
-          <li><strong>Net Sales</strong> — SUM((price − discount/qty) × qty) on non-refunded line items</li>
+          <li><strong>Net Sales</strong> — SUM((price − discount/qty) × qty) on non-refunded line items (REFUND_FLAG = FALSE), converted to USD</li>
           <li><strong>Units Sold</strong> — SUM(quantity) on non-refunded line items</li>
           <li><strong>AOV</strong> — Net Sales ÷ Unique Orders</li>
+          <li><strong>New vs Returning</strong> — a buyer is New if their first-ever UOS order is on/after the launch date</li>
           <li><strong>PDP CVR</strong> — Purchases ÷ Product Detail Views (UTS.PRODUCT_PAGE)</li>
           <li><strong>ATC Rate</strong> — Add-to-Cart ÷ PDP Views</li>
           <li><strong>Site CVR</strong> — Transactions ÷ Sessions (GA4, site-wide)</li>
-          <li><strong>% to Plan</strong> — Actual Units ÷ Planned Units from GSHEETS.SKU_LAUNCH_DAY_FORECAST</li>
-          <li><strong>New to Category</strong> — launch buyers with no prior purchase in the launch's category before launch date (UOS order history)</li>
+          <li><strong>% to Plan</strong> — Actual Units ÷ SUM of daily planned units from launch date through the data cutoff (GSHEETS.SKU_LAUNCH_DAY_FORECAST)</li>
+          <li><strong>New to Category</strong> — launch buyers with no prior purchase in the launch's category before launch date (full UOS order history, category via UOS.PRODUCTS.PRODUCT_TYPE)</li>
         </ul>
       </div>
       <div class="guide-card">
@@ -284,9 +287,10 @@
         <ul>
           <li>Traffic data is <strong>site-wide</strong>, not launch-specific</li>
           <li>PDP Health data is launch-SKU filtered via UTS.PRODUCT_PAGE</li>
-          <li>Cross-sell pairs sourced from DRP.PRODUCT_AFFINITY_SETS (same-order basket analysis)</li>
-          <li>New vs Returning split estimated from historical ratio applied to current totals</li>
-          <li>Subscription data from USS does not have order dates — all-time totals shown</li>
+          <li>Cross-sell pairs sourced from DRP.PRODUCT_AFFINITY_SETS (same-cart basket analysis, launch SKU as primary)</li>
+          <li>Subscription counts include true Recharge subscription lines only (one-time purchases excluded); USS has no order dates, so totals are all-time</li>
+          <li>A source that isn't granted to the refresh's Snowflake user shows as empty with a note, and fills in automatically on the next refresh once access is granted</li>
+          <li>Figures can differ from earlier manual snapshots by a low single-digit % (USD conversion, first-order-based new/returning, plan window)</li>
         </ul>
       </div>
       <div class="guide-card full">
@@ -814,6 +818,35 @@ function renderCategory(d) {
   }
 }
 
+/* ── DATA GUIDE TAB (dynamic bits) ── */
+function renderGuide(d) {
+  document.getElementById('guide-fresh').innerHTML = META.mode === 'automated'
+    ? 'Data is refreshed <strong>daily at 6:00am PT</strong> by GitHub Actions (scripts/refresh_data.py querying Snowflake ' + (META.sourceDb || 'DAASITY_DB') + '). Current data cutoff: <strong>' + fmt.date(META.dataCutoff) + '</strong> (always yesterday); GA4 traffic through <strong>' + fmt.date(META.gaCutoff) + '</strong> (~2-day sync lag). Last generated ' + fmt.date(META.generatedAt) + '.'
+    : 'This is a <strong>static snapshot</strong> with data through <strong>' + fmt.date(META.dataCutoff) + '</strong>. Automated daily refresh activates once Snowflake credentials are configured.';
+  // Prefer the refresh script's recorded outcome (meta.sourceStatus);
+  // fall back to inferring availability from data presence.
+  const st = META.sourceStatus || {};
+  const sources = [
+    {key: 'uos', name: 'Sales / customers (UOS)', has: !!(d.summary && d.dailySales.length)},
+    {key: 'uts', name: 'PDP Health (UTS)', has: (d.pdp || []).length > 0},
+    {key: 'drp', name: 'Cross-sells (DRP)', has: (d.crossSell || []).length > 0},
+    {key: 'ga4_api', name: 'Traffic (GA4_API)', has: (DD.traffic.byChannel || []).length > 0},
+    {key: 'ga4_bq', name: 'Landing pages (GA4_BQ_STG)', has: (DD.landing || []).length > 0},
+    {key: 'uss', name: 'Subscriptions (USS)', has: !!(d.summary && d.summary.subscriptionOrders > 0)},
+    {key: 'gsheets', name: '% to Plan (GSHEETS)', has: !!(d.summary && d.summary.planUnits != null)},
+    {key: 'uos_products', name: 'Category customers (UOS.PRODUCTS)', has: !!d.categoryCustomers},
+  ];
+  const TAGS = {
+    live: '<span class="tag-good">live</span>',
+    fallback: '<span class="tag-warn">committed snapshot</span>',
+    unavailable: '<span class="tag-bad">pending grant</span>',
+  };
+  document.getElementById('guide-sources-status').innerHTML = sources.map(s => {
+    const state = st[s.key] || (s.has ? 'live' : 'unavailable');
+    return `<li>${TAGS[state] || TAGS.unavailable} ${s.name}</li>`;
+  }).join('');
+}
+
 /* ── UPCOMING LAUNCHES TAB ── */
 function renderUpcoming() {
   const cards = [];
@@ -875,6 +908,7 @@ function init() {
     renderHeader(d);
     renderUpcoming();
     renderCategory(d);
+    renderGuide(d);
     renderTraffic();
     renderLanding();
 
