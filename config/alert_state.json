@@ -5,13 +5,13 @@
     "standing alert is not re-posted every morning. Delete an entry to",
     "make that alert fire again on the next run."
   ],
-  "lastRun": "2026-09-05",
+  "lastRun": "2026-09-06",
   "lastDigest": null,
-  "dataCutoff": "2026-09-04",
+  "dataCutoff": "2026-09-05",
   "alerts": {
     "psl-pout-hero|oos-soon:TBB013": {
       "rank": 1,
-      "title": "Pumpkin Spice Latte projects out of stock ~Sep 14, 2026",
+      "title": "Pumpkin Spice Latte projects out of stock ~Sep 15, 2026",
       "firstSeen": "2026-09-03",
       "lastPosted": "2026-09-03"
     },
@@ -29,7 +29,7 @@
     },
     "eyeshadow-quads|oos-soon:TVG6700": {
       "rank": 1,
-      "title": "Warm Neutrals projects out of stock ~Sep 7, 2026",
+      "title": "Warm Neutrals projects out of stock ~Sep 6, 2026",
       "firstSeen": "2026-09-01",
       "lastPosted": "2026-09-01"
     },
@@ -62,6 +62,12 @@
       "title": "Mila PDP converts below the launch average",
       "firstSeen": "2026-09-01",
       "lastPosted": "2026-09-01"
+    },
+    "psl-pout-hero|behind-plan:TBB013": {
+      "rank": 3,
+      "title": "Pumpkin Spice Latte is behind plan",
+      "firstSeen": "2026-09-06",
+      "lastPosted": "2026-09-06"
     },
     "lasting-mark-lip-stain|behind-plan:TVG7230": {
       "rank": 3,
