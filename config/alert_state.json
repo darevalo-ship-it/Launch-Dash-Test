@@ -5,105 +5,105 @@
     "standing alert is not re-posted every morning. Delete an entry to",
     "make that alert fire again on the next run."
   ],
-  "lastRun": "2026-09-06",
-  "lastDigest": null,
-  "dataCutoff": "2026-09-05",
+  "lastRun": "2026-09-07",
+  "lastDigest": "2026-09-07",
+  "dataCutoff": "2026-09-06",
   "alerts": {
     "psl-pout-hero|oos-soon:TBB013": {
       "rank": 1,
-      "title": "Pumpkin Spice Latte projects out of stock ~Sep 15, 2026",
+      "title": "Pumpkin Spice Latte projects out of stock ~Sep 16, 2026",
       "firstSeen": "2026-09-03",
-      "lastPosted": "2026-09-03"
+      "lastPosted": "2026-09-07"
     },
     "lasting-mark-lip-stain|oos-soon:TVG7250": {
       "rank": 1,
       "title": "Daniella projects out of stock ~Sep 12, 2026",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
     },
     "eyeshadow-quads|oos-soon:TVG6720": {
       "rank": 1,
-      "title": "Cool Neutrals projects out of stock ~Sep 6, 2026",
+      "title": "Cool Neutrals projects out of stock ~Sep 8, 2026",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
     },
     "eyeshadow-quads|oos-soon:TVG6700": {
       "rank": 1,
-      "title": "Warm Neutrals projects out of stock ~Sep 6, 2026",
+      "title": "Warm Neutrals projects out of stock ~Sep 8, 2026",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
     },
     "triple-threat-reform|pdp-drag:TVG7150": {
       "rank": 2,
       "title": "Mackenzie PDP converts below the launch average",
       "firstSeen": "2026-09-02",
-      "lastPosted": "2026-09-02"
+      "lastPosted": "2026-09-07"
     },
     "triple-threat-reform|pdp-drag:TVG4880": {
       "rank": 2,
       "title": "Dionne PDP converts below the launch average",
       "firstSeen": "2026-09-04",
-      "lastPosted": "2026-09-04"
-    },
-    "lasting-mark-lip-stain|pdp-drag:TVG7230": {
-      "rank": 2,
-      "title": "Li PDP converts below the launch average",
-      "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
     },
     "lasting-mark-lip-stain|pdp-drag:TVG7220": {
       "rank": 2,
       "title": "Brandy PDP converts below the launch average",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
+    },
+    "lasting-mark-lip-stain|pdp-drag:TVG7230": {
+      "rank": 2,
+      "title": "Li PDP converts below the launch average",
+      "firstSeen": "2026-09-01",
+      "lastPosted": "2026-09-07"
     },
     "beb-hoda-mila|pdp-drag:TVG4770": {
       "rank": 2,
       "title": "Mila PDP converts below the launch average",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
     },
     "psl-pout-hero|behind-plan:TBB013": {
       "rank": 3,
       "title": "Pumpkin Spice Latte is behind plan",
       "firstSeen": "2026-09-06",
-      "lastPosted": "2026-09-06"
+      "lastPosted": "2026-09-07"
     },
     "lasting-mark-lip-stain|behind-plan:TVG7230": {
       "rank": 3,
       "title": "Li is behind plan",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
     },
     "beb-hoda-mila|behind-plan:TVG4770": {
       "rank": 3,
       "title": "Mila is behind plan",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
     },
     "becca-brow|behind-plan:TVG6710": {
       "rank": 3,
       "title": "Brow Liner is behind plan",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
     },
     "becca-brow|behind-plan:TVG6680": {
       "rank": 3,
       "title": "Brow Pencil is behind plan",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
     },
     "beb-hoda-mila|pacing": {
       "rank": 4,
       "title": "Last 7 days are pacing behind plan",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
     },
     "becca-brow|pacing": {
       "rank": 4,
       "title": "Last 7 days are pacing behind plan",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-01"
+      "lastPosted": "2026-09-07"
     }
   }
 }
