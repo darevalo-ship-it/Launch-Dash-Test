@@ -95,6 +95,15 @@
     tbody tr:last-child { border-bottom:none; }
     tbody tr:hover:not(.tot) { background:var(--tc-teal-light); }
     tbody tr.tot { background:var(--tc-teal-light); font-weight:600; }
+    /* Weekly roll-ups are subordinate to the days they summarise — a tinted
+       rule rather than another highlighted row, so the daily rhythm still
+       reads top to bottom. */
+    tbody tr.wk { background:var(--bg); font-weight:600; }
+    tbody tr.wk td { border-top:1px solid var(--border); }
+    /* Applies to the grand total's day count as well as the weekly ranges. */
+    .wk-range { font-weight:400; color:var(--muted); font-size:11px; margin-left:6px; }
+    tbody tr.grand { background:var(--tc-teal-light); font-weight:700; }
+    tbody tr.grand td { border-top:2px solid var(--tc-teal); }
     td { padding:11px 16px; white-space:nowrap; }
     td.r { text-align:right; font-variant-numeric:tabular-nums; }
     .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:8px; vertical-align:middle; }
@@ -343,6 +352,11 @@
           <thead><tr><th>Date</th><th class="r">Units</th><th class="r">Plan Units</th><th class="r">Var.</th><th class="r">% to Plan</th><th class="r">Net Sales</th><th class="r">US Units</th><th class="r">CA Units</th><th class="r">Cum. Units</th><th class="r">Cum. Plan</th><th class="r">Cum. Net Sales</th></tr></thead>
           <tbody id="tbl-daily"></tbody>
         </table>
+      </div>
+      <div style="padding:0 20px 14px"><p class="data-note">Weekly lines roll up the seven days above them, counted
+        from the launch date rather than the calendar, so days 1&ndash;7 are Week 1. A part-week at the end gets no
+        line until it completes. The <strong>Total</strong> sums the daily rows only &mdash; the weekly lines are the
+        same days again, so counting both would double every figure.</p>
       </div>
     </div>
   </div>
@@ -804,29 +818,147 @@ function planMaps(d) {
   return { cum, daily };
 }
 
+/* Daily Sales Detail.
+
+   Rows are days, with a roll-up after each COMPLETE launch week and a grand
+   total at the bottom. Weeks are counted from the launch date, not the
+   calendar — days 1-7 are week 1 — because that is how everything else on
+   this page is measured, and a Monday-to-Sunday split would cut launch week
+   across two rows.
+
+   The roll-ups are derived from the days they sit under, so the grand total
+   sums the DAYS only. Adding the week lines in as well would count every day
+   twice. */
+const DAYS_PER_WEEK = 7;
+const weekIndex = (launchDate, date) => Math.floor(daysBetween(launchDate, date) / DAYS_PER_WEEK);
+
+/* Running totals for a week or for the whole table. */
+function dailyTotals() {
+  return {days: 0, units: 0, plan: null, netSales: 0, usUnits: 0, caUnits: 0,
+    add(r, plan) {
+      this.days++;
+      this.units += r.units;
+      this.netSales += r.netSales;
+      this.usUnits += r.usUnits ?? 0;
+      this.caUnits += r.caUnits ?? 0;
+      if (plan != null) this.plan = (this.plan ?? 0) + plan;
+    }};
+}
+
+/* Same rows the table draws, flattened for CSV. Kept beside the renderer so
+   the two cannot drift on what counts as a complete week. */
+function dailyExportRows(d, pm) {
+  const line = (type, label, t, cumU, cumP, cumS, nc, rc) =>
+    [type, label, t.units, t.plan ?? '', t.plan == null ? '' : t.units - t.plan,
+     t.plan ? (t.units / t.plan * 100).toFixed(1) : '',
+     Math.round(t.netSales * 100) / 100, t.usUnits, t.caUnits,
+     cumU ?? '', cumP ?? '', cumS ?? '', nc ?? '', rc ?? ''];
+  const out = [];
+  let week = dailyTotals(), total = dailyTotals();
+  d.dailySales.forEach((r, i) => {
+    const plan = pm.daily[r.date] ?? null;
+    week.add(r, plan);
+    total.add(r, plan);
+    const day = dailyTotals();
+    day.add(r, plan);
+    out.push(line('daily', r.date, day, r.cumUnits, pm.cum[r.date], r.cumSales,
+                  r.newCustomers, r.retCustomers));
+    const w = weekIndex(d.launchDate, r.date), next = d.dailySales[i + 1];
+    if (!next || weekIndex(d.launchDate, next.date) !== w) {
+      if (week.days === DAYS_PER_WEEK) {
+        const first = d.dailySales[i - DAYS_PER_WEEK + 1];
+        out.push(line('week', `Week ${w + 1} (${first.date} to ${r.date})`, week,
+                      r.cumUnits, pm.cum[r.date], r.cumSales));
+      }
+      week = dailyTotals();
+    }
+  });
+  out.push(line('total', `${total.days} days`, total));
+  return out;
+}
+
 function renderDailyTable(d) {
   const body = document.getElementById('tbl-daily');
   const pm = planMaps(d);
-  body.innerHTML = d.dailySales.map(r => {
-    const plan = pm.daily[r.date] ?? null;
-    const varU = plan == null ? null : r.units - plan;
-    const pct  = plan ? r.units / plan * 100 : null;
-    const vc   = varU == null ? 'var(--muted)' : varU >= 0 ? 'var(--positive)' : 'var(--danger)';
-    return `<tr>
-    <td data-sort="${r.date}">${fmt.day(r.date)}</td>
-    <td class="r">${fmt.num(r.units)}</td>
-    <td class="r">${plan != null ? fmt.num(plan) : '—'}</td>
-    <td class="r" style="color:${vc}">${varU == null ? '—' : (varU >= 0 ? '+' : '') + fmt.num(varU)}</td>
-    <td class="r" style="color:${ptpColor(pct)}">${fmt.pct(pct)}</td>
-    <td class="r">${fmt.cur(r.netSales)}</td>
-    <td class="r">${r.usUnits != null ? fmt.num(r.usUnits) : '—'}</td>
-    <td class="r">${r.caUnits != null ? fmt.num(r.caUnits) : '—'}</td>
-    <td class="r">${fmt.num(r.cumUnits)}</td>
-    <td class="r">${pm.cum[r.date] != null ? fmt.num(pm.cum[r.date]) : '—'}</td>
-    <td class="r">${fmt.cur(r.cumSales)}</td>
-  </tr>`;
-  }).join('') || '<tr><td colspan="11" style="text-align:center;padding:20px;color:var(--muted)">No daily data</td></tr>';
+  const rows = d.dailySales;
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:20px;color:var(--muted)">No daily data</td></tr>';
+    return;
+  }
 
+  const cell = (v, style) => `<td class="r"${style ? ` style="${style}"` : ''}>${v}</td>`;
+  const varCell = (units, plan) => {
+    const varU = plan == null ? null : units - plan;
+    const c = varU == null ? 'var(--muted)' : varU >= 0 ? 'var(--positive)' : 'var(--danger)';
+    return cell(varU == null ? '—' : (varU >= 0 ? '+' : '') + fmt.num(varU), `color:${c}`);
+  };
+  const pctCell = (units, plan) => {
+    const pct = plan ? units / plan * 100 : null;
+    return cell(fmt.pct(pct), `color:${ptpColor(pct)}`);
+  };
+
+  let week = dailyTotals(), total = dailyTotals();
+  const out = [];
+  rows.forEach((r, i) => {
+    const plan = pm.daily[r.date] ?? null;
+    week.add(r, plan);
+    total.add(r, plan);
+    out.push(`<tr>
+    <td data-sort="${r.date}">${fmt.day(r.date)}</td>
+    ${cell(fmt.num(r.units))}
+    ${cell(plan != null ? fmt.num(plan) : '—')}
+    ${varCell(r.units, plan)}
+    ${pctCell(r.units, plan)}
+    ${cell(fmt.cur(r.netSales))}
+    ${cell(r.usUnits != null ? fmt.num(r.usUnits) : '—')}
+    ${cell(r.caUnits != null ? fmt.num(r.caUnits) : '—')}
+    ${cell(fmt.num(r.cumUnits))}
+    ${cell(pm.cum[r.date] != null ? fmt.num(pm.cum[r.date]) : '—')}
+    ${cell(fmt.cur(r.cumSales))}
+  </tr>`);
+
+    // Close the week when the next row belongs to a later one, or at the end
+    // of the data — but only if it actually ran its full seven days. A
+    // trailing part-week gets no line: "week 3 so far" sitting under two
+    // complete weeks invites a comparison that is not there.
+    const w = weekIndex(d.launchDate, r.date), next = rows[i + 1];
+    if (!next || weekIndex(d.launchDate, next.date) !== w) {
+      if (week.days === DAYS_PER_WEEK) {
+        const first = rows[i - DAYS_PER_WEEK + 1];
+        out.push(`<tr class="wk">
+    <td>Week ${w + 1}<span class="wk-range">${fmt.day(first.date)} – ${fmt.day(r.date)}</span></td>
+    ${cell(fmt.num(week.units))}
+    ${cell(week.plan != null ? fmt.num(week.plan) : '—')}
+    ${varCell(week.units, week.plan)}
+    ${pctCell(week.units, week.plan)}
+    ${cell(fmt.cur(week.netSales))}
+    ${cell(fmt.num(week.usUnits))}
+    ${cell(fmt.num(week.caUnits))}
+    ${cell(fmt.num(r.cumUnits))}
+    ${cell(pm.cum[r.date] != null ? fmt.num(pm.cum[r.date]) : '—')}
+    ${cell(fmt.cur(r.cumSales))}
+  </tr>`);
+      }
+      week = dailyTotals();
+    }
+  });
+
+  // Cumulative columns stay blank on the total: the running total on the last
+  // day is the same number as the total itself, and printing it twice only
+  // invites the question of how the two differ.
+  out.push(`<tr class="grand">
+    <td>Total<span class="wk-range">${fmt.num(total.days)} day${total.days !== 1 ? 's' : ''}</span></td>
+    ${cell(fmt.num(total.units))}
+    ${cell(total.plan != null ? fmt.num(total.plan) : '—')}
+    ${varCell(total.units, total.plan)}
+    ${pctCell(total.units, total.plan)}
+    ${cell(fmt.cur(total.netSales))}
+    ${cell(fmt.num(total.usUnits))}
+    ${cell(fmt.num(total.caUnits))}
+    ${cell('—')}${cell('—')}${cell('—')}
+  </tr>`);
+
+  body.innerHTML = out.join('');
 }
 
 /* ── CSV EXPORT ──
@@ -936,18 +1068,15 @@ const EXPORTS = {
     const v = filteredView(LOADED), pm = planMaps(v);
     return { slug: 'daily-sales', title: 'Daily Sales Detail',
       filters: () => overviewFilters(true),
-      columns: ['Date', 'Units', 'Plan Units', 'Variance Units', 'Pct to Plan',
+      // Row Type leads so the file can be filtered or pivoted without
+      // re-deriving the weeks — and so that summing a column by hand cannot
+      // silently double-count: the week and total rows are roll-ups of the
+      // daily rows, not extra data.
+      columns: ['Row Type', 'Date', 'Units', 'Plan Units', 'Variance Units', 'Pct to Plan',
                 'Net Sales USD', 'US Units', 'CA Units', 'Cum Units',
                 'Cum Plan Units', 'Cum Net Sales USD',
                 'New Customers', 'Returning Customers'],
-      rows: v.dailySales.map(r => {
-        const plan = pm.daily[r.date] ?? null;
-        return [r.date, r.units, plan ?? '', plan == null ? '' : r.units - plan,
-                plan ? (r.units / plan * 100).toFixed(1) : '', r.netSales,
-                r.usUnits ?? '', r.caUnits ?? '', r.cumUnits,
-                pm.cum[r.date] ?? '', r.cumSales,
-                r.newCustomers ?? '', r.retCustomers ?? ''];
-      }) };
+      rows: dailyExportRows(v, pm) };
   },
   'traffic-channels': () => ({
     slug: 'traffic-by-channel', title: 'Channel Breakdown', filters: LAUNCH_WIDE,
