@@ -52,6 +52,11 @@
        gutters allow, which is a silly reason to make people scroll. */
     @media(max-width:1400px) {
       body:has(#view-analysis:not([style*="none"])) .main { padding-left:14px; padding-right:14px; }
+      /* Product is the only long free-text column, and the newer launch names
+         ("Pumpkin Spice Latte Pout Hero™ Lip Balm") pushed the table back over
+         the gutters on a 13" screen. Letting just that column wrap costs a
+         second line on the longest names and keeps every number in view. */
+      .sum-card td.sum-prod, .sum-card th[data-k="product"] { white-space:normal; }
     }
 
     .hub-tabs { display:flex; gap:6px; margin-bottom:24px; border-bottom:1px solid var(--border); }
@@ -169,6 +174,22 @@
     .section-title.split { display:flex; align-items:center; justify-content:space-between; gap:12px; }
     /* Above the table, not below it: the colours are how people scan the rows,
        so the key has to arrive before the rows do. */
+    .sum-filter { display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+                  padding:12px 14px; border-bottom:1px solid var(--border); }
+    .sum-filter .sf-lead { font-size:11px; font-weight:600; text-transform:uppercase;
+                           letter-spacing:.05em; color:var(--muted); margin-right:2px; }
+    .sf-chip { font:500 12px inherit; padding:5px 11px; border-radius:999px; cursor:pointer;
+               border:1px solid var(--border); background:#fff; color:var(--text);
+               display:inline-flex; align-items:center; gap:6px; transition:opacity .12s; }
+    .sf-chip .dot { width:7px; height:7px; border-radius:50%; background:var(--tc-teal); }
+    /* Hidden launches stay legible rather than disappearing — you have to be
+       able to find the one you switched off in order to switch it back on. */
+    .sf-chip.off { background:var(--bg); color:var(--muted); border-style:dashed; }
+    .sf-chip.off .dot { background:var(--border); }
+    .sf-reset { font:600 12px inherit; margin-left:auto; padding:5px 12px; border-radius:8px;
+                border:1px solid var(--border); background:#fff; color:var(--muted); cursor:pointer; }
+    .sf-reset:hover:not(:disabled) { color:var(--text); border-color:var(--muted); }
+    .sf-reset:disabled { opacity:.45; cursor:default; }
     .sum-legend { display:flex; align-items:center; gap:16px; flex-wrap:wrap;
                   padding:12px 14px; border-bottom:1px solid var(--border);
                   font-size:11.5px; color:var(--muted); }
@@ -220,6 +241,7 @@
       <button type="button" class="btn-export" id="sum-export" title="Download this table as CSV"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 12 5 5 5-5"/><path d="M4 21h16"/></svg>Export to Excel (CSV)</button>
     </div>
     <div class="sum-card">
+      <div class="sum-filter" id="sum-filter"></div>
       <div class="sum-legend" id="sum-legend"></div>
       <div class="sum-wrap">
         <table>
@@ -430,6 +452,7 @@
     : w <= COVER_AMBER ? 'rgba(245,158,11,.14)' : 'rgba(34,160,107,.10)';
 
   const sumRows = live.flatMap(l => (l.byVariant || []).map(v => ({
+    launchId: l.launchId,
     product: l.name, variant: v.name, sku: v.sku,
     launch: l.launchDate, curveEnd: v.planEndDate || l.planEndDate,
     ptp: v.pctToPlanUnits, inv: v.inventoryUnits,
@@ -445,8 +468,15 @@
   })));
 
   const num = v => v == null ? '—' : Number(v).toLocaleString('en-US');
+
+  /* Launches switched off in the filter bar. Empty by default — the table
+     shows everything until someone chooses otherwise. */
+  const hiddenLaunches = new Set();
+  const visibleRows = () => sumRows.filter(r => !hiddenLaunches.has(r.launchId));
+
   const renderSummary = () => {
-    document.getElementById('sum-body').innerHTML = sumRows.length ? sumRows.map(r => `
+    const rows = visibleRows();
+    document.getElementById('sum-body').innerHTML = rows.length ? rows.map(r => `
       <tr>
         <td class="sum-prod"><a href="${r.href}" style="color:inherit;text-decoration:none">${r.product}</a></td>
         <td>${r.variant}</td>
@@ -461,28 +491,34 @@
         <td class="r pill-risk" style="color:${coverColour(r.weeks)}">${num(r.npdInv)}</td>
         <td class="r ref">${num(r.inv)}</td>
       </tr>`).join('')
-      : '<tr><td colspan="10" style="text-align:center;padding:22px;color:var(--muted)">No live launches inside their decay curve.</td></tr>';
+      : `<tr><td colspan="11" style="text-align:center;padding:22px;color:var(--muted)">${
+          sumRows.length ? 'Every launch is hidden — switch one back on above.'
+                         : 'No live launches inside their decay curve.'}</td></tr>`;
+    renderLegend();
+    renderNote();
   };
-  renderSummary();
 
-  // Counts come from the rows themselves so the key doubles as a tally of how
-  // many SKUs are actually in trouble — the number people want first.
+  // Counts come from the rows on screen, so the key doubles as a tally of how
+  // many SKUs are actually in trouble — and follows the launch filter, since a
+  // tally that counted hidden launches would answer a question nobody asked.
   const band = w => w == null ? 'none' : w < COVER_RED ? 'red' : w <= COVER_AMBER ? 'amber' : 'green';
-  const tally = b => sumRows.filter(r => band(r.weeks) === b).length;
-  const legendItem = (b, label) => {
-    const n = tally(b);
+  const legendItem = (rows, b, label) => {
+    const n = rows.filter(r => band(r.weeks) === b).length;
     if (!n) return '';
     const w = b === 'red' ? 1 : b === 'amber' ? COVER_RED + 1 : COVER_AMBER + 1;
     return `<span class="lg-item"><code class="lg-chip" style="color:${coverColour(b === 'none' ? null : w)};`
       + `background:${coverTint(b === 'none' ? null : w)}">SKU</code>${label} · ${n}</span>`;
   };
-  document.getElementById('sum-legend').innerHTML =
-    `<span class="lg-lead">SKU colour = weeks of stock left</span>`
-    + legendItem('red', `under ${COVER_RED} weeks`)
-    + legendItem('amber', `${COVER_RED}–${COVER_AMBER} weeks`)
-    + legendItem('green', `over ${COVER_AMBER} weeks`)
-    + legendItem('none', 'no recent sales to project from')
-    + `<span class="lg-item">Real Inventory and Wks of Stock carry the same colour.</span>`;
+  const renderLegend = () => {
+    const rows = visibleRows();
+    document.getElementById('sum-legend').innerHTML =
+      `<span class="lg-lead">SKU colour = weeks of stock left</span>`
+      + legendItem(rows, 'red', `under ${COVER_RED} weeks`)
+      + legendItem(rows, 'amber', `${COVER_RED}–${COVER_AMBER} weeks`)
+      + legendItem(rows, 'green', `over ${COVER_AMBER} weeks`)
+      + legendItem(rows, 'none', 'no recent sales to project from')
+      + `<span class="lg-item">Real Inventory and Wks of Stock carry the same colour.</span>`;
+  };
 
   /* ── CSV EXPORT ──
      Same shape as the launch pages: a provenance block, a blank line, then
@@ -498,7 +534,14 @@
   const exportSummary = () => {
     const meta = [
       ['Table', 'Live Launch Summary'],
-      ['Scope', `${sumRows.length} variants across ${live.length} live launches, inside their decay curve`],
+      ['Scope', `${visibleRows().length} variants across ${live.length - hiddenLaunches.size} live launches, inside their decay curve`],
+      // The export follows what is on screen, and says so — a file that
+      // quietly held launches the reader had filtered out would be worse than
+      // one that held all of them.
+      ['Launch filter', hiddenLaunches.size
+        ? `${live.length - hiddenLaunches.size} of ${live.length} shown; hidden: `
+          + live.filter(l => hiddenLaunches.has(l.launchId)).map(l => l.name).join('; ')
+        : 'All launches shown'],
       ['Data cutoff', META.dataCutoff],
       ['Generated at', new Date().toISOString()],
       // The column's own label, not the internal key — "npdInv ascending"
@@ -524,7 +567,7 @@
     const out = meta.map(r => r.map(csvCell).join(','));
     out.push('');
     out.push(columns.map(csvCell).join(','));
-    for (const r of sumRows) {
+    for (const r of visibleRows()) {
       out.push([r.product, r.variant, r.sku, r.launch, r.curveEnd ?? '',
                 r.ptp ?? '', r.weeks ?? '', band(r.weeks),
                 r.inv === 0 ? 'out of stock' : (r.oos ?? ''),
@@ -535,7 +578,7 @@
       { type: 'text/csv;charset=utf-8;' }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = `launch-hub_live-launch-summary_${META.dataCutoff}.csv`;
+    a.download = `launch-hub_live-launch-summary${hiddenLaunches.size ? '_' + (live.length - hiddenLaunches.size) + '-launches' : ''}_${META.dataCutoff}.csv`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -558,8 +601,11 @@
     }
   });
 
-  document.getElementById('sum-note').innerHTML =
-    `${sumRows.length} variant${sumRows.length !== 1 ? 's' : ''} across ${live.length} live launch${live.length !== 1 ? 'es' : ''}. ` +
+  const renderNote = () => {
+    const rows = visibleRows(), shownLaunches = live.length - hiddenLaunches.size;
+    document.getElementById('sum-note').innerHTML =
+    `${rows.length} variant${rows.length !== 1 ? 's' : ''} across ${shownLaunches} live launch${shownLaunches !== 1 ? 'es' : ''}` +
+    (hiddenLaunches.size ? ` (${hiddenLaunches.size} hidden)` : '') + '. ' +
     `<strong>% to Plan</strong> is units against plan through ${fmtSmart(META.dataCutoff)} — the same number as the ` +
     `<strong>% to Plan</strong> column on each launch page. <strong>Curve Ends</strong> is the last day of that SKU's ` +
     `plan curve. ` +
@@ -580,9 +626,48 @@
     `holds with no replenishment arriving; neither is a forecast. ` +
     `On a launch only a few weeks old the trailing rate is still the launch spike, so cover reads short and ` +
     `<strong>Decay Curve OOS</strong>, which assumes demand decays, will sit much further out. Click any column to sort.`;
+  };
+
+  /* Launch filter. All launches are on by default — the point of this table is
+     seeing everything at once — but with seven live launches and rising, being
+     able to drop the ones you are not working on makes it readable again.
+     Reset clears both the hidden launches and the sort, since those are the
+     only two things that change what this table shows. */
+  const renderFilter = () => {
+    const dirty = hiddenLaunches.size > 0 || sortKey !== null;
+    document.getElementById('sum-filter').innerHTML =
+      `<span class="sf-lead">Launches</span>`
+      + live.map(l => `<button type="button" class="sf-chip${hiddenLaunches.has(l.launchId) ? ' off' : ''}" `
+          + `data-launch="${l.launchId}" aria-pressed="${!hiddenLaunches.has(l.launchId)}" `
+          + `title="${hiddenLaunches.has(l.launchId) ? 'Show' : 'Hide'} ${l.name}">`
+          + `<span class="dot" style="${hiddenLaunches.has(l.launchId) ? '' : 'background:' + (l.accent || 'var(--tc-teal)')}"></span>`
+          + `${l.name}</button>`).join('')
+      + `<button type="button" class="sf-reset" id="sum-reset"${dirty ? '' : ' disabled'} `
+      + `title="Show every launch and clear the sort">Reset filters</button>`;
+
+    document.querySelectorAll('#sum-filter [data-launch]').forEach(btn => btn.onclick = () => {
+      const id = btn.dataset.launch;
+      if (hiddenLaunches.has(id)) hiddenLaunches.delete(id); else hiddenLaunches.add(id);
+      renderFilter();
+      renderSummary();
+    });
+    const reset = document.getElementById('sum-reset');
+    if (reset) reset.onclick = () => {
+      hiddenLaunches.clear();
+      sortKey = null;
+      sortAsc = true;
+      sumRows.sort((a, b) => defaultOrder.get(a) - defaultOrder.get(b));
+      document.querySelectorAll('.sum-card th[data-k]').forEach(th => th.removeAttribute('aria-sort'));
+      renderFilter();
+      renderSummary();
+    };
+  };
 
   // Sorting: click a header, toggle direction. Nulls always sink.
   let sortKey = null, sortAsc = true;
+  // Position of each row as the refresh emitted it, so Reset can put the table
+  // back rather than leaving it in whatever order the last click produced.
+  const defaultOrder = new Map(sumRows.map((r, i) => [r, i]));
   document.querySelectorAll('.sum-card th[data-k]').forEach(th => th.onclick = () => {
     const k = th.dataset.k;
     sortAsc = sortKey === k ? !sortAsc : true;
@@ -595,8 +680,14 @@
       const c = typeof x === 'number' && typeof y === 'number' ? x - y : String(x).localeCompare(String(y));
       return sortAsc ? c : -c;
     });
+    document.querySelectorAll('.sum-card th[data-k]').forEach(o => o.removeAttribute('aria-sort'));
+    th.setAttribute('aria-sort', sortAsc ? 'ascending' : 'descending');
+    renderFilter();          // Reset becomes available once a sort is applied
     renderSummary();
   });
+
+  renderFilter();
+  renderSummary();
 
   document.getElementById('hdr-meta').innerHTML = [
     `<span class="stat-pill green">${live.length} Live Launch${live.length !== 1 ? 'es' : ''}</span>`,
