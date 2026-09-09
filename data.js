@@ -3225,17 +3225,9 @@ window.DASHBOARD_DATA = {
           {
             "rank": 2,
             "key": "atc-drop:TVG6720",
-            "missedAtc": 695,
-            "title": "Cool Neutrals add-to-cart rate fell to 14.0%",
-            "detail": "Down 2.7 points from 16.7% the week before, on 25,851 views \u2014 about 695 fewer add-to-carts, roughly $8,865 at this shade's own purchase rate and price.",
-            "action": "Check whether anything changed on the page or in the traffic mix \u2014 creative, price, promo placement, or a paid source sending colder traffic."
-          },
-          {
-            "rank": 2,
-            "key": "atc-drop:TVG6700",
-            "missedAtc": 559,
-            "title": "Warm Neutrals add-to-cart rate fell to 12.6%",
-            "detail": "Down 2.6 points from 15.2% the week before, on 21,583 views \u2014 about 559 fewer add-to-carts, roughly $7,830 at this shade's own purchase rate and price.",
+            "missedAtc": 708,
+            "title": "Cool Neutrals add-to-cart rate fell to 13.7%",
+            "detail": "Down 2.9 points from 16.7% the week before, on 24,057 views \u2014 about 708 fewer add-to-carts, roughly $9,031 at this shade's own purchase rate and price.",
             "action": "Check whether anything changed on the page or in the traffic mix \u2014 creative, price, promo placement, or a paid source sending colder traffic."
           }
         ],
@@ -7243,10 +7235,10 @@ window.DASHBOARD_DATA = {
           },
           {
             "rank": 2,
-            "key": "atc-drop:TVG7240",
-            "missedAtc": 544,
-            "title": "Liliana add-to-cart rate fell to 16.3%",
-            "detail": "Down 3.3 points from 19.6% the week before, on 16,335 views \u2014 about 544 fewer add-to-carts, roughly $5,255 at this shade's own purchase rate and price.",
+            "key": "atc-drop:TVG7250",
+            "missedAtc": 575,
+            "title": "Daniella add-to-cart rate fell to 24.1%",
+            "detail": "Down 2.7 points from 26.8% the week before, on 21,269 views \u2014 about 575 fewer add-to-carts, roughly $5,845 at this shade's own purchase rate and price.",
             "action": "Check whether anything changed on the page or in the traffic mix \u2014 creative, price, promo placement, or a paid source sending colder traffic."
           },
           {
@@ -8710,9 +8702,9 @@ window.DASHBOARD_DATA = {
           {
             "rank": 2,
             "key": "atc-drop:TVG4961",
-            "missedAtc": 1025,
-            "title": "Kaisa add-to-cart rate fell to 31.2%",
-            "detail": "Down 8.5 points from 39.8% the week before, on 12,038 views \u2014 about 1,025 fewer add-to-carts, roughly $11,657 at this shade's own purchase rate and price.",
+            "missedAtc": 1082,
+            "title": "Kaisa add-to-cart rate fell to 30.8%",
+            "detail": "Down 10.0 points from 40.8% the week before, on 10,850 views \u2014 about 1,082 fewer add-to-carts, roughly $12,306 at this shade's own purchase rate and price.",
             "action": "Check whether anything changed on the page or in the traffic mix \u2014 creative, price, promo placement, or a paid source sending colder traffic."
           }
         ],

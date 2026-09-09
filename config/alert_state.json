@@ -6,110 +6,124 @@
     "make that alert fire again on the next run."
   ],
   "lastRun": "2026-09-09",
-  "lastDigest": "2026-09-07",
+  "rulesVersion": 2,
+  "lastDigest": "2026-09-09",
   "dataCutoff": "2026-09-08",
   "alerts": {
-    "psl-pout-hero|oos-soon:TBB013": {
-      "rank": 1,
-      "title": "Pumpkin Spice Latte projects out of stock ~Sep 18, 2026",
-      "firstSeen": "2026-09-03",
-      "lastPosted": "2026-09-07"
-    },
-    "lasting-mark-lip-stain|oos-soon:TVG7250": {
-      "rank": 1,
-      "title": "Daniella projects out of stock ~Sep 11, 2026",
-      "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-07"
-    },
-    "eyeshadow-quads|oos-soon:TVG6700": {
-      "rank": 1,
-      "title": "Warm Neutrals projects out of stock ~Sep 12, 2026",
+    "lasting-mark-lip-stain|oos:ca:TVG7250": {
+      "rank": 0,
+      "title": "Daniella is out of stock in Canada (.ca)",
       "firstSeen": "2026-09-09",
       "lastPosted": "2026-09-09"
     },
-    "eyeshadow-quads|oos-soon:TVG6720": {
+    "psl-pout-hero|oos-soon:ca:TBB013": {
       "rank": 1,
-      "title": "Cool Neutrals projects out of stock ~Sep 13, 2026",
-      "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-07"
+      "title": "Pumpkin Spice Latte runs out in Canada (.ca) in ~21 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
     },
-    "triple-threat-reform|pdp-drag:TVG7150": {
+    "psl-pout-hero|oos-soon:us:TBB013": {
+      "rank": 1,
+      "title": "Pumpkin Spice Latte runs out in US (.com) in ~9 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
+    },
+    "lasting-mark-lip-stain|oos-soon:ca:TVG7220": {
+      "rank": 1,
+      "title": "Brandy runs out in Canada (.ca) in ~14 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
+    },
+    "lasting-mark-lip-stain|oos-soon:us:TVG7250": {
+      "rank": 1,
+      "title": "Daniella runs out in US (.com) in ~3 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
+    },
+    "lasting-mark-lip-stain|oos-soon:ca:TVG7260": {
+      "rank": 1,
+      "title": "Leslie runs out in Canada (.ca) in ~3 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
+    },
+    "eyeshadow-quads|oos-soon:us:TVG6720": {
+      "rank": 1,
+      "title": "Cool Neutrals runs out in US (.com) in ~4 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
+    },
+    "eyeshadow-quads|oos-soon:us:TVG6700": {
+      "rank": 1,
+      "title": "Warm Neutrals runs out in US (.com) in ~3 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
+    },
+    "triple-threat-reform|atc-drop:TVG4961": {
       "rank": 2,
-      "title": "Mackenzie PDP converts below the launch average",
-      "firstSeen": "2026-09-02",
-      "lastPosted": "2026-09-07"
+      "title": "Kaisa add-to-cart rate fell to 30.8%",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
     },
-    "triple-threat-reform|pdp-drag:TVG4880": {
+    "lasting-mark-lip-stain|atc-drop:TVG7250": {
       "rank": 2,
-      "title": "Dionne PDP converts below the launch average",
-      "firstSeen": "2026-09-04",
-      "lastPosted": "2026-09-07"
+      "title": "Daniella add-to-cart rate fell to 24.1%",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
     },
-    "lasting-mark-lip-stain|pdp-drag:TVG7220": {
+    "eyeshadow-quads|atc-drop:TVG6720": {
       "rank": 2,
-      "title": "Brandy PDP converts below the launch average",
-      "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-07"
+      "title": "Cool Neutrals add-to-cart rate fell to 13.7%",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
     },
-    "lasting-mark-lip-stain|pdp-drag:TVG7230": {
-      "rank": 2,
-      "title": "Li PDP converts below the launch average",
-      "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-07"
-    },
-    "beb-hoda-mila|pdp-drag:TVG4770": {
-      "rank": 2,
-      "title": "Mila PDP converts below the launch average",
-      "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-07"
-    },
-    "psl-pout-hero|behind-plan:TBB013": {
+    "psl-pout-hero|recent-behind:TBB013": {
       "rank": 3,
-      "title": "Pumpkin Spice Latte is behind plan",
-      "firstSeen": "2026-09-06",
-      "lastPosted": "2026-09-07"
+      "title": "Pumpkin Spice Latte is behind plan over the last 7 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
     },
-    "lasting-mark-lip-stain|behind-plan:TVG7230": {
+    "lasting-mark-lip-stain|recent-behind:TVG7230": {
       "rank": 3,
-      "title": "Li is behind plan",
-      "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-07"
+      "title": "Li is behind plan over the last 7 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
     },
-    "beb-hoda-mila|behind-plan:TVG4770": {
+    "beb-hoda-mila|recent-behind:TVG6640": {
       "rank": 3,
-      "title": "Mila is behind plan",
-      "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-07"
+      "title": "Hoda is behind plan over the last 7 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
     },
-    "becca-brow|behind-plan:TVG6710": {
+    "becca-brow|recent-behind:TVG6710": {
       "rank": 3,
-      "title": "Brow Liner is behind plan",
-      "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-07"
+      "title": "Brow Liner is behind plan over the last 7 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
     },
-    "becca-brow|behind-plan:TVG6680": {
+    "becca-brow|recent-behind:TVG6690": {
       "rank": 3,
-      "title": "Brow Pencil is behind plan",
-      "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-07"
+      "title": "Brow Gel is behind plan over the last 7 days",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
     },
     "psl-pout-hero|pacing": {
       "rank": 4,
-      "title": "Last 7 days are pacing behind plan",
+      "title": "The whole launch is pacing behind plan",
       "firstSeen": "2026-09-09",
       "lastPosted": "2026-09-09"
     },
     "beb-hoda-mila|pacing": {
       "rank": 4,
-      "title": "Last 7 days are pacing behind plan",
+      "title": "The whole launch is pacing behind plan",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-07"
+      "lastPosted": "2026-09-09"
     },
     "becca-brow|pacing": {
       "rank": 4,
-      "title": "Last 7 days are pacing behind plan",
+      "title": "The whole launch is pacing behind plan",
       "firstSeen": "2026-09-01",
-      "lastPosted": "2026-09-07"
+      "lastPosted": "2026-09-09"
     }
-  }
+  },
+  "resolvedToday": []
 }
