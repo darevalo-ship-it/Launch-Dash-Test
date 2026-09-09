@@ -399,6 +399,28 @@ GROUP BY 1 ORDER BY PDP_VIEWS DESC
 """
 
 
+def q_pdp_windows(skus):
+    """Add-to-cart rate over the trailing week and the week before it.
+
+    The launch-to-date PDP figures cannot answer "is this getting worse".
+    A shade that has always converted at 4% is a merchandising fact; one that
+    fell from 12% to 4% last week is something that happened, and only the
+    second is worth waking anyone up for.
+    """
+    c = COLS["pdp"]
+    return f"""
+SELECT {c['sku']} AS SKU,
+       SUM(CASE WHEN CAST({c['date']} AS DATE) > %(pdp_mid)s THEN {c['views']} ELSE 0 END) AS RECENT_VIEWS,
+       SUM(CASE WHEN CAST({c['date']} AS DATE) > %(pdp_mid)s THEN {c['atc']}   ELSE 0 END) AS RECENT_ATC,
+       SUM(CASE WHEN CAST({c['date']} AS DATE) <= %(pdp_mid)s THEN {c['views']} ELSE 0 END) AS PRIOR_VIEWS,
+       SUM(CASE WHEN CAST({c['date']} AS DATE) <= %(pdp_mid)s THEN {c['atc']}   ELSE 0 END) AS PRIOR_ATC
+FROM {SRC_DB}.{c['table']}
+WHERE {c['sku']} IN ({sku_list_sql(skus)})
+  AND CAST({c['date']} AS DATE) BETWEEN %(pdp_start)s AND %(pdp_end)s
+GROUP BY 1
+"""
+
+
 def q_cross_sell(skus):
     c = COLS["affinity"]
     in_list = sku_list_sql(skus)
@@ -835,13 +857,13 @@ def _build_category(cur, skus, cat_patterns, params, lc, sku_meta):
 # than no alert.
 SIGNAL_RULES = {
     "oosSoonDays": 21,        # flag SKUs projected out of stock within this window
-    "atcDragRatio": 0.80,     # variant ATC rate below this share of the launch average
-    "atcDragMinMissed": 500,  # ...and at least this many estimated missed add-to-carts
-    "atcStarRatio": 1.20,     # variant ATC rate above this share of the average
-    "behindPlanPct": 85,
-    "aheadPlanPct": 115,
-    "pacingWindowDays": 7,
-    "pacingBehindPct": 85,
+    "atcDropPts": 2.0,        # percentage-point fall in ATC rate, week over week
+    "atcMinMissedAtc": 500,   # ...costing at least this many add-to-carts
+    "atcMinViews": 1000,      # ...on at least this many views in each week
+    "recentWindowDays": 7,    # trailing window for "how is it going lately"
+    "recentBehindPct": 85,    # recent units below this share of recent plan
+    "recentAheadPct": 115,
+    "minRecentPlanUnits": 50,  # ignore attainment on a plan too small to mean anything
     # Per-rule cap. Without it one rule fires five near-identical lines and
     # crowds every other signal type out of the group.
     "maxPerRule": 2,
@@ -852,130 +874,178 @@ def _num(v):
     return f"{int(round(float(v or 0))):,}"
 
 
+def _money(v):
+    return f"${int(round(float(v or 0))):,}"
+
+
 def _date(iso):
     if not iso:
         return ""
     return dt.date.fromisoformat(str(iso)[:10]).strftime("%b %-d, %Y")
 
 
-def project_oos(avail, run_rate, cutoff):
-    """(days_to_oos, iso_date) for available units at a sell-through rate.
+REGION_LABEL = {"us": "US (.com)", "ca": "Canada (.ca)"}
 
-    An assumption, not a forecast: it holds demand steady and assumes no
-    replenishment arrives. Returns (None, None) when there is nothing honest
-    to project from — no inventory figure at all, or no recent sales.
+
+def _stock_signals(by_variant, R):
+    """Stock alerts, per storefront.
+
+    Stock does not move between the two, so a combined alert can read
+    comfortable while one side is empty — and, worse, sends someone to solve a
+    demand problem when the real one is where the pallets are. Each region is
+    judged on its own units and its own sell-through.
     """
-    if avail is None:
-        return None, None                      # inventory source unavailable
-    if avail <= 0:
-        return 0, cutoff                       # already out of stock
-    if run_rate > 0:
-        days = int(avail // run_rate)
-        return days, str(dt.date.fromisoformat(cutoff) + dt.timedelta(days=days))
-    return None, None                          # no recent sales, no runway
+    out = []
+    for v in by_variant:
+        for rg in ("us", "ca"):
+            units = v.get(f"{rg}InventoryUnits")
+            if units is None:
+                continue
+            days = v.get(f"{rg}DaysToOOS")
+            label = REGION_LABEL[rg]
+            other = "ca" if rg == "us" else "us"
+            other_units = v.get(f"{other}InventoryUnits")
+            # A SKU healthy on the other side is a distribution problem, not a
+            # demand one, and the alert should say which.
+            lopsided = (other_units or 0) > 0 and units == 0
+            if units == 0:
+                out.append({
+                    "rank": 0, "key": f"oos:{rg}:{v['sku']}",
+                    "title": f"{v['name']} is out of stock in {label}",
+                    "detail": f"0 units in {label}."
+                              + (f" {_num(other_units)} units still in {REGION_LABEL[other]}, so this is a "
+                                 f"distribution problem, not a demand one." if lopsided else ""),
+                    "action": (f"Route or transfer stock to {label} — the units exist, they are in the wrong place."
+                               if lopsided else f"Reorder for {label}."),
+                })
+            elif days is not None and 0 < days <= R["oosSoonDays"]:
+                rate = v.get(f"{rg}RunRateUnitsPerDay")
+                weeks = round(units / rate / 7, 1) if rate else None
+                out.append({
+                    "rank": 1, "key": f"oos-soon:{rg}:{v['sku']}",
+                    "title": f"{v['name']} runs out in {label} in ~{days} days",
+                    "detail": f"{_num(units)} units left in {label} at {rate}/day"
+                              + (f" ({weeks} weeks cover)." if weeks is not None else "."),
+                    "action": f"Confirm a replenishment date for {label} with Demand Planning, "
+                              f"or plan for the shade to go dark there.",
+                })
+    # Out-of-stock first, then soonest.
+    out.sort(key=lambda a: (a["rank"], a["title"]))
+    by_rank = {}
+    for a in out:
+        by_rank.setdefault(a["rank"], []).append(a)
+    capped = []
+    for rank in sorted(by_rank):
+        capped.extend(by_rank[rank][: R["maxPerRule"] * 2])
+    return capped
 
 
-def compute_signals(by_variant, pdp, daily, plan_daily, cross_sell, cc):
+def compute_signals(by_variant, pdp, daily, plan_daily, cross_sell, cc,
+                    daily_by_sku=None, plan_by_sku=None, pdp_windows=None):
     """Returns {"attention": [...], "working": [...]}, attention ranked.
 
-    Ranks are the alert priority order: 0 out of stock, 1 projects OOS soon,
-    2 PDP conversion drag, 3 behind plan, 4 recent pacing. Slack takes the top
-    N across launches off the same ordering the page shows.
+    Every attention signal carries an `action` — the alert is only worth
+    sending if somebody can do something about it, and writing the action down
+    forces that test at the point the rule is written rather than leaving it to
+    whoever reads the message.
+
+    Ranks are the alert priority order: 0 out of stock, 1 running out soon,
+    2 conversion falling, 3 recent attainment, 4 launch pacing.
     """
     R, attention, working = SIGNAL_RULES, [], []
+    asp = {v["sku"]: (v["netSales"] / v["units"] if v.get("units") else 0) for v in by_variant}
+    name = {v["sku"]: v["name"] for v in by_variant}
 
-    for v in [v for v in by_variant if v.get("inventoryUnits") == 0]:
-        ptp = v.get("pctToPlanUnits")
+    attention.extend(_stock_signals(by_variant, R))
+
+    # ── Conversion, week over week ──────────────────────────────────────────
+    # A level ("below the launch average") is arithmetic: on a seven-shade
+    # launch five shades are below the mean by definition, so it fires forever
+    # and means nothing. A fall is an event.
+    for w in (pdp_windows or []):
+        rv, ra = w["recentViews"], w["recentAtc"]
+        pv, pa = w["priorViews"], w["priorAtc"]
+        if min(rv, pv) < R["atcMinViews"]:
+            continue
+        recent_rate, prior_rate = ra / rv * 100, pa / pv * 100
+        drop = prior_rate - recent_rate
+        missed = round(rv * drop / 100)
+        # Two gates, and both are needed. The point drop says the rate really
+        # moved rather than wobbled; the missed add-to-carts say it cost enough
+        # to be worth someone's morning. A two-point fall on a thousand views
+        # is twenty carts, which is noise wearing a percentage.
+        if drop < R["atcDropPts"] or missed < R["atcMinMissedAtc"]:
+            continue
+        # Valued at this SKU's own ATC-to-purchase rate and average selling
+        # price, so the figure is the SKU's own behaviour rather than a
+        # launch-wide assumption applied to it.
+        row = next((r for r in pdp if r["sku"] == w["sku"]), None)
+        conv = (row["purch"] / row["atc"]) if row and row.get("atc") else 0
+        value = missed * conv * asp.get(w["sku"], 0)
         attention.append({
-            "rank": 0, "key": f"oos:{v['sku']}",
-            "title": f"{v['name']} is out of stock",
-            "detail": "0 units available across all fulfillment locations, at "
-                      + (f"{ptp:.1f}% to plan." if ptp is not None else "unknown plan attainment."),
+            "rank": 2, "key": f"atc-drop:{w['sku']}", "missedAtc": missed,
+            "title": f"{name.get(w['sku'], w['sku'])} add-to-cart rate fell to {recent_rate:.1f}%",
+            "detail": f"Down {drop:.1f} points from {prior_rate:.1f}% the week before, on "
+                      f"{_num(rv)} views — about {_num(missed)} fewer add-to-carts"
+                      + (f", roughly {_money(value)} at this shade's own purchase rate and price." if value > 0 else "."),
+            "action": "Check whether anything changed on the page or in the traffic mix — "
+                      "creative, price, promo placement, or a paid source sending colder traffic.",
         })
+    # Keep the costliest, not the first alphabetically.
+    for extra in sorted([a for a in attention if a["rank"] == 2],
+                        key=lambda a: -a["missedAtc"])[R["maxPerRule"]:]:
+        attention.remove(extra)
 
-    soon = sorted([v for v in by_variant
-                   if (v.get("daysToOOS") or 0) > 0 and v["daysToOOS"] <= R["oosSoonDays"]],
-                  key=lambda v: v["daysToOOS"])[:R["maxPerRule"]]
-    for v in soon:
+    # ── Recent attainment, per SKU ──────────────────────────────────────────
+    # Cumulative attainment keeps a SKU flagged for a stumble in week one long
+    # after it recovered. What matters is the last seven days.
+    recent_by_sku = _recent_attainment(daily_by_sku, plan_by_sku, R["recentWindowDays"])
+    behind = sorted(
+        [(sku, u, p) for sku, (u, p) in recent_by_sku.items()
+         if p >= R["minRecentPlanUnits"] and u / p * 100 < R["recentBehindPct"]],
+        key=lambda x: x[1] / x[2])
+    for sku, u, p in behind[: R["maxPerRule"]]:
+        short = p - u
         attention.append({
-            "rank": 1, "key": f"oos-soon:{v['sku']}",
-            "title": f"{v['name']} projects out of stock ~{_date(v.get('estOOSDate'))}",
-            "detail": f"{_num(v.get('inventoryUnits'))} units left at "
-                      f"{v.get('runRateUnitsPerDay')}/day (~{v['daysToOOS']} days). "
-                      "Assumes the current rate holds and no replenishment arrives.",
+            "rank": 3, "key": f"recent-behind:{sku}",
+            "title": f"{name.get(sku, sku)} is behind plan over the last {R['recentWindowDays']} days",
+            "detail": f"{_num(u)} units against {_num(p)} planned ({u / p * 100:.0f}%), "
+                      f"{_num(short)} short — about {_money(short * asp.get(sku, 0))} at its current price.",
+            "action": "Recent, not cumulative — this is the last week only. Worth checking "
+                      "against promo calendar and paid support before treating it as demand.",
         })
-
-    # Ranked by estimated missed add-to-carts (views x gap to average), not by
-    # rate alone: a weak rate on heavy traffic is the bigger opportunity.
-    views = sum(r["pdpViews"] for r in pdp)
-    avg_atc = (sum(r["atc"] for r in pdp) / views * 100) if views > 0 else 0
-    if avg_atc > 0:
-        drags = sorted(
-            [(r, round(r["pdpViews"] * (avg_atc - r["atcRate"]) / 100)) for r in pdp
-             if r["atcRate"] < avg_atc * R["atcDragRatio"]
-             and round(r["pdpViews"] * (avg_atc - r["atcRate"]) / 100) >= R["atcDragMinMissed"]],
-            key=lambda x: -x[1])
-        for i, (r, missed) in enumerate(drags[:R["maxPerRule"]]):
-            attention.append({
-                "rank": 2, "key": f"pdp-drag:{r['sku']}",
-                "title": f"{r['name']} PDP converts below the launch average",
-                "detail": f"{r['atcRate']:.1f}% add-to-cart vs {avg_atc:.1f}% average across "
-                          f"{_num(r['pdpViews'])} views — roughly {_num(missed)} missed add-to-carts"
-                          + (", the largest gap in this launch" if i == 0 and len(drags) > 1 else "")
-                          + ". PDP creative and merchandising are the levers.",
-            })
-        best = max(pdp, key=lambda r: r["atcRate"], default=None)
-        if best and best["atcRate"] >= avg_atc * R["atcStarRatio"]:
+    for sku, (u, p) in recent_by_sku.items():
+        if p >= R["minRecentPlanUnits"] and u / p * 100 >= R["recentAheadPct"]:
             working.append({
-                "key": f"pdp-star:{best['sku']}",
-                "title": f"{best['name']} converts best on the PDP",
-                "detail": f"{best['atcRate']:.1f}% add-to-cart vs {avg_atc:.1f}% average "
-                          f"({best['atcRate'] / avg_atc * 100:.0f}% of it) on {_num(best['pdpViews'])} views. "
-                          "Worth looking at what its page does differently.",
+                "key": f"recent-ahead:{sku}",
+                "title": f"{name.get(sku, sku)} is ahead of plan over the last {R['recentWindowDays']} days",
+                "detail": f"{_num(u)} units against {_num(p)} planned ({u / p * 100:.0f}%).",
             })
 
-    behind = sorted([v for v in by_variant
-                     if v.get("pctToPlanUnits") is not None
-                     and v["pctToPlanUnits"] < R["behindPlanPct"]],
-                    key=lambda v: v["pctToPlanUnits"])[:R["maxPerRule"]]
-    for v in behind:
-        attention.append({
-            "rank": 3, "key": f"behind-plan:{v['sku']}",
-            "title": f"{v['name']} is behind plan",
-            "detail": f"{v['pctToPlanUnits']:.1f}% to plan — {_num(v['units'])} units against "
-                      f"{_num(v.get('planUnits'))} planned.",
-        })
-
-    recent = [(r["units"], plan_daily[r["date"]]) for r in daily[-R["pacingWindowDays"]:]
+    # ── Launch-level pacing ─────────────────────────────────────────────────
+    recent = [(r["units"], plan_daily[r["date"]]) for r in daily[-R["recentWindowDays"]:]
               if r["date"] in plan_daily]
-    if len(recent) == R["pacingWindowDays"]:
+    if len(recent) == R["recentWindowDays"]:
         au, ap = sum(x[0] for x in recent), sum(x[1] for x in recent)
         pct = (au / ap * 100) if ap > 0 else None
-        if pct is not None and pct < R["pacingBehindPct"]:
+        if pct is not None and pct < R["recentBehindPct"]:
             attention.append({
                 "rank": 4, "key": "pacing",
-                "title": f"Last {R['pacingWindowDays']} days are pacing behind plan",
-                "detail": f"{_num(au)} units vs {_num(ap)} planned ({pct:.0f}%). "
+                "title": f"The whole launch is pacing behind plan",
+                "detail": f"{_num(au)} units vs {_num(ap)} planned over the last "
+                          f"{R['recentWindowDays']} days ({pct:.0f}%). "
                           "Cumulative attainment can stay green while recent days slip.",
+                "action": "Launch-wide rather than one shade — look at traffic and promo "
+                          "support before shade-level merchandising.",
             })
         elif pct is not None:
             working.append({
                 "key": "pacing",
-                "title": f"Last {R['pacingWindowDays']} days are on or above plan",
+                "title": f"Last {R['recentWindowDays']} days are on or above plan",
                 "detail": f"{_num(au)} units vs {_num(ap)} planned ({pct:.0f}%).",
             })
 
-    ahead = sorted([v for v in by_variant
-                    if (v.get("pctToPlanUnits") or 0) >= R["aheadPlanPct"]],
-                   key=lambda v: -v["pctToPlanUnits"])[:R["maxPerRule"]]
-    for v in ahead:
-        working.append({
-            "key": f"ahead-plan:{v['sku']}",
-            "title": f"{v['name']} is ahead of plan",
-            "detail": f"{v['pctToPlanUnits']:.1f}% to plan — {_num(v['units'])} units against "
-                      f"{_num(v.get('planUnits'))} planned.",
-        })
-
+    # ── Cross-sell and category acquisition ────────────────────────────────
     top = (cross_sell or [{}])[0]
     if top.get("pairs", 0) > 0:
         working.append({
@@ -998,6 +1068,45 @@ def compute_signals(by_variant, pdp, daily, plan_daily, cross_sell, cc):
     return {"attention": attention, "working": working}
 
 
+def _recent_attainment(daily_by_sku, plan_by_sku, window):
+    """{sku: (units, plan_units)} over the last `window` days with plan data.
+
+    Returns nothing when the per-SKU series is missing, which is honest: with
+    no per-SKU plan there is no attainment to judge, and a launch with no
+    forecast at all should raise no attainment alerts rather than look healthy.
+    """
+    if not daily_by_sku or not plan_by_sku:
+        return {}
+    out = {}
+    for sku, rows in daily_by_sku.items():
+        plan = dict(plan_by_sku.get(sku) or [])
+        if not plan:
+            continue
+        recent = rows[-window:]
+        if len(recent) < window:
+            continue
+        u = sum(r[1] for r in recent)
+        p = sum(plan.get(r[0], 0) for r in recent)
+        if p > 0:
+            out[sku] = (u, p)
+    return out
+
+
+def project_oos(avail, run_rate, cutoff):
+    """(days_to_oos, iso_date) for available units at a sell-through rate.
+
+    An assumption, not a forecast: it holds demand steady and assumes no
+    replenishment arrives. Returns (None, None) when there is nothing honest
+    to project from — no inventory figure at all, or no recent sales.
+    """
+    if avail is None:
+        return None, None                      # inventory source unavailable
+    if avail <= 0:
+        return 0, cutoff                       # already out of stock
+    if run_rate > 0:
+        days = int(avail // run_rate)
+        return days, str(dt.date.fromisoformat(cutoff) + dt.timedelta(days=days))
+    return None, None                          # no recent sales, no runway
 def build_launch(cur, lc, cutoff, ga_cutoff, full=True):
     launch_date = lc["launch_date"]
     skus = [s["sku"] for s in lc["skus"]]
@@ -1009,6 +1118,15 @@ def build_launch(cur, lc, cutoff, ga_cutoff, full=True):
                     str(dt.date.fromisoformat(cutoff) - dt.timedelta(days=OOS_WINDOW_DAYS - 1)))
     oos_days = (dt.date.fromisoformat(cutoff) - dt.date.fromisoformat(oos_start)).days + 1
     params["oos_start"] = oos_start
+    # Two adjacent seven-day windows ending at the GA cutoff, for the
+    # week-over-week conversion comparison. Clamped to the launch date so a
+    # launch younger than a fortnight compares only real days.
+    pdp_end = min(ga_cutoff, cutoff)
+    pdp_start = max(launch_date, str(dt.date.fromisoformat(pdp_end) - dt.timedelta(days=13)))
+    params["pdp_end"] = pdp_end
+    params["pdp_start"] = pdp_start
+    params["pdp_mid"] = str(dt.date.fromisoformat(pdp_end) - dt.timedelta(days=6, seconds=0)
+                            - dt.timedelta(days=1))
 
     lid = lc["id"]
     # Core sales data (UOS) — a failure here is a real failure.
@@ -1022,6 +1140,8 @@ def build_launch(cur, lc, cutoff, ga_cutoff, full=True):
     # figures cannot change any more and re-querying them daily is pure cost.
     if full:
         pdp_rows = safe_fetch(f"{lid}.pdp (UTS)", lambda: rows(cur, q_pdp(skus), params), [], key="uts")
+        pdp_window_rows = safe_fetch(f"{lid}.pdp_windows (UTS)",
+                                     lambda: rows(cur, q_pdp_windows(skus), params), [], key="uts")
         cross_rows = safe_fetch(f"{lid}.cross_sell (DRP)", lambda: rows(cur, q_cross_sell(skus), params), [], key="drp")
         cross_sku_rows = safe_fetch(f"{lid}.cross_sell_by_sku (DRP)",
                                     lambda: rows(cur, q_cross_sell_by_sku(skus), params), [], key="drp")
@@ -1042,6 +1162,7 @@ def build_launch(cur, lc, cutoff, ga_cutoff, full=True):
                              lambda: build_landing(cur, lc, ga_params), [], key="ga4_bq")
     else:
         pdp_rows, cross_rows, cross_sku_rows, inv_rows, trail_rows = [], [], [], [], []
+        pdp_window_rows = []
         subs_row = {"SUB_ORDERS": 0, "SUB_UNITS": 0, "SUB_REVENUE": None}
         traffic, landing = {"byChannel": [], "monthly": []}, []
     plan_detail = safe_fetch(f"{lid}.plan (GSHEETS)",
@@ -1295,10 +1416,17 @@ def build_launch(cur, lc, cutoff, ga_cutoff, full=True):
         "byVariant": by_variant,
         # Same rules the page renders, computed once here so the dashboard
         # panel and the Slack alert can never disagree.
-        "signals": compute_signals(by_variant, pdp, daily, plan_daily,
-                                   [{"product": r["PRODUCT"], "sku": r["SKU"],
-                                     "pairs": int(r["PAIRS"] or 0)} for r in cross_rows],
-                                   cc),
+        "signals": compute_signals(
+            by_variant, pdp, daily, plan_daily,
+            [{"product": r["PRODUCT"], "sku": r["SKU"], "pairs": int(r["PAIRS"] or 0)}
+             for r in cross_rows],
+            cc,
+            daily_by_sku=daily_by_sku, plan_by_sku=plan_by_sku,
+            pdp_windows=[{"sku": r["SKU"],
+                          "recentViews": int(r["RECENT_VIEWS"] or 0),
+                          "recentAtc": int(r["RECENT_ATC"] or 0),
+                          "priorViews": int(r["PRIOR_VIEWS"] or 0),
+                          "priorAtc": int(r["PRIOR_ATC"] or 0)} for r in pdp_window_rows]),
         "dailySales": daily,
         # Per-SKU daily series, so a shade filter can rebuild the daily trend,
         # the daily table and the new-vs-returning trend from the same numbers
@@ -1484,6 +1612,7 @@ def main():
             queries = [
                 ("summary", q_summary(skus)), ("by_variant", q_by_variant(skus)),
                 ("daily", q_daily(skus)), ("daily_customers", q_daily_customers(skus)),
+                ("pdp_windows", q_pdp_windows(skus)),
                 ("plan", q_plan(skus)),
                 ("plan_full", q_plan_full(skus)),
             ]

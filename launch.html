@@ -122,6 +122,9 @@
                 border-left:4px solid var(--muted); }
     .sig-card.attention { border-left-color:var(--danger); background:#FEF4F4; }
     .sig-card.working   { border-left-color:var(--positive); background:#F1FAF6; }
+    /* The recommended action, on the page as well as in Slack — one rule set
+       feeding both means the two can never suggest different things. */
+    .sig-do { display:block; margin-top:3px; font-size:11.5px; font-weight:600; opacity:.85; }
     .sig-card h4 { font-size:13px; font-weight:600; margin-bottom:8px; }
     .sig-list { list-style:none; display:flex; flex-direction:column; gap:9px; }
     .sig-list li { font-size:12px; line-height:1.55; }
@@ -779,7 +782,9 @@ function signalCard(kind, heading, items, emptyText) {
   const hidden = items.length - shown.length;
   const body = shown.length
     ? `<ul class="sig-list">${shown.map(s =>
-        `<li><strong>${s.title}</strong>${s.detail}</li>`).join('')}</ul>`
+        `<li><strong>${s.title}</strong>${s.detail}`
+        + (s.action ? `<span class="sig-do">Do: ${s.action}</span>` : '')
+        + `</li>`).join('')}</ul>`
       // Never silently truncate — say what was left out.
       + (hidden > 0 ? `<p class="sig-empty" style="margin-top:8px">+${hidden} more not shown — see the tables below.</p>` : '')
     : `<p class="sig-empty">${emptyText}</p>`;

@@ -812,29 +812,27 @@ window.DASHBOARD_DATA = {
         "attention": [
           {
             "rank": 3,
-            "key": "behind-plan:TVG6710",
-            "title": "Brow Liner is behind plan",
-            "detail": "17.9% to plan \u2014 1,895 units against 10,572 planned."
+            "key": "recent-behind:TVG6710",
+            "title": "Brow Liner is behind plan over the last 7 days",
+            "detail": "127 units against 785 planned (16%), 658 short \u2014 about $14,412 at its current price.",
+            "action": "Recent, not cumulative \u2014 this is the last week only. Worth checking against promo calendar and paid support before treating it as demand."
           },
           {
             "rank": 3,
-            "key": "behind-plan:TVG6680",
-            "title": "Brow Pencil is behind plan",
-            "detail": "54.2% to plan \u2014 2,251 units against 4,154 planned."
+            "key": "recent-behind:TVG6690",
+            "title": "Brow Gel is behind plan over the last 7 days",
+            "detail": "412 units against 595 planned (69%), 183 short \u2014 about $4,003 at its current price.",
+            "action": "Recent, not cumulative \u2014 this is the last week only. Worth checking against promo calendar and paid support before treating it as demand."
           },
           {
             "rank": 4,
             "key": "pacing",
-            "title": "Last 7 days are pacing behind plan",
-            "detail": "650 units vs 1,507 planned (43%). Cumulative attainment can stay green while recent days slip."
+            "title": "The whole launch is pacing behind plan",
+            "detail": "650 units vs 1,507 planned over the last 7 days (43%). Cumulative attainment can stay green while recent days slip.",
+            "action": "Launch-wide rather than one shade \u2014 look at traffic and promo support before shade-level merchandising."
           }
         ],
         "working": [
-          {
-            "key": "pdp-star:TVG6680",
-            "title": "Brow Pencil converts best on the PDP",
-            "detail": "21.1% add-to-cart vs 15.5% average (136% of it) on 27,189 views. Worth looking at what its page does differently."
-          },
           {
             "key": "pairing:TVG6640",
             "title": "Most common basket pairing: Brilliant Eye Brightener\u2122",
@@ -3212,37 +3210,50 @@ window.DASHBOARD_DATA = {
         "attention": [
           {
             "rank": 1,
-            "key": "oos-soon:TVG6700",
-            "title": "Warm Neutrals projects out of stock ~Sep 12, 2026",
-            "detail": "699 units left at 158.14/day (~4 days). Assumes the current rate holds and no replenishment arrives."
+            "key": "oos-soon:us:TVG6720",
+            "title": "Cool Neutrals runs out in US (.com) in ~4 days",
+            "detail": "849 units left in US (.com) at 190.29/day (0.6 weeks cover).",
+            "action": "Confirm a replenishment date for US (.com) with Demand Planning, or plan for the shade to go dark there."
           },
           {
             "rank": 1,
-            "key": "oos-soon:TVG6720",
-            "title": "Cool Neutrals projects out of stock ~Sep 13, 2026",
-            "detail": "1,075 units left at 193.0/day (~5 days). Assumes the current rate holds and no replenishment arrives."
+            "key": "oos-soon:us:TVG6700",
+            "title": "Warm Neutrals runs out in US (.com) in ~3 days",
+            "detail": "558 units left in US (.com) at 154.57/day (0.5 weeks cover).",
+            "action": "Confirm a replenishment date for US (.com) with Demand Planning, or plan for the shade to go dark there."
+          },
+          {
+            "rank": 2,
+            "key": "atc-drop:TVG6720",
+            "missedAtc": 695,
+            "title": "Cool Neutrals add-to-cart rate fell to 14.0%",
+            "detail": "Down 2.7 points from 16.7% the week before, on 25,851 views \u2014 about 695 fewer add-to-carts, roughly $8,865 at this shade's own purchase rate and price.",
+            "action": "Check whether anything changed on the page or in the traffic mix \u2014 creative, price, promo placement, or a paid source sending colder traffic."
+          },
+          {
+            "rank": 2,
+            "key": "atc-drop:TVG6700",
+            "missedAtc": 559,
+            "title": "Warm Neutrals add-to-cart rate fell to 12.6%",
+            "detail": "Down 2.6 points from 15.2% the week before, on 21,583 views \u2014 about 559 fewer add-to-carts, roughly $7,830 at this shade's own purchase rate and price.",
+            "action": "Check whether anything changed on the page or in the traffic mix \u2014 creative, price, promo placement, or a paid source sending colder traffic."
           }
         ],
         "working": [
           {
-            "key": "pdp-star:TVG6720",
-            "title": "Cool Neutrals converts best on the PDP",
-            "detail": "18.4% add-to-cart vs 15.2% average (121% of it) on 172,248 views. Worth looking at what its page does differently."
+            "key": "recent-ahead:TVG6700",
+            "title": "Warm Neutrals is ahead of plan over the last 7 days",
+            "detail": "1,107 units against 405 planned (273%)."
+          },
+          {
+            "key": "recent-ahead:TVG6720",
+            "title": "Cool Neutrals is ahead of plan over the last 7 days",
+            "detail": "1,351 units against 485 planned (279%)."
           },
           {
             "key": "pacing",
             "title": "Last 7 days are on or above plan",
             "detail": "2,458 units vs 890 planned (276%)."
-          },
-          {
-            "key": "ahead-plan:TVG6700",
-            "title": "Warm Neutrals is ahead of plan",
-            "detail": "197.7% to plan \u2014 10,212 units against 5,165 planned."
-          },
-          {
-            "key": "ahead-plan:TVG6720",
-            "title": "Cool Neutrals is ahead of plan",
-            "detail": "187.4% to plan \u2014 11,616 units against 6,197 planned."
           },
           {
             "key": "pairing:TVG558",
@@ -5049,30 +5060,21 @@ window.DASHBOARD_DATA = {
       "signals": {
         "attention": [
           {
-            "rank": 2,
-            "key": "pdp-drag:TVG4770",
-            "title": "Mila PDP converts below the launch average",
-            "detail": "7.2% add-to-cart vs 9.4% average across 383,890 views \u2014 roughly 8,618 missed add-to-carts. PDP creative and merchandising are the levers."
-          },
-          {
             "rank": 3,
-            "key": "behind-plan:TVG4770",
-            "title": "Mila is behind plan",
-            "detail": "70.8% to plan \u2014 10,601 units against 14,972 planned."
+            "key": "recent-behind:TVG6640",
+            "title": "Hoda is behind plan over the last 7 days",
+            "detail": "441 units against 733 planned (60%), 292 short \u2014 about $6,716 at its current price.",
+            "action": "Recent, not cumulative \u2014 this is the last week only. Worth checking against promo calendar and paid support before treating it as demand."
           },
           {
             "rank": 4,
             "key": "pacing",
-            "title": "Last 7 days are pacing behind plan",
-            "detail": "978 units vs 1,354 planned (72%). Cumulative attainment can stay green while recent days slip."
+            "title": "The whole launch is pacing behind plan",
+            "detail": "978 units vs 1,354 planned over the last 7 days (72%). Cumulative attainment can stay green while recent days slip.",
+            "action": "Launch-wide rather than one shade \u2014 look at traffic and promo support before shade-level merchandising."
           }
         ],
         "working": [
-          {
-            "key": "pdp-star:TVG6640",
-            "title": "Hoda converts best on the PDP",
-            "detail": "14.1% add-to-cart vs 9.4% average (150% of it) on 183,923 views. Worth looking at what its page does differently."
-          },
           {
             "key": "pairing:TVG349",
             "title": "Most common basket pairing: Brilliant Eye Brightener\u2122",
@@ -7212,50 +7214,74 @@ window.DASHBOARD_DATA = {
       "signals": {
         "attention": [
           {
+            "rank": 0,
+            "key": "oos:ca:TVG7250",
+            "title": "Daniella is out of stock in Canada (.ca)",
+            "detail": "0 units in Canada (.ca). 1,070 units still in US (.com), so this is a distribution problem, not a demand one.",
+            "action": "Route or transfer stock to Canada (.ca) \u2014 the units exist, they are in the wrong place."
+          },
+          {
             "rank": 1,
-            "key": "oos-soon:TVG7250",
-            "title": "Daniella projects out of stock ~Sep 11, 2026",
-            "detail": "1,070 units left at 354.86/day (~3 days). Assumes the current rate holds and no replenishment arrives."
+            "key": "oos-soon:ca:TVG7220",
+            "title": "Brandy runs out in Canada (.ca) in ~14 days",
+            "detail": "105 units left in Canada (.ca) at 7.43/day (2.0 weeks cover).",
+            "action": "Confirm a replenishment date for Canada (.ca) with Demand Planning, or plan for the shade to go dark there."
+          },
+          {
+            "rank": 1,
+            "key": "oos-soon:us:TVG7250",
+            "title": "Daniella runs out in US (.com) in ~3 days",
+            "detail": "1,070 units left in US (.com) at 354.86/day (0.4 weeks cover).",
+            "action": "Confirm a replenishment date for US (.com) with Demand Planning, or plan for the shade to go dark there."
+          },
+          {
+            "rank": 1,
+            "key": "oos-soon:ca:TVG7260",
+            "title": "Leslie runs out in Canada (.ca) in ~3 days",
+            "detail": "29 units left in Canada (.ca) at 8.71/day (0.5 weeks cover).",
+            "action": "Confirm a replenishment date for Canada (.ca) with Demand Planning, or plan for the shade to go dark there."
           },
           {
             "rank": 2,
-            "key": "pdp-drag:TVG7220",
-            "title": "Brandy PDP converts below the launch average",
-            "detail": "5.1% add-to-cart vs 11.0% average across 132,434 views \u2014 roughly 7,802 missed add-to-carts, the largest gap in this launch. PDP creative and merchandising are the levers."
-          },
-          {
-            "rank": 2,
-            "key": "pdp-drag:TVG7230",
-            "title": "Li PDP converts below the launch average",
-            "detail": "5.3% add-to-cart vs 11.0% average across 115,659 views \u2014 roughly 6,617 missed add-to-carts. PDP creative and merchandising are the levers."
+            "key": "atc-drop:TVG7240",
+            "missedAtc": 544,
+            "title": "Liliana add-to-cart rate fell to 16.3%",
+            "detail": "Down 3.3 points from 19.6% the week before, on 16,335 views \u2014 about 544 fewer add-to-carts, roughly $5,255 at this shade's own purchase rate and price.",
+            "action": "Check whether anything changed on the page or in the traffic mix \u2014 creative, price, promo placement, or a paid source sending colder traffic."
           },
           {
             "rank": 3,
-            "key": "behind-plan:TVG7230",
-            "title": "Li is behind plan",
-            "detail": "76.8% to plan \u2014 2,531 units against 3,297 planned."
+            "key": "recent-behind:TVG7230",
+            "title": "Li is behind plan over the last 7 days",
+            "detail": "663 units against 800 planned (83%), 137 short \u2014 about $3,121 at its current price.",
+            "action": "Recent, not cumulative \u2014 this is the last week only. Worth checking against promo calendar and paid support before treating it as demand."
           }
         ],
         "working": [
           {
-            "key": "pdp-star:TVG7250",
-            "title": "Daniella converts best on the PDP",
-            "detail": "23.4% add-to-cart vs 11.0% average (212% of it) on 88,402 views. Worth looking at what its page does differently."
+            "key": "recent-ahead:TVG7220",
+            "title": "Brandy is ahead of plan over the last 7 days",
+            "detail": "930 units against 320 planned (291%)."
+          },
+          {
+            "key": "recent-ahead:TVG7240",
+            "title": "Liliana is ahead of plan over the last 7 days",
+            "detail": "1,259 units against 800 planned (157%)."
+          },
+          {
+            "key": "recent-ahead:TVG7250",
+            "title": "Daniella is ahead of plan over the last 7 days",
+            "detail": "2,484 units against 480 planned (518%)."
+          },
+          {
+            "key": "recent-ahead:TVG7260",
+            "title": "Leslie is ahead of plan over the last 7 days",
+            "detail": "627 units against 156 planned (402%)."
           },
           {
             "key": "pacing",
             "title": "Last 7 days are on or above plan",
             "detail": "5,963 units vs 2,556 planned (233%)."
-          },
-          {
-            "key": "ahead-plan:TVG7250",
-            "title": "Daniella is ahead of plan",
-            "detail": "472.0% to plan \u2014 9,345 units against 1,980 planned."
-          },
-          {
-            "key": "ahead-plan:TVG7260",
-            "title": "Leslie is ahead of plan",
-            "detail": "369.9% to plan \u2014 2,382 units against 644 planned."
           },
           {
             "key": "pairing:TVG2840",
@@ -8683,23 +8709,14 @@ window.DASHBOARD_DATA = {
         "attention": [
           {
             "rank": 2,
-            "key": "pdp-drag:TVG7150",
-            "title": "Mackenzie PDP converts below the launch average",
-            "detail": "3.0% add-to-cart vs 13.2% average across 42,471 views \u2014 roughly 4,331 missed add-to-carts, the largest gap in this launch. PDP creative and merchandising are the levers."
-          },
-          {
-            "rank": 2,
-            "key": "pdp-drag:TVG4880",
-            "title": "Dionne PDP converts below the launch average",
-            "detail": "5.8% add-to-cart vs 13.2% average across 10,355 views \u2014 roughly 765 missed add-to-carts. PDP creative and merchandising are the levers."
+            "key": "atc-drop:TVG4961",
+            "missedAtc": 1025,
+            "title": "Kaisa add-to-cart rate fell to 31.2%",
+            "detail": "Down 8.5 points from 39.8% the week before, on 12,038 views \u2014 about 1,025 fewer add-to-carts, roughly $11,657 at this shade's own purchase rate and price.",
+            "action": "Check whether anything changed on the page or in the traffic mix \u2014 creative, price, promo placement, or a paid source sending colder traffic."
           }
         ],
         "working": [
-          {
-            "key": "pdp-star:TVG4900",
-            "title": "Joy converts best on the PDP",
-            "detail": "43.5% add-to-cart vs 13.2% average (331% of it) on 5,086 views. Worth looking at what its page does differently."
-          },
           {
             "key": "pairing:TVG2840",
             "title": "Most common basket pairing: Liquid Lash\u2122 Extensions Tubing Mascara",
@@ -9944,21 +9961,31 @@ window.DASHBOARD_DATA = {
         "attention": [
           {
             "rank": 1,
-            "key": "oos-soon:TBB013",
-            "title": "Pumpkin Spice Latte projects out of stock ~Sep 18, 2026",
-            "detail": "4,146 units left at 408.86/day (~10 days). Assumes the current rate holds and no replenishment arrives."
+            "key": "oos-soon:ca:TBB013",
+            "title": "Pumpkin Spice Latte runs out in Canada (.ca) in ~21 days",
+            "detail": "476 units left in Canada (.ca) at 22.29/day (3.1 weeks cover).",
+            "action": "Confirm a replenishment date for Canada (.ca) with Demand Planning, or plan for the shade to go dark there."
+          },
+          {
+            "rank": 1,
+            "key": "oos-soon:us:TBB013",
+            "title": "Pumpkin Spice Latte runs out in US (.com) in ~9 days",
+            "detail": "3,670 units left in US (.com) at 386.57/day (1.4 weeks cover).",
+            "action": "Confirm a replenishment date for US (.com) with Demand Planning, or plan for the shade to go dark there."
           },
           {
             "rank": 3,
-            "key": "behind-plan:TBB013",
-            "title": "Pumpkin Spice Latte is behind plan",
-            "detail": "75.2% to plan \u2014 2,862 units against 3,804 planned."
+            "key": "recent-behind:TBB013",
+            "title": "Pumpkin Spice Latte is behind plan over the last 7 days",
+            "detail": "2,862 units against 3,804 planned (75%), 942 short \u2014 about $22,576 at its current price.",
+            "action": "Recent, not cumulative \u2014 this is the last week only. Worth checking against promo calendar and paid support before treating it as demand."
           },
           {
             "rank": 4,
             "key": "pacing",
-            "title": "Last 7 days are pacing behind plan",
-            "detail": "2,862 units vs 3,804 planned (75%). Cumulative attainment can stay green while recent days slip."
+            "title": "The whole launch is pacing behind plan",
+            "detail": "2,862 units vs 3,804 planned over the last 7 days (75%). Cumulative attainment can stay green while recent days slip.",
+            "action": "Launch-wide rather than one shade \u2014 look at traffic and promo support before shade-level merchandising."
           }
         ],
         "working": [
@@ -11140,30 +11167,12 @@ window.DASHBOARD_DATA = {
         }
       ],
       "signals": {
-        "attention": [
-          {
-            "rank": 3,
-            "key": "behind-plan:TVG5970",
-            "title": "Kackie is behind plan",
-            "detail": "21.7% to plan \u2014 1,729 units against 7,964 planned."
-          },
-          {
-            "rank": 3,
-            "key": "behind-plan:TVG5940",
-            "title": "Kathy is behind plan",
-            "detail": "46.5% to plan \u2014 2,544 units against 5,466 planned."
-          }
-        ],
+        "attention": [],
         "working": [
           {
-            "key": "ahead-plan:TVG5890",
-            "title": "Michelle is ahead of plan",
-            "detail": "181.7% to plan \u2014 8,764 units against 4,823 planned."
-          },
-          {
-            "key": "ahead-plan:TVG5900",
-            "title": "Rosa is ahead of plan",
-            "detail": "175.9% to plan \u2014 6,239 units against 3,546 planned."
+            "key": "recent-ahead:TVG5890",
+            "title": "Michelle is ahead of plan over the last 7 days",
+            "detail": "274 units against 183 planned (150%)."
           },
           {
             "key": "new-to-category",
@@ -13915,16 +13924,6 @@ window.DASHBOARD_DATA = {
       "signals": {
         "attention": [],
         "working": [
-          {
-            "key": "ahead-plan:TVG6380",
-            "title": "Iris is ahead of plan",
-            "detail": "235.0% to plan \u2014 42,425 units against 18,056 planned."
-          },
-          {
-            "key": "ahead-plan:TVG6390",
-            "title": "Ivy is ahead of plan",
-            "detail": "218.7% to plan \u2014 28,732 units against 13,135 planned."
-          },
           {
             "key": "new-to-category",
             "title": "38% of buyers are new to Mascara",
