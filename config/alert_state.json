@@ -5,25 +5,31 @@
     "standing alert is not re-posted every morning. Delete an entry to",
     "make that alert fire again on the next run."
   ],
-  "lastRun": "2026-09-08",
+  "lastRun": "2026-09-09",
   "lastDigest": "2026-09-07",
-  "dataCutoff": "2026-09-07",
+  "dataCutoff": "2026-09-08",
   "alerts": {
     "psl-pout-hero|oos-soon:TBB013": {
       "rank": 1,
-      "title": "Pumpkin Spice Latte projects out of stock ~Sep 16, 2026",
+      "title": "Pumpkin Spice Latte projects out of stock ~Sep 18, 2026",
       "firstSeen": "2026-09-03",
       "lastPosted": "2026-09-07"
     },
     "lasting-mark-lip-stain|oos-soon:TVG7250": {
       "rank": 1,
-      "title": "Daniella projects out of stock ~Sep 10, 2026",
+      "title": "Daniella projects out of stock ~Sep 11, 2026",
       "firstSeen": "2026-09-01",
       "lastPosted": "2026-09-07"
     },
+    "eyeshadow-quads|oos-soon:TVG6700": {
+      "rank": 1,
+      "title": "Warm Neutrals projects out of stock ~Sep 12, 2026",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
+    },
     "eyeshadow-quads|oos-soon:TVG6720": {
       "rank": 1,
-      "title": "Cool Neutrals projects out of stock ~Sep 8, 2026",
+      "title": "Cool Neutrals projects out of stock ~Sep 13, 2026",
       "firstSeen": "2026-09-01",
       "lastPosted": "2026-09-07"
     },
@@ -86,6 +92,12 @@
       "title": "Brow Pencil is behind plan",
       "firstSeen": "2026-09-01",
       "lastPosted": "2026-09-07"
+    },
+    "psl-pout-hero|pacing": {
+      "rank": 4,
+      "title": "Last 7 days are pacing behind plan",
+      "firstSeen": "2026-09-09",
+      "lastPosted": "2026-09-09"
     },
     "beb-hoda-mila|pacing": {
       "rank": 4,
