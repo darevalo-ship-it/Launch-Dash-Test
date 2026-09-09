@@ -19,6 +19,14 @@ on:
           (today - 1) picks up a partial Los Angeles day and labels it complete.
         required: false
         type: string
+      force_digest:
+        description: >-
+          Post the full weekly digest instead of only what changed. The digest
+          normally fires on Mondays; set this to send one on demand, e.g. after
+          a change to the alert rules.
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -130,7 +138,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_ALERT_LIMIT: ${{ vars.SLACK_ALERT_LIMIT }}
           DASHBOARD_URL: ${{ vars.DASHBOARD_URL }}
-        run: python scripts/post_slack_alerts.py
+        run: python scripts/post_slack_alerts.py ${{ inputs.force_digest && '--digest' || '' }}
 
       - name: Commit and push if data changed
         if: steps.creds.outputs.configured == 'true'
