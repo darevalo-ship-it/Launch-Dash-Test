@@ -5,10 +5,10 @@
     "standing alert is not re-posted every morning. Delete an entry to",
     "make that alert fire again on the next run."
   ],
-  "lastRun": "2026-09-09",
+  "lastRun": "2026-09-10",
   "rulesVersion": 2,
   "lastDigest": "2026-09-09",
-  "dataCutoff": "2026-09-08",
+  "dataCutoff": "2026-09-09",
   "alerts": {
     "lasting-mark-lip-stain|oos:ca:TVG7250": {
       "rank": 0,
@@ -16,27 +16,21 @@
       "firstSeen": "2026-09-09",
       "lastPosted": "2026-09-09"
     },
-    "psl-pout-hero|oos-soon:ca:TBB013": {
-      "rank": 1,
-      "title": "Pumpkin Spice Latte runs out in Canada (.ca) in ~21 days",
-      "firstSeen": "2026-09-09",
-      "lastPosted": "2026-09-09"
-    },
     "psl-pout-hero|oos-soon:us:TBB013": {
       "rank": 1,
-      "title": "Pumpkin Spice Latte runs out in US (.com) in ~9 days",
+      "title": "Pumpkin Spice Latte runs out in US (.com) in ~12 days",
       "firstSeen": "2026-09-09",
       "lastPosted": "2026-09-09"
     },
     "lasting-mark-lip-stain|oos-soon:ca:TVG7220": {
       "rank": 1,
-      "title": "Brandy runs out in Canada (.ca) in ~14 days",
+      "title": "Brandy runs out in Canada (.ca) in ~15 days",
       "firstSeen": "2026-09-09",
       "lastPosted": "2026-09-09"
     },
     "lasting-mark-lip-stain|oos-soon:us:TVG7250": {
       "rank": 1,
-      "title": "Daniella runs out in US (.com) in ~3 days",
+      "title": "Daniella runs out in US (.com) in ~2 days",
       "firstSeen": "2026-09-09",
       "lastPosted": "2026-09-09"
     },
@@ -54,25 +48,31 @@
     },
     "eyeshadow-quads|oos-soon:us:TVG6700": {
       "rank": 1,
-      "title": "Warm Neutrals runs out in US (.com) in ~3 days",
+      "title": "Warm Neutrals runs out in US (.com) in ~2 days",
       "firstSeen": "2026-09-09",
       "lastPosted": "2026-09-09"
     },
     "triple-threat-reform|atc-drop:TVG4961": {
       "rank": 2,
-      "title": "Kaisa add-to-cart rate fell to 30.8%",
+      "title": "Kaisa add-to-cart rate fell to 31.2%",
       "firstSeen": "2026-09-09",
       "lastPosted": "2026-09-09"
     },
-    "lasting-mark-lip-stain|atc-drop:TVG7250": {
+    "lasting-mark-lip-stain|atc-drop:TVG7240": {
       "rank": 2,
-      "title": "Daniella add-to-cart rate fell to 24.1%",
-      "firstSeen": "2026-09-09",
-      "lastPosted": "2026-09-09"
+      "title": "Liliana add-to-cart rate fell to 16.3%",
+      "firstSeen": "2026-09-10",
+      "lastPosted": "2026-09-10"
+    },
+    "eyeshadow-quads|atc-drop:TVG6700": {
+      "rank": 2,
+      "title": "Warm Neutrals add-to-cart rate fell to 12.6%",
+      "firstSeen": "2026-09-10",
+      "lastPosted": "2026-09-10"
     },
     "eyeshadow-quads|atc-drop:TVG6720": {
       "rank": 2,
-      "title": "Cool Neutrals add-to-cart rate fell to 13.7%",
+      "title": "Cool Neutrals add-to-cart rate fell to 14.0%",
       "firstSeen": "2026-09-09",
       "lastPosted": "2026-09-09"
     },
@@ -82,17 +82,17 @@
       "firstSeen": "2026-09-09",
       "lastPosted": "2026-09-09"
     },
-    "lasting-mark-lip-stain|recent-behind:TVG7230": {
-      "rank": 3,
-      "title": "Li is behind plan over the last 7 days",
-      "firstSeen": "2026-09-09",
-      "lastPosted": "2026-09-09"
-    },
     "beb-hoda-mila|recent-behind:TVG6640": {
       "rank": 3,
       "title": "Hoda is behind plan over the last 7 days",
       "firstSeen": "2026-09-09",
       "lastPosted": "2026-09-09"
+    },
+    "beb-hoda-mila|recent-behind:TVG4770": {
+      "rank": 3,
+      "title": "Mila is behind plan over the last 7 days",
+      "firstSeen": "2026-09-10",
+      "lastPosted": "2026-09-10"
     },
     "becca-brow|recent-behind:TVG6710": {
       "rank": 3,
@@ -125,5 +125,9 @@
       "lastPosted": "2026-09-09"
     }
   },
-  "resolvedToday": []
+  "resolvedToday": [
+    "Pumpkin Spice Latte runs out in Canada (.ca) in ~21 days",
+    "Daniella add-to-cart rate fell to 24.1%",
+    "Li is behind plan over the last 7 days"
+  ]
 }
